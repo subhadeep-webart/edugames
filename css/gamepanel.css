@@ -1,0 +1,1917 @@
+/* ==========================================================================
+   Trivia-SmackDown — Game Panel (GamePanel.html)
+
+   Link AFTER tokens.css:
+     <link rel="stylesheet" href="css/tokens.css">
+     <link rel="stylesheet" href="css/gamepanel.css">
+
+   Never hard-code a hex value here — add it to tokens.css instead.
+
+   ---------------------------------------------------------------------------
+   IMPORTANT — this screen is driven by the live game scripts in js/.
+   Every `id` on this page is a global variable (see the const block in
+   GamePanel.html). The scripts also write inline styles at runtime —
+   mostly `display` / `visibility` toggles — and those BEAT these rules.
+   So: never set `display` on an element the JS toggles, and never rename
+   or drop an id or a class the JS keys off
+   (butHolder, playerName, pt, but2Player, bidButs, timePts, TmPtHeader).
+   ========================================================================== */
+
+/* ---- page shell -------------------------------------------------------- */
+
+body.tsd-panel {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--tsd-bg-gradient);
+  background-attachment: fixed;
+  color: var(--tsd-text);
+  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+}
+
+.tsd-panel-page {
+  max-width: var(--tsd-container);
+  margin: 0 auto;
+  padding: clamp(12px, 1.6vw, 26px) var(--tsd-gutter)
+           clamp(30px, 4vw, 60px);
+}
+
+/* ---- header ------------------------------------------------------------ */
+
+.tsd-panel-header {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 22px);
+  margin-bottom: clamp(14px, 1.8vw, 28px);
+}
+
+.tsd-panel-logo {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tsd-panel-logo img {
+  width: clamp(34px, 3.2vw, 48px);
+  height: auto;
+  display: block;
+}
+
+/* the glowing status pill: "ROUND 1 OF 3   GAME MODE: ..." */
+.tsd-panel-status {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 26px);
+
+  margin: 0;
+  padding: clamp(8px, .9vw, 15px) clamp(16px, 2vw, 34px);
+  border-radius: 999px;
+  border: var(--tsd-border-hairline);
+  background: var(--tsd-card-bg);
+
+  font-size: clamp(15px, 1.75vw, 30px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-shadow: var(--tsd-title-glow);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tsd-panel-tools {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, .9vw, 14px);
+}
+
+/* round icon buttons (help, volume) */
+.tsd-icon-but {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: clamp(34px, 3vw, 46px);
+  height: clamp(34px, 3vw, 46px);
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--tsd-accent-pink);
+  background: transparent;
+  color: var(--tsd-text);
+  cursor: pointer;
+  transition: background .18s var(--tsd-ease), transform .18s var(--tsd-ease);
+}
+
+.tsd-icon-but img,
+.tsd-icon-but svg {
+  width: 48%;
+  height: auto;
+  display: block;
+  filter: var(--tsd-icon-white);
+}
+
+.tsd-icon-but:hover  { background: rgba(253, 12, 117, .18); }
+.tsd-icon-but:active { transform: scale(.94); }
+
+.tsd-icon-but:focus-visible,
+.tsd-exit-but:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 2px;
+}
+
+/* pill-shaped "Exit Game" */
+.tsd-exit-but {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: clamp(8px, .85vw, 13px) clamp(14px, 1.5vw, 24px);
+  border-radius: 999px;
+  border: 1.5px solid var(--tsd-hairline);
+  background: transparent;
+  color: var(--tsd-text);
+  font-size: clamp(12px, 1.05vw, 17px);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .18s var(--tsd-ease);
+}
+
+.tsd-exit-but img { width: 1.15em; height: auto; filter: var(--tsd-icon-white); }
+.tsd-exit-but:hover { background: rgba(255, 255, 255, .08); }
+
+/* ---- scoreboard row ----------------------------------------------------
+   Five across, exactly as the design:
+   player 1 · bid grid 1 · bidding timer · bid grid 2 · player 2          */
+
+/* The two bid columns are sized to the Figma box (303px) and the rest of
+   the width is shared by the player cards and the clock. minmax(0, 303px)
+   lets them shrink below 303 rather than overflow on a narrow viewport. */
+.tsd-scorebar {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 303px)
+    minmax(0, 275px)
+    minmax(0, 303px)
+    minmax(0, 1fr);
+  /* center, not stretch: the bid boxes have a fixed design height (160px)
+     and must not be stretched to match the tallest cell in the row. */
+  align-items: center;
+  gap: clamp(8px, 1vw, 18px);
+  margin-bottom: clamp(18px, 2.4vw, 40px);
+}
+
+/* ---- player cards ------------------------------------------------------ */
+
+.tsd-pl-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, .7vw, 12px);
+  min-width: 0;
+
+  padding: clamp(10px, 1.1vw, 16px) clamp(10px, 1vw, 16px);
+  border-radius: 14px;
+  border: var(--tsd-border-hairline);
+}
+
+.tsd-pl-card--p1 {
+  background: var(--tsd-p1-gradient);
+  border-color: var(--tsd-blue);
+}
+
+.tsd-pl-card--p2 {
+  background: var(--tsd-p2-gradient);
+  border-color: var(--tsd-modal-red);
+}
+
+/* the offset corner brackets in the design */
+.tsd-pl-card::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 18px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.tsd-pl-card--p1::before {
+  border-left:   2px solid var(--tsd-blue);
+  border-bottom: 2px solid var(--tsd-blue);
+}
+
+.tsd-pl-card--p2::before {
+  border-right:  2px solid var(--tsd-modal-red);
+  border-bottom: 2px solid var(--tsd-modal-red);
+}
+
+/* avatar — same placeholder pattern as the setup page (css/setup.css) */
+.tsd-pl-avatar {
+  flex: none;
+  display: block;
+  width:  clamp(40px, 3.8vw, 62px);
+  height: clamp(40px, 3.8vw, 62px);
+  border-radius: 50%;
+  overflow: hidden;
+  background: #1A1748;
+}
+
+.tsd-pl-card--p1 .tsd-pl-avatar { border: 2.5px solid var(--tsd-blue); }
+.tsd-pl-card--p2 .tsd-pl-avatar { border: 2.5px solid #E040C8; }
+
+.tsd-pl-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tsd-pl-avatar .tsd-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(255, 255, 255, .35);
+}
+
+.tsd-pl-avatar .tsd-avatar-empty svg { width: 42%; height: auto; }
+
+.tsd-pl-body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.tsd-pl-card--p2 .tsd-pl-body { text-align: right; }
+
+.tsd-pl-slot {
+  margin: 0 0 2px;
+  font-size: clamp(10px, .82vw, 14px);
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tsd-player-label);
+}
+
+/* #player0 / #player1 — the JS writes the name into these.
+   Names can be long; wrap to a second line rather than truncating, so a
+   player never sees their own name cut off. */
+.tsd-pl-card .playerName {
+  margin: 0;
+  font-size: clamp(12px, 1.15vw, 19px);
+  font-weight: 700;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+  overflow-wrap: anywhere;
+}
+
+.tsd-pl-caption {
+  margin: clamp(2px, .3vw, 6px) 0 0;
+  font-size: clamp(9px, .78vw, 13px);
+  color: var(--tsd-text-muted);
+}
+
+/* #rndTotL / #rndTotR — the running score */
+.tsd-pl-card .pt {
+  margin: 0;
+  font-size: clamp(18px, 1.9vw, 32px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--tsd-text);
+}
+
+/* #setTotL / #setTotR */
+.tsd-pl-total {
+  font-size: clamp(9px, .75vw, 12px);
+  color: var(--tsd-text-muted);
+}
+
+/* ---- bid panels --------------------------------------------------------
+   #insrtpt0X / #insrtpt1X (.butHolder) are the insert points BidButs.js
+   fills with its own bidButs table of .but2Player buttons.               */
+
+/* Figma: 303 × 160, radius 20, border 1.5px #FFFFFF33.
+   max-width keeps the design's 303px as a ceiling while still letting the
+   box shrink inside the grid column on narrower screens. */
+.tsd-bid-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  min-width: 0;
+  width: 100%;
+  max-width: 303px;
+  /* Figma height is 160px, but the button count is data-driven
+     (BidButs.createButs is called with rightAnsArray.length / itemMax), so a
+     round with many answers needs more rows. min-height holds the design
+     size for the common case and grows instead of clipping. */
+  min-height: 160px;
+  margin-inline: auto;
+  padding: 16px;
+  box-sizing: border-box;
+
+  border-radius: 20px;
+  border: 1.5px solid var(--tsd-hairline-soft);
+  background: var(--tsd-panel-bg);
+}
+
+/* Figma: "Place Your Bid" — #8B9FB6 */
+.tsd-bid-title {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(14px, 1.15vw, 18px);
+  font-weight: 500;
+  color: var(--tsd-bid-label);
+}
+
+/* The insert point is empty until BidButs.js fills it. The panel's own
+   min-height (160px, per Figma) already reserves the space, so this just
+   centres whatever arrives. */
+.tsd-bid-panel .butHolder {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* #butLeft / #butRight — BidButs.js toggles their `display` between
+   'block' and 'none' to show/hide the bid buttons, so never set `display`
+   on them here; only size them.
+   flex: none — letting these grow would stretch the box past its 160px
+   design height. */
+.tsd-bid-panel > div { flex: none; min-width: 0; }
+
+/* BidButs.js emits a table.bidButs; flatten it to a wrapping grid so the
+   numbers lay out 6-across as in the design. */
+.tsd-bid-panel .bidButs,
+.tsd-bid-panel .bidButs tbody,
+.tsd-bid-panel .bidButs tr,
+.tsd-bid-panel .bidButs td {
+  display: block;
+  border: 0 !important;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  /* the UA's default table border-spacing survives display:block and would
+     otherwise add ~35px of dead height inside the box */
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+/* BidButs.js breaks the numbers into two rows itself (one <tr> per row).
+   Lay each row out as a 6-column grid so the wrap matches the design
+   regardless of how many buttons the round asks for. */
+.tsd-bid-panel .bidButs td {
+  display: grid;
+  grid-template-columns: repeat(6, 30px);
+  justify-content: center;
+  gap: 8px;
+}
+
+/* rows after the first need the same gap between them */
+.tsd-bid-panel .bidButs tr + tr td { margin-top: 6px; }
+
+/* the individual bid numbers — outlined squares, not solid fills.
+   Figma: 30 × 30, border 1.05px #FFFFFF40 (= --tsd-hairline). */
+.tsd-bid-panel .but2Player {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+
+  width:  30px;
+  height: 30px;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1.05px solid var(--tsd-hairline);
+  background: transparent;
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform .15s var(--tsd-ease), border-color .15s var(--tsd-ease);
+}
+
+.tsd-bid-panel--p1 .but2Player:hover { border-color: var(--tsd-blue); }
+.tsd-bid-panel--p2 .but2Player:hover { border-color: var(--tsd-modal-red); }
+.tsd-bid-panel .but2Player:active    { transform: scale(.92); }
+
+/* A bid takes every number up to it out of play. Those stay visible and
+   readable — just muted — rather than being blanked out. */
+.tsd-bid-panel .but2Player:disabled {
+  color: rgba(255, 255, 255, .35);
+  border-color: rgba(255, 255, 255, .12);
+  cursor: default;
+}
+
+/* the number actually bid — Figma: 2.1px solid, matching text colour, 700.
+   Wins over :disabled above because it is more specific.
+   Left panel is blue (#0683FC), right panel pink (#FD0C75). */
+.tsd-bid-panel .but2Player.is-bid,
+.tsd-bid-panel .but2Player.is-bid:disabled {
+  border: 2.1px solid var(--tsd-blue);
+  color: var(--tsd-blue);
+  font-weight: 700;
+}
+
+.tsd-bid-panel--p2 .but2Player.is-bid,
+.tsd-bid-panel--p2 .but2Player.is-bid:disabled {
+  border-color: var(--tsd-accent-pink);
+  color: var(--tsd-accent-pink);
+}
+
+/* ---- centre bidding / timer card --------------------------------------
+   #centerDisplay is written by BidButs.js (innerHTML) and recoloured by the
+   game scripts via centerDisplay.style.color / .backgroundColor.          */
+
+/* Figma: 275 × 203, radius 16, background #08274B.
+   min-height (not height) because the JS writes variable-length status text
+   into #centerDisplay — a fixed height would clip a longer notice. */
+.tsd-bid-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  min-width: 0;
+  width: 100%;
+  max-width: 275px;
+  min-height: 203px;
+  margin-inline: auto;
+  padding: 18px 20px;
+  box-sizing: border-box;
+
+  border-radius: 16px;
+  background: var(--tsd-bid-clock-bg);
+}
+
+/* Figma: "BIDDING STARTED" — #F9C800, flanked by a zap either side.
+   BidButs.js writes plain text into #centerDisplay, so the zaps are
+   ::before/::after on the element rather than markup it would overwrite. */
+.tsd-bid-clock #centerDisplay {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  /* Figma: 26px / weight 400 / line-height 100% / letter-spacing 4% */
+  text-align: center;
+  font-size: clamp(17px, 1.65vw, 26px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--tsd-bid-gold);
+}
+
+/* When the JS paints a player colour (blue / red) to signal who bid, that
+   inline background wins — pair it with a matching pill so the notice
+   still reads as part of the card rather than a bare colour block. */
+.tsd-bid-clock #centerDisplay[style*="background"] {
+  padding: 6px 12px;
+  border-radius: 10px;
+}
+
+.tsd-bid-clock #centerDisplay::before,
+.tsd-bid-clock #centerDisplay::after {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.tsd-bid-clock #centerDisplay::before {
+  background-image: url("../images/new-images/homepage_left_zap.svg");
+}
+
+.tsd-bid-clock #centerDisplay::after {
+  background-image: url("../images/new-images/homepage_right_zap.svg");
+}
+
+/* #centerDisplay is emptied between rounds; hide the zaps when there is
+   no status text so two bolts do not float in an empty card. */
+.tsd-bid-clock #centerDisplay:empty { display: none; }
+
+/* #timeBox — the countdown, styled as plain text not a button.
+   Figma: #0D77F2. */
+.tsd-bid-clock #timeBox {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+
+  font-family: inherit;
+  font-size: clamp(22px, 2.2vw, 34px);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--tsd-bid-time);
+  cursor: pointer;
+}
+
+.tsd-clock-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, .7vw, 12px);
+}
+
+/* timer_icon.svg is authored in #F9C800 already — do NOT apply
+   --tsd-icon-white here, it would flatten the gold to white. */
+.tsd-clock-row img {
+  width: clamp(16px, 1.5vw, 22px);
+  height: auto;
+  display: block;
+}
+
+/* the thin progress bar under the clock.
+   Figma fill: linear-gradient(90deg, #0D77F2 0%, #81B2EB 100%) */
+.tsd-clock-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .14);
+  overflow: hidden;
+}
+
+.tsd-clock-bar > i {
+  display: block;
+  height: 100%;
+  width: 45%;                       /* static: no JS drives this */
+  border-radius: 999px;
+  background: var(--tsd-bid-bar-gradient);
+}
+
+/* ---- action buttons ---------------------------------------------------
+   #nextRoundBut, #ansBut, #checkBut. The JS toggles their display and
+   visibility — never set `display` on them here.                        */
+
+.tsd-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, .7vw, 12px);
+}
+
+.tsd-panel-actions .btn,
+.tsd-bid-clock .btn {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+
+  padding: clamp(8px, .85vw, 14px) clamp(14px, 1.6vw, 26px);
+  border-radius: 10px;
+  border: 1.5px solid var(--tsd-btn-border);
+  background: transparent;
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(11px, 1vw, 16px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .18s var(--tsd-ease), transform .18s var(--tsd-ease);
+}
+
+/* Next Round — Figma calls for a 1px border filled with
+   linear-gradient(90deg, #0683FC 0%, #570496 100%), i.e. --tsd-primary-gradient.
+   `border-image` cannot be used: it ignores border-radius and would square
+   off the corners. Two stacked backgrounds (padding-box over border-box)
+   paint a gradient border that respects the radius. */
+.tsd-bid-clock #nextRoundBut {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background:
+    linear-gradient(var(--tsd-bid-clock-bg), var(--tsd-bid-clock-bg)) padding-box,
+    var(--tsd-primary-gradient) border-box;
+}
+
+.tsd-panel-actions .btn:hover,
+.tsd-bid-clock .btn:hover { background: rgba(6, 131, 252, .2); }
+
+/* keep the gradient border on hover; brighten the fill instead */
+.tsd-bid-clock #nextRoundBut:hover {
+  background:
+    linear-gradient(rgba(13, 119, 242, .28), rgba(13, 119, 242, .28)) padding-box,
+    var(--tsd-primary-gradient) border-box;
+}
+
+.tsd-panel-actions .btn:active,
+.tsd-bid-clock .btn:active { transform: scale(.97); }
+
+.tsd-panel-actions .btn:focus-visible,
+.tsd-bid-clock .btn:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 2px;
+}
+
+/* the help select sits in the same row as the action buttons */
+.tsd-panel-actions select.btn {
+  text-transform: none;
+  letter-spacing: normal;
+  background: var(--tsd-field-bg);
+}
+
+.tsd-panel-actions form { margin: 0; }
+
+/* ---- question ---------------------------------------------------------- */
+
+.tsd-question-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(10px, 1.4vw, 26px);
+  margin-bottom: clamp(12px, 1.6vw, 24px);
+}
+
+.tsd-question-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+
+/* #qBox — the JS writes the question text here and toggles its display */
+.tsd-question-main #qBox {
+  margin: 0;
+  font-size: clamp(16px, 1.85vw, 32px);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--tsd-text);
+}
+
+/* the "Drag each item…" helper line */
+.tsd-question-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: clamp(6px, .8vw, 12px) 0 0;
+  font-size: clamp(12px, 1.15vw, 20px);
+  color: var(--tsd-body-text);
+}
+
+.tsd-question-hint svg { width: 1.2em; height: auto; flex: none; color: var(--tsd-blue); }
+
+/* ---- play area ---------------------------------------------------------
+   #gamePlayArea and the insert points are filled by the Game* renderers,
+   which apply their own inline colours from the question data. Style only
+   the container — never the generated contents.                          */
+
+.tsd-play-area {
+  min-height: clamp(220px, 30vw, 460px);
+}
+
+.tsd-play-area #gamePlayArea { min-width: 0; }
+
+/* ---- drag & drop panels (GameC) ----------------------------------------
+   GameC.js builds:
+     <table id='tabl'><tr>
+       <td width='30%'><div id='left'></div></td>   <- source items
+       <td><div id='right'></div></td>              <- drop targets
+     </tr></table>
+   Items are <input class='draggableC'>, drop cells are <td class='containerC'>.
+   Ids and classes are load-bearing (GameC.js queries them) — style only.   */
+
+/* Neutralise the generated layout table so the two panels sit side by side.
+   Two game types build this area with different ids/classes:
+     GameC -> <table border='1' id='tabl'>,     panels #left/#right
+     GameO -> <table border='3' id='theTable'>, panels .container#left/#right
+   Both carry a `border` ATTRIBUTE, which paints the white outline — the
+   attribute is only overridden by an explicit border rule here. */
+/* The generated markup is a table, but table cells will not reliably give
+   the two panels a shared height (percentage heights on a <td> have no
+   definite parent to resolve against). Re-casting the table and its row as
+   flex containers makes the two cells equal-height siblings, so the taller
+   panel sets the height for both. */
+.tsd-play-area #tabl,
+.tsd-play-area #theTable {
+  display: block;
+  width: 100%;
+  border: 0 !important;
+}
+
+.tsd-play-area #tabl > tbody,
+.tsd-play-area #theTable > tbody { display: block; }
+
+.tsd-play-area #tabl > tbody > tr,
+.tsd-play-area #theTable > tbody > tr {
+  display: flex;
+  align-items: stretch;              /* equal-height cells */
+  gap: clamp(10px, 1.5vw, 24px);
+}
+
+.tsd-play-area #tabl > tbody > tr > td,
+.tsd-play-area #theTable > tbody > tr > td {
+  display: flex;                     /* so the panel can fill the cell */
+  border: 0 !important;
+  padding: 0;
+  /* GameC.js hard-codes width='30%' on the first cell; the design shows two
+     panels of equal width, so override it here. */
+  flex: 1 1 0;
+  width: 50%;
+  min-width: 0;
+}
+
+/* Figma: 632 × 432, radius 20.
+   min-height, not height: the item count is data-driven (one box per answer),
+   so the panel must be able to grow rather than clip.
+   Both GameC and GameO name their panels #left / #right, so the colour split
+   below works for either game type. */
+.tsd-play-area #left,
+.tsd-play-area #right,
+.tsd-play-area .container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 632px;
+  /* 432px is the design height, but the item count is data-driven, so a
+     panel with many items grows. height:100% makes each panel fill its
+     table cell, and the cells equalise — so whichever side is taller sets
+     the height for BOTH and the two boxes always match. */
+  min-height: 432px;
+  height: 100%;
+  padding: 20px;
+
+  border-radius: 20px;
+}
+
+/* left — source items: bg #0683FC1A, border 1px #0683FC80 */
+.tsd-play-area #left {
+  border: 1px solid var(--tsd-dnd-panel-border);
+  background: var(--tsd-dnd-panel-bg);
+}
+
+/* right — drop targets: bg #F9C8001A, border 1px #F9C80080 */
+.tsd-play-area #right {
+  border: 1px solid var(--tsd-dnd-target-border);
+  background: var(--tsd-dnd-target-bg);
+}
+
+/* the draggable items — inner container #FFFFFF26, text #9297B1.
+   .draggableC = GameC (<input>), .draggable = GameO (<p>). */
+.tsd-play-area .draggableC,
+.tsd-play-area .draggable {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+
+  /* The design nests a filled inner box inside a dashed outer slot, but
+     GameC/GameO emit ONE flat element per item (<input>/<p>) with no
+     wrapper div. Rather than change those renderers, one element carries
+     both layers:
+       border          -> the dashed outer slot
+       padding (6px)   -> the GAP between the slot and the fill
+       content-box bg  -> the filled inner box, inset by that padding
+     Figma: radius 10, 1px dashed #FFFFFF40, inner fill #FFFFFF26. */
+  border: 1px dashed var(--tsd-dnd-slot-border);
+  border-radius: 10px;
+  padding: 6px;
+  /* The fill is painted on the CONTENT box, so the 6px padding above shows
+     through as the gap between the dashed slot and the filled inner box.
+     The fill still picks up the rounded corners from border-radius. */
+  background: var(--tsd-dnd-item-bg) content-box;
+  background-clip: content-box;
+
+  /* Figma: Lufga 400, 18px / line-height 16px / letter-spacing 4% / centred.
+     GameC.js writes an inline font-Size on every item from
+     getDefaultFontSize(), and inline wins — hence the !important here.
+     It is the only way CSS can reach these without changing GameC.js. */
+  font-family: var(--tsd-dnd-font);
+  font-size: 18px !important;
+  font-weight: 400;
+  /* The fill is the content box, so its height comes from line-height
+     rather than padding — this is the inner box's vertical breathing room.
+     (Figma's 16px line-height applies to the text itself; the extra here
+     is what gives the filled box its height.) */
+  line-height: 38px;
+  letter-spacing: .04em;
+  text-align: center;
+  color: var(--tsd-dnd-item-text);
+
+  cursor: move;
+  transition: background .15s var(--tsd-ease);
+}
+
+.tsd-play-area .draggableC:hover,
+.tsd-play-area .draggable:hover { background: rgba(255, 255, 255, .22); }
+
+/* the item being dragged (GameC.js / GameO.js toggle .dragging) */
+.tsd-play-area .draggableC.dragging,
+.tsd-play-area .draggable.dragging { opacity: .5; }
+
+/* drop targets — dashed 8,8 outline, 1px #FFFFFF40 */
+.tsd-play-area .containerC {
+  box-sizing: border-box;
+  height: auto;
+  margin: 0 0 12px;
+  /* same 6px + 38px geometry as a source item, so an empty slot and a
+     filled item line up at the same height across the two panels */
+  padding: 6px;
+
+  border: 1px dashed var(--tsd-dnd-slot-border) !important;
+  border-radius: 10px;
+  background: transparent;
+
+  font-family: var(--tsd-dnd-font);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 38px;          /* matches the source items */
+  letter-spacing: .04em;
+  text-align: center;
+  color: var(--tsd-dnd-item-text);
+}
+
+/* the right panel's generated grid is a plain table — flatten it so each
+   drop cell stacks as a full-width row like the design */
+.tsd-play-area #right table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 0 !important;
+}
+
+.tsd-play-area #right table,
+.tsd-play-area #right tbody,
+.tsd-play-area #right tr { display: block; width: 100%; }
+
+.tsd-play-area #right tr { height: auto !important; }
+
+.tsd-play-area #right td.containerC { display: block; width: 100%; }
+
+.tsd-play-area .containerC p { margin: 0; }
+
+#ansBoxDiv { margin-top: clamp(12px, 1.6vw, 24px); }
+
+#ansBox {
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(8px, 1vw, 16px);
+  border-radius: 12px;
+  border: var(--tsd-field-border-w) solid var(--tsd-field-border);
+  background: var(--tsd-field-bg);
+  color: var(--tsd-text);
+  font-family: inherit;
+}
+
+/* #noticeA — the "ALREADY SELECTED!" flash.
+   A centred fixed overlay, hidden until script.js flips it to 'block'
+   (js/script.js toggles display between 'none' and 'block'), so the
+   initial `display: none` here is load-bearing — do not remove it. */
+#noticeA {
+  display: none;                 /* initially hidden — script.js shows it */
+  position: fixed;
+  top: 300px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: min(400px, calc(100vw - 32px));
+  box-sizing: border-box;
+
+  padding: clamp(8px, .9vw, 14px) clamp(12px, 1.4vw, 22px);
+  border-radius: 12px;
+  border: 1.5px solid var(--tsd-modal-red);
+  background: rgba(40, 10, 22, .95);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+  color: var(--tsd-text);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ---- developer tools bar ----------------------------------------------
+   #tools is the hidden dev bar (revealed by the copyright() easter egg).
+   Kept functional but visually out of the way.                          */
+
+#tools {
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .35);
+  font-size: 12px;
+}
+
+/* ---- responsive --------------------------------------------------------
+   Below ~1100px the five-across row cannot hold; stack it as
+   players side by side, then the two bid panels, then the clock.        */
+
+@media (max-width: 1100px) {
+  .tsd-scorebar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tsd-pl-card--p1   { grid-column: 1; grid-row: 1; }
+  .tsd-pl-card--p2   { grid-column: 2; grid-row: 1; }
+  .tsd-bid-panel--p1 { grid-column: 1; grid-row: 2; }
+  .tsd-bid-panel--p2 { grid-column: 2; grid-row: 2; }
+  .tsd-bid-clock     { grid-column: 1 / -1; grid-row: 3; }
+}
+
+@media (max-width: 720px) {
+  .tsd-panel-header  { flex-wrap: wrap; }
+  .tsd-panel-status  { order: 3; flex-basis: 100%; white-space: normal; }
+  .tsd-question-bar  { flex-direction: column; align-items: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-icon-but,
+  .tsd-exit-but,
+  .tsd-panel-actions .btn,
+  .tsd-bid-clock .btn,
+  .tsd-bid-panel .but2Player { transition: none; }
+}
+
+/* ---- Game B — image box grid -------------------------------------------
+   GameB.setUpMultiImageTable() writes a plain <table border='1'> into
+   #gameInsrtPt, one <td> per picture:
+
+     <td><div id='divR1C1'><img id='R1C1' class='gameBImage'></div></td>
+
+   The ids are read back by the click handlers and the check-mark placer, so
+   the structure is left exactly as generated — only its presentation changes.
+   The table is flattened to a wrapping flex row so the cards keep the Figma
+   size and gap instead of table-cell spacing.                            */
+
+.tsd-play-area #gameInsrtPt > table {
+  border: 0;
+  border-collapse: separate;
+  margin: 0 auto;
+}
+
+/* strip the generated border='1' from every level */
+.tsd-play-area #gameInsrtPt > table,
+.tsd-play-area #gameInsrtPt > table tr,
+.tsd-play-area #gameInsrtPt > table td { border: 0; }
+
+/* rows become flex lines; cells become cards */
+.tsd-play-area #gameInsrtPt > table > tbody { display: block; }
+
+.tsd-play-area #gameInsrtPt > table > tbody > tr {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.tsd-play-area #gameInsrtPt > table > tbody > tr > td {
+  display: block;
+  padding: 0;
+}
+
+/* the card itself — Figma: 152.34 × 172.34, radius 9.23 */
+.tsd-play-area #gameInsrtPt [id^="divR"] {
+  position: relative;
+  width: var(--tsd-gb-card-w);
+  height: var(--tsd-gb-card-h);
+  border-radius: var(--tsd-gb-radius);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--tsd-gb-name-bg);
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+
+.tsd-play-area #gameInsrtPt [id^="divR"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+}
+
+/* the picture fills the card; the caption bar overlays its lower edge */
+.tsd-play-area .gameBImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+
+/* the unchecked selection box, top-right — 1.15px solid #FD0C75.
+   Drawn on the card so no extra element is needed.                       */
+.tsd-play-area #gameInsrtPt [id^="divR"]::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: var(--tsd-gb-check);
+  height: var(--tsd-gb-check);
+  border: var(--tsd-gb-check-border);
+  border-radius: 3px;
+  background: rgba(10, 8, 45, .45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* the name plate across the bottom of each card.
+   The renderer emits no caption text, so the plate is driven by a data
+   attribute the markup can carry without touching game logic:
+       <div id="divR1C1" data-name="Hillary Clinton">
+   With no data-name present the plate is not drawn at all.               */
+.tsd-play-area #gameInsrtPt [id^="divR"][data-name]::before {
+  content: attr(data-name);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 7px 6px;
+  background: var(--tsd-gb-name-bg);
+  font-family: var(--tsd-gb-name-font);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 12.31px;
+  letter-spacing: .04em;
+  text-align: center;
+  color: var(--tsd-gb-name-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Game B states -----------------------------------------------------
+   GameB.js signals state two ways, and neither is changed here:
+     · it drops a 17x16 blue/red dot .jpg into the cell for a player pick
+     · it sets inline border colour/width/style green dotted on a correct cell
+   The rules below dress those same signals up to match the design.       */
+
+/* a picked cell — the dot image inside is what marks it, so the card is
+   given a ring to match. :has() keeps this purely presentational.        */
+.tsd-play-area #gameInsrtPt [id^="divR"]:has(.dot) {
+  box-shadow: 0 0 0 2px var(--tsd-accent-pink), 0 6px 18px rgba(0, 0, 0, .45);
+}
+
+/* fill the selection box once the cell carries a dot */
+.tsd-play-area #gameInsrtPt [id^="divR"]:has(.dot)::after {
+  background: var(--tsd-accent-pink);
+}
+
+/* the player dots and check marks the renderer injects.
+   They are positioned by inline styles from the JS; only their look is
+   adjusted so they read as badges rather than loose thumbnails.          */
+.tsd-play-area #gameInsrtPt .dot,
+.tsd-play-area #gameInsrtPt .ckMrk {
+  z-index: 3;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85);
+}
+
+/* a revealed-correct cell. GameB.js sets `border: 8px dotted green` inline,
+   which wins over any border here — so the highlight is drawn with an
+   outline and a glow instead, which inline styles do not touch.          */
+.tsd-play-area #gameInsrtPt [id^="divR"][style*="green"] {
+  outline: 2px solid var(--tsd-gb-correct);
+  outline-offset: -2px;
+  box-shadow: 0 0 14px rgba(45, 226, 143, .55);
+}
+
+/* ---- Game B responsive -------------------------------------------------
+   The grid width comes from the question data (rows/cols), so the row is
+   allowed to wrap and the cards shrink rather than overflow the page.   */
+
+@media (max-width: 1100px) {
+  .tsd-play-area #gameInsrtPt > table > tbody > tr { gap: 14px; margin-bottom: 14px; }
+  :root { --tsd-gb-card-w: 132px; --tsd-gb-card-h: 150px; }
+}
+
+@media (max-width: 720px) {
+  .tsd-play-area #gameInsrtPt > table > tbody > tr { gap: 10px; margin-bottom: 10px; }
+  :root { --tsd-gb-card-w: 108px; --tsd-gb-card-h: 124px; }
+  .tsd-play-area #gameInsrtPt [id^="divR"][data-name]::before { font-size: 11px; padding: 6px 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-play-area #gameInsrtPt [id^="divR"] { transition: none; }
+  .tsd-play-area #gameInsrtPt [id^="divR"]:hover { transform: none; }
+}
+
+/* ==========================================================================
+   Game D — date line (year slider + day slider)
+
+   GameD.insertLayout() and insertDayTable() write nested tables into
+   #gamePlayArea. The structure, ids and inline handlers are generated by
+   the JS and are left exactly as they are; only presentation changes.
+
+   Two range inputs carry the play:
+     #sliderYear  (class .sliderYear)  — the year, min/max set at runtime
+     #sliderDay                        — the day-of-year, 1..370
+   Both are native <input type="range">, so the track and thumb are styled
+   through the vendor pseudo-elements below.
+   ========================================================================== */
+
+/* ---- neutralise the generated layout tables ---------------------------- */
+
+.tsd-play-area #gamePlayArea table {
+  border: 0;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.tsd-play-area #gamePlayArea table td { border: 0; padding: 0; }
+
+/* the generated <caption> — "SELECT THE YEAR" / "SELECT THE DAY".
+   The design shows this as the hint line under the question.            */
+.tsd-play-area #gamePlayArea table > caption {
+  caption-side: top;
+  margin-bottom: 14px;
+  font-family: var(--tsd-dnd-font);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  text-transform: none;
+  color: var(--tsd-text-muted);
+  text-align: center;
+}
+
+/* #displayBoxYear is the live readout. GameD.js sets background-color on it
+   inline to flag whose turn it is, so the background is left to the JS and
+   only the rest of the box is styled here.                               */
+.tsd-play-area #displayBoxYear {
+  display: block;
+  margin: 0 auto 18px;
+  width: 140px;
+  padding: 8px 10px;
+  border: var(--tsd-border-hairline);
+  border-radius: 10px;
+  font-family: var(--tsd-dnd-font);
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--tsd-modal-ink);
+}
+
+/* ---- the range sliders -------------------------------------------------
+   Figma: track #FFFFFF1F, progress #FD0C75, thumb #F6A3C7.
+
+   The filled portion is painted with a left-anchored linear-gradient sized
+   by --tsd-sl-pct. Firefox has ::-moz-range-progress and uses it directly;
+   WebKit/Blink has no progress pseudo-element, so the gradient on the track
+   is what shows there. Without JS to update --tsd-sl-pct the WebKit track
+   reads as unfilled — see the note under "progress fill" below.         */
+
+.tsd-play-area #gamePlayArea input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  max-width: 940px;
+  margin: 0 auto;
+  height: var(--tsd-sl-thumb-size);
+  background: transparent;   /* the track pseudo-elements paint instead */
+  cursor: pointer;
+}
+
+/* --- track --- */
+.tsd-play-area #gamePlayArea input[type="range"]::-webkit-slider-runnable-track {
+  height: var(--tsd-sl-track-h);
+  border-radius: 999px;
+  background:
+    linear-gradient(var(--tsd-sl-fill), var(--tsd-sl-fill))
+      0 / var(--tsd-sl-pct, 0%) 100% no-repeat,
+    var(--tsd-sl-track-bg);
+}
+
+.tsd-play-area #gamePlayArea input[type="range"]::-moz-range-track {
+  height: var(--tsd-sl-track-h);
+  border-radius: 999px;
+  background: var(--tsd-sl-track-bg);
+}
+
+/* Firefox paints the filled portion for us, no JS needed */
+.tsd-play-area #gamePlayArea input[type="range"]::-moz-range-progress {
+  height: var(--tsd-sl-track-h);
+  border-radius: 999px;
+  background: var(--tsd-sl-fill);
+}
+
+/* --- thumb --- */
+.tsd-play-area #gamePlayArea input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width:  var(--tsd-sl-thumb-size);
+  height: var(--tsd-sl-thumb-size);
+  border-radius: 50%;
+  background: var(--tsd-sl-thumb);
+  border: 3px solid var(--tsd-sl-thumb-ring);
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+  /* centre the thumb on the track: (thumb - track) / 2 */
+  margin-top: calc((var(--tsd-sl-track-h) - var(--tsd-sl-thumb-size)) / 2);
+  transition: transform .12s var(--tsd-ease);
+}
+
+.tsd-play-area #gamePlayArea input[type="range"]::-moz-range-thumb {
+  width:  var(--tsd-sl-thumb-size);
+  height: var(--tsd-sl-thumb-size);
+  border-radius: 50%;
+  background: var(--tsd-sl-thumb);
+  border: 3px solid var(--tsd-sl-thumb-ring);
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+}
+
+.tsd-play-area #gamePlayArea input[type="range"]:hover::-webkit-slider-thumb,
+.tsd-play-area #gamePlayArea input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+
+.tsd-play-area #gamePlayArea input[type="range"]:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+/* ---- the ruler above each slider ---------------------------------------
+   The design draws a ruled axis: a #0783FB baseline, tall #FD0C75 ticks at
+   the labelled years, short #FFFFFF80 ticks between them.
+
+   The renderer supplies this as a bitmap instead — #nbrLine (NbrLine-1.gif)
+   for the year row and #dateLine (DateLine-1.jpg) for the day row. Those
+   images cannot be recoloured with CSS, so they are hidden and the ruler is
+   drawn with repeating-linear-gradient on their container. The <img> tags
+   stay in the DOM untouched; only their visibility changes.
+
+   Tick spacing assumes the year row spans 25 units with a major tick every
+   5, matching the design. #sliderYear's real min/max come from the question
+   data at runtime (GameD.insertHiAndLo sets a 50-year span), so the ruler is
+   decorative — it is not a per-value readout.                            */
+
+.tsd-play-area #gamePlayArea #nbrLine,
+.tsd-play-area #gamePlayArea #dateLine {
+  display: none;
+}
+
+.tsd-play-area #gamePlayArea #sliderDiv,
+.tsd-play-area #gamePlayArea #dateLineInsrtPt {
+  position: relative;
+  width: 100%;
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+/* the ruled axis: a blue baseline, tall pink ticks every 20%, short white
+   ticks every 4%. Both tick rows are anchored to the bottom of the band so
+   they rise from the baseline the way the design shows.                  */
+.tsd-play-area #gamePlayArea #sliderDiv::before {
+  content: "";
+  display: block;
+  height: var(--tsd-sl-rule-h);
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--tsd-sl-rule-line);
+  background-repeat: repeat-x;
+  background-image:
+    repeating-linear-gradient(90deg,
+      var(--tsd-sl-rule-major) 0 2px,
+      transparent 2px 20%),
+    repeating-linear-gradient(90deg,
+      var(--tsd-sl-rule-minor) 0 1px,
+      transparent 1px 4%);
+  background-size: 100% 100%, 100% 55%;
+  background-position: left bottom, left bottom;
+}
+
+/* ---- the year scale labels --------------------------------------------
+   #displayTextLow / #displayTextMid / #displayTextHi are the only three
+   labels the renderer creates (low, midpoint, high). The design shows six;
+   three is what the data provides, so they are spread across the axis.  */
+
+.tsd-play-area #gamePlayArea table table {
+  width: 100%;
+  max-width: 940px;
+  margin: 0 auto 4px;
+  table-layout: fixed;
+}
+
+.tsd-play-area #gamePlayArea .gameDCell {
+  padding: 0;
+  font-family: var(--tsd-dnd-font);
+  font-size: clamp(15px, 1.5vw, 24px);
+  font-weight: 600;
+  color: var(--tsd-sl-label);
+}
+
+.tsd-play-area #gamePlayArea .gameDCell:nth-child(1) { text-align: left; }
+.tsd-play-area #gamePlayArea .gameDCell:nth-child(2) { text-align: center; }
+.tsd-play-area #gamePlayArea .gameDCell:nth-child(3) { text-align: right; }
+
+/* ---- day row ("SELECT THE DAY") ----------------------------------------
+   insertDayTable() spaces the day slider with 67px / 60px filler cells so
+   it lines up under the bitmap date line. With that bitmap hidden the
+   filler is no longer needed — collapse it so the two sliders share one
+   left edge, as the design shows.                                       */
+
+.tsd-play-area #theDayTable td[width="67px"],
+.tsd-play-area #theDayTable td[width="60px"] { width: 0; padding: 0; }
+
+.tsd-play-area #theDayTable { margin-top: 26px; }
+
+/* the day ruler — twelve months, so a tick every 1/12 with no minor ticks */
+.tsd-play-area #gamePlayArea #dateLineInsrtPt::before,
+.tsd-play-area #theDayTable td:has(#dateLine)::before {
+  content: "";
+  display: block;
+  height: var(--tsd-sl-rule-h);
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--tsd-sl-rule-line);
+  background-repeat: repeat-x;
+  background-image:
+    repeating-linear-gradient(90deg,
+      var(--tsd-sl-rule-minor) 0 1px,
+      transparent 1px calc(100% / 12));
+  background-size: 100% 55%;
+  background-position: left bottom;
+}
+
+/* ---- player answer markers ---------------------------------------------
+   placeArrows() injects Blue/RedUpArrow .jpg thumbnails into #arrowInsrtPt0
+   and #arrowInsrtPt1 and positions them with an inline `left`. The inline
+   position is left alone; only the row height and stacking are set so the
+   markers sit against the slider instead of pushing the layout apart.   */
+
+.tsd-play-area #arrowInsrtPt0,
+.tsd-play-area #arrowInsrtPt1 {
+  position: relative;
+  height: 20px;
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+.tsd-play-area .upArrow {
+  position: absolute;
+  top: 0;
+  z-index: 5;
+}
+
+/* the black answer arrow, dropped into #dateLineInsrtPt after the play */
+.tsd-play-area #blackDownArrow {
+  position: absolute;
+  z-index: 6;
+}
+
+/* ---- Game D responsive -------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  :root { --tsd-sl-rule-h: 34px; }
+  .tsd-play-area #gamePlayArea .gameDCell { font-size: 16px; }
+}
+
+@media (max-width: 720px) {
+  :root { --tsd-sl-rule-h: 26px; --tsd-sl-thumb-size: 20px; }
+  .tsd-play-area #gamePlayArea table > caption { font-size: 16px; }
+  .tsd-play-area #gamePlayArea .gameDCell { font-size: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-play-area #gamePlayArea input[type="range"]::-webkit-slider-thumb {
+    transition: none;
+  }
+  .tsd-play-area #gamePlayArea input[type="range"]:hover::-webkit-slider-thumb,
+  .tsd-play-area #gamePlayArea input[type="range"]:active::-webkit-slider-thumb {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   Pre-game notice (Game D, L and N — two-player and single-player)
+
+   showPregameNotice() writes three stacked sections into #gamePlayArea:
+
+     <div class="tsd-pregame">
+       <div class="tsd-pregame-head">    back button + "Pre-Game Notice"
+       <div class="tsd-pregame-rules">   the bulleted rules
+       <div class="tsd-pregame-foot">    the Start Round button
+
+   Inside .tsd-pregame-rules the markup is still legacy — unclosed
+   <font size="..."> tags wrapping <p> and loose <b> — so those tags are
+   neutralised here rather than in the JS.
+   ========================================================================== */
+
+/* ---- outer rim + inner card -------------------------------------------- */
+
+.tsd-play-area .tsd-pregame {
+  position: relative;
+  width: 100%;
+  max-width: var(--tsd-pg-width);
+  margin: clamp(10px, 2vw, 26px) auto;       /* centred */
+  padding: var(--tsd-pg-pad);                /* the #FFFFFF40 rim */
+  border-radius: var(--tsd-pg-radius);
+  background: var(--tsd-pg-outer-bg);
+  box-shadow: 0 4px 53.75px rgba(255, 255, 255, .3);
+}
+
+/* the dark card inside the rim, behind all three sections */
+.tsd-play-area .tsd-pregame::after {
+  content: "";
+  position: absolute;
+  inset: var(--tsd-pg-pad);
+  border-radius: var(--tsd-pg-inner-radius);
+  background: var(--tsd-pg-inner-bg);
+  z-index: 0;
+}
+
+.tsd-play-area .tsd-pregame > * { position: relative; z-index: 1; }
+
+/* ---- 1. header: back button + title ------------------------------------
+   Both sit in normal flow. The title takes the remaining width and centres
+   inside it, which lands it slightly right of the card's true centre —
+   matching the Figma, where the title centre is 18px right of the card's. */
+
+.tsd-play-area .tsd-pregame-head {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.2vw, 18px);
+  min-height: clamp(34px, 3.4vw, 48px);
+  padding: var(--tsd-pg-inner-pad) var(--tsd-pg-inner-pad) 0;
+}
+
+.tsd-play-area .tsd-pregame-title {
+  flex: 1 1 auto;
+  text-align: center;
+  font-family: var(--tsd-dnd-font);
+  font-size: clamp(24px, 2.3vw, 38px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--tsd-pg-heading);
+}
+
+/* ---- back button --------------------------------------------------------
+   Same asset and behaviour as the back button on index.html and
+   overview.html, so the three screens match.                             */
+
+.tsd-play-area .tsd-pregame-back {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .2s var(--tsd-ease), filter .2s var(--tsd-ease);
+}
+
+.tsd-play-area .tsd-pregame-back img {
+  display: block;
+  width: auto;
+  height: clamp(30px, 3vw, 44px);
+}
+
+.tsd-play-area .tsd-pregame-back:hover  { transform: translateX(-2px); }
+.tsd-play-area .tsd-pregame-back:active { transform: scale(.94); }
+
+.tsd-play-area .tsd-pregame-back:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* ---- 2. rules ----------------------------------------------------------- */
+
+.tsd-play-area .tsd-pregame-rules {
+  padding: var(--tsd-pg-head-gap) var(--tsd-pg-inner-pad) 0;
+
+  /* reset the legacy <font size> sizing for everything inside */
+  font-family: var(--tsd-dnd-font);
+  font-size: clamp(15px, 1.15vw, 19px);
+  line-height: 1.5;
+  color: var(--tsd-pg-body);
+}
+
+/* The rules sit in their own centred column, narrower than the card so the
+   lines do not run the full width. Figma has them at ~82% of the card. */
+.tsd-play-area .tsd-pregame-rules-inner {
+  width: 100%;
+  max-width: var(--tsd-pg-rules-w);
+  margin-inline: auto;
+}
+
+.tsd-play-area .tsd-pregame-rules font {
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+/* Each <p> gets the ringed blue bullet from the design and is indented to
+   clear it. The notice is a run of <p> and loose <b>, not a list.        */
+
+.tsd-play-area .tsd-pregame-rules p {
+  position: relative;
+  margin: 0 0 clamp(14px, 1.5vw, 24px);
+  padding-left: calc(var(--tsd-pg-bullet-size) + 22px);
+}
+
+.tsd-play-area .tsd-pregame-rules p::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .38em;
+  width:  var(--tsd-pg-bullet-size);
+  height: var(--tsd-pg-bullet-size);
+  border-radius: 50%;
+  border: 2px solid var(--tsd-pg-bullet);
+  background:
+    radial-gradient(circle,
+      var(--tsd-pg-bullet) 0 42%,
+      transparent 42% 100%);
+  box-sizing: border-box;
+}
+
+/* nested <p> — the two-player variants wrap one <p> inside another, so the
+   inner one must not draw a second bullet or indent again. */
+.tsd-play-area .tsd-pregame-rules p p         { padding-left: 0; margin-bottom: 0; }
+.tsd-play-area .tsd-pregame-rules p p::before { display: none; }
+
+/* bold runs stay in the body colour — the design does not brighten them */
+.tsd-play-area .tsd-pregame-rules b {
+  font-weight: 600;
+  color: var(--tsd-pg-body);
+}
+
+/* the stray <br> runs at the end of the GameL variants */
+.tsd-play-area .tsd-pregame-rules br { display: none; }
+
+/* ---- 3. footer: Start Round -------------------------------------------- */
+
+.tsd-play-area .tsd-pregame-foot {
+  display: flex;
+  justify-content: center;
+  padding: clamp(22px, 2.8vw, 40px) var(--tsd-pg-inner-pad)
+           var(--tsd-pg-inner-pad);
+}
+
+/* The icon and label form one centred group, as in the Figma: the triangle,
+   a 20px gap, then "START ROUND", with the pair centred on the button.
+
+   <input type="button"> cannot hold a child element, so the triangle is a
+   background layer on the button rather than a pseudo-element.
+
+   Centring the pair without knowing the label's width: give the button a
+   left padding of (icon + gap) and no right padding of its own. The label
+   then centres inside the box that starts after the icon, which shifts it
+   right by exactly half of (icon + gap) - and placing the icon's centre the
+   same distance left of the button's centre puts the two either side of it,
+   balanced. Works at any label length.                                   */
+/* The button is a <button>, not an <input>, so the play triangle can be a
+   real child element. Flex centring then keeps the icon and label together
+   as one group in the middle of the button - at any label length, with no
+   arithmetic that depends on how wide the text happens to be.            */
+.tsd-play-area .tsd-pregame-start {
+  appearance: none;
+  -webkit-appearance: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tsd-pg-icon-gap);
+
+  width: var(--tsd-pg-btn-w);
+  max-width: 100%;
+  min-height: var(--tsd-pg-btn-h);
+  padding: 0 var(--tsd-pg-btn-pad);
+  border: 0;
+  border-radius: 12px;
+  background: var(--tsd-primary-gradient);
+
+  font-family: var(--tsd-dnd-font);
+  font-size: clamp(15px, 1.25vw, 20px);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+  cursor: pointer;
+
+  box-shadow: 0 8px 24px rgba(6, 131, 252, .32);
+  transition: transform .16s var(--tsd-ease), box-shadow .16s var(--tsd-ease);
+}
+
+/* the play triangle, masked so it takes the button's colour */
+.tsd-play-area .tsd-pregame-play {
+  flex: 0 0 auto;
+  width:  var(--tsd-pg-icon);
+  height: var(--tsd-pg-icon);
+  background: currentColor;
+  -webkit-mask: var(--tsd-pg-play-icon) center / contain no-repeat;
+          mask: var(--tsd-pg-play-icon) center / contain no-repeat;
+}
+
+.tsd-play-area .tsd-pregame-start:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(6, 131, 252, .45);
+}
+
+.tsd-play-area .tsd-pregame-start:active {
+  transform: translateY(0) scale(.985);
+}
+
+.tsd-play-area .tsd-pregame-start:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 3px;
+}
+
+/* ---- pre-game notice responsive ---------------------------------------- */
+
+@media (max-width: 720px) {
+  :root {
+    --tsd-pg-pad: 16px;
+    --tsd-pg-inner-pad: 18px;
+    --tsd-pg-head-gap: 26px;
+    --tsd-pg-bullet-size: 16px;
+  }
+
+  .tsd-play-area .tsd-pregame-rules p {
+    padding-left: calc(var(--tsd-pg-bullet-size) + 14px);
+  }
+
+  /* the title would collide with the back button at this width */
+  .tsd-play-area .tsd-pregame-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .tsd-play-area .tsd-pregame-title { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-play-area .tsd-pregame-start,
+  .tsd-play-area .tsd-pregame-back { transition: none; }
+  .tsd-play-area .tsd-pregame-start:hover { transform: none; }
+}
+
+/* ==========================================================================
+   Box-grid games — E, M, P and U
+
+   All four extend BoxGame, which builds the layout in two steps:
+
+     BoxGame.createGrid()          — a <table border='5'> of <td>, each
+                                     holding <div class='gridInsrtPt'>, and
+                                     a literal "-----" separator per cell
+     BoxGame.loadButtonsIntoGrid() — one <input type='button' class='but'>
+                                     inside each insert point, carrying
+                                     style='background-color:aquamarine;'
+
+   Both the table border and the aquamarine fill are written inline by the
+   JS, so they are overridden here rather than merely restyled. The ids,
+   classes and click handlers are untouched.
+
+   Grid size comes from the question data (Rows/Cols) — 4x3 up to 10x3 — so
+   the panel sizes to its content instead of to the Figma's fixed 530x307.
+   ========================================================================== */
+
+/* ---- the surrounding panel ---------------------------------------------
+   Figma: 530 x 307, radius 20, bg #FFFFFF0D, border 1px #FFFFFF40.
+   Width follows the content, as asked: it shrinks to a small grid and grows
+   with a large one, capped so a 10-row grid still fits the viewport.     */
+
+.tsd-play-area #gamePlayArea:has(> table > tbody > tr > td .gridInsrtPt) {
+  display: inline-block;
+  padding: clamp(18px, 2vw, 30px);
+  border: var(--tsd-bx-panel-border);
+  border-radius: var(--tsd-bx-panel-radius);
+  background: var(--tsd-bx-panel-bg);
+}
+
+/* centre that shrink-to-fit panel in the play area */
+.tsd-play-area:has(#gamePlayArea .gridInsrtPt) { text-align: center; }
+.tsd-play-area #gamePlayArea .gridInsrtPt      { text-align: initial; }
+
+/* ---- the generated table ------------------------------------------------
+   border='5' is an attribute, so it is cleared on every level.          */
+
+.tsd-play-area #gamePlayArea table:has(.gridInsrtPt),
+.tsd-play-area #gamePlayArea table:has(.gridInsrtPt) tr,
+.tsd-play-area #gamePlayArea table:has(.gridInsrtPt) td {
+  border: 0;
+}
+
+.tsd-play-area #gamePlayArea table:has(.gridInsrtPt) {
+  border-collapse: separate;
+  border-spacing: var(--tsd-bx-btn-gap);
+  margin: 0 auto;
+}
+
+.tsd-play-area #gamePlayArea table:has(.gridInsrtPt) td {
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* createGrid() writes a literal "-------" <center> after every cell as a
+   spacer. The gap is handled by border-spacing now, so hide it. */
+.tsd-play-area #gamePlayArea td:has(.gridInsrtPt) > center { display: none; }
+
+/* the insert point carries an inline background-color:aquamarine */
+.tsd-play-area #gamePlayArea .gridInsrtPt {
+  background: none !important;
+}
+
+/* ---- the buttons --------------------------------------------------------
+   Figma: 109 x 36 min, radius 8, padding 9/23, bg #FFFFFF4D at .4 opacity.
+
+   loadButtonsIntoGrid() writes style='background-color:aquamarine;' inline,
+   which beats a normal rule — hence !important on the background alone.
+   Width is a minimum, not a fixed size, so a long label ("South Carolina")
+   grows its button instead of overflowing it.                            */
+
+.tsd-play-area #gamePlayArea .but {
+  appearance: none;
+  -webkit-appearance: none;
+
+  min-width: var(--tsd-bx-btn-min-w);
+  min-height: var(--tsd-bx-btn-min-h);
+  padding: var(--tsd-bx-btn-pad-y) var(--tsd-bx-btn-pad-x);
+  border: 0;
+  border-radius: var(--tsd-bx-btn-radius);
+  background: var(--tsd-bx-btn-bg) !important;
+  opacity: var(--tsd-bx-btn-opacity);
+
+  font-family: var(--tsd-dnd-font);
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--tsd-bx-btn-ink);
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+
+  cursor: pointer;
+  transition: opacity .14s var(--tsd-ease), transform .14s var(--tsd-ease);
+}
+
+.tsd-play-area #gamePlayArea .but:hover {
+  opacity: .7;
+}
+
+.tsd-play-area #gamePlayArea .but:active {
+  transform: scale(.97);
+}
+
+.tsd-play-area #gamePlayArea .but:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+/* ---- selected -----------------------------------------------------------
+   The renderers mark a pick by setting style.backgroundColor inline to the
+   player's colour — player 0 is #00008B, player 1 is #8B0000
+   (PlayerLineUp.js:290, 299) — and GameE/GameP also set style.color.
+
+   Those inline values cannot be replaced from CSS, but they CAN be matched
+   on, so each player colour maps to the design's selected treatment. The
+   attribute selectors below read the inline style text itself.          */
+
+.tsd-play-area #gamePlayArea .but[style*="rgb(0, 0, 139)"],
+.tsd-play-area #gamePlayArea .but[style*="00008B"],
+.tsd-play-area #gamePlayArea .but[style*="rgb(139, 0, 0)"],
+.tsd-play-area #gamePlayArea .but[style*="8B0000"],
+.tsd-play-area #gamePlayArea .but[style*="blue"],
+.tsd-play-area #gamePlayArea .but[style*="red"] {
+  background: var(--tsd-bx-selected) !important;
+  opacity: 1;
+  color: var(--tsd-text);
+  font-weight: 600;
+}
+
+/* GameE / GameP paint an eliminated button black */
+.tsd-play-area #gamePlayArea .but[style*="black"] {
+  background: rgba(255, 255, 255, .08) !important;
+  opacity: .3;
+  color: var(--tsd-text-muted);
+}
+
+/* BoxGame hides played buttons with the `hidden` property rather than a
+   class. Keep them occupying their cell so the grid does not reflow. */
+.tsd-play-area #gamePlayArea .but[hidden] {
+  display: inline-block;
+  visibility: hidden;
+}
+
+/* ---- box-grid responsive ------------------------------------------------ */
+
+@media (max-width: 1100px) {
+  :root { --tsd-bx-btn-min-w: 96px; --tsd-bx-btn-pad-x: 14px; }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --tsd-bx-btn-min-w: 74px;
+    --tsd-bx-btn-min-h: 32px;
+    --tsd-bx-btn-pad-x: 8px;
+    --tsd-bx-btn-gap:   6px;
+  }
+  .tsd-play-area #gamePlayArea .but { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-play-area #gamePlayArea .but { transition: none; }
+  .tsd-play-area #gamePlayArea .but:active { transform: none; }
+}
+
+/* ==========================================================================
+   Game I — progressive reveal
+
+   GameI.insertImage() puts <img id="gameIImage"> into #imageInsertPt, then
+   one of three renderers covers it:
+
+     DisplayType=BlockOut  placeBlockOuts() — <button class='butX'> panels
+                           absolutely positioned over the image from
+                           coordinates in the question data, hidden one at
+                           a time as the clock runs
+     DisplayType=Grid      a full row/col grid of cover panels
+     DisplayType=Focus     panels whose height shrinks each tick
+
+   Panels are positioned with inline left/top/width/height written by the JS
+   (GameI.js:225-226) and removed by setting `hidden`. Those inline values
+   are load-bearing for the reveal, so nothing here touches position or
+   size — only the panel's surface.
+   ========================================================================== */
+
+/* ---- the stage ---------------------------------------------------------
+   #imageInsertPt must stay position:relative — the panels are absolutely
+   positioned against it. Sizing to the image keeps the panel coordinates,
+   which are pixel values against the image's natural size, accurate.    */
+
+.tsd-play-area #imageInsertPt {
+  position: relative;
+  display: inline-block;
+  line-height: 0;                 /* no descender gap under the image */
+  border: var(--tsd-gi-stage-border);
+  border-radius: var(--tsd-gi-stage-radius);
+  background: var(--tsd-gi-stage-bg);
+  overflow: hidden;
+}
+
+/* centre the shrink-to-fit stage */
+.tsd-play-area:has(#imageInsertPt #gameIImage) { text-align: center; }
+
+.tsd-play-area #gameIImage {
+  position: relative;
+  display: block;
+  /* natural size only — the cover panels are positioned in image pixels,
+     so scaling the image here would misalign every panel. */
+  max-width: none;
+}
+
+/* ---- the cover panels ---------------------------------------------------
+   Figma: solid blue plate, hairline edge, small radius, centred number.
+   position/z-index are kept from the original rule because the reveal
+   depends on them; the JS supplies left/top/width/height inline.        */
+
+.tsd-play-area #imageInsertPt .butX {
+  position: absolute;
+  z-index: 2;
+
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  border: var(--tsd-gi-panel-border);
+  border-radius: var(--tsd-gi-panel-radius);
+  background: linear-gradient(180deg,
+                var(--tsd-gi-panel-bg)  0%,
+                var(--tsd-gi-panel-bg2) 100%);
+
+  font-family: var(--tsd-dnd-font);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--tsd-gi-panel-ink);
+  text-align: center;
+
+  cursor: pointer;
+  transition: opacity .35s var(--tsd-ease);
+}
+
+/* a panel is retired with the `hidden` property, not a class */
+.tsd-play-area #imageInsertPt .butX[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-play-area #imageInsertPt .butX { transition: none; }
+}

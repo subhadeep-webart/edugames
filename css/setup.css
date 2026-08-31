@@ -1,0 +1,875 @@
+/* ==========================================================================
+   Trivia-SmackDown — Game Setup / onboarding (index.html)
+
+   Layout only. All colour/metric tokens live in css/tokens.css, which MUST be
+   linked before this file.
+
+   IMPORTANT: this page re-skins the LIVE registration form. Every element id
+   (p0/z0/g0/s0, p1/z1/g1/s1, bidTime, setSerNbr, secondPlayer, infoBox) is
+   preserved — only presentation changes here.
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  min-height: 100%;
+  background: var(--tsd-bg-gradient);
+  background-attachment: fixed;
+}
+
+body.tsd-setup {
+  margin: 0;
+  min-height: 100vh;
+  background: transparent;
+  color: var(--tsd-text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ambient corner blooms */
+body.tsd-setup::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 42% 42% at 100% 0%,
+      rgba(180, 60, 200, .20) 0%, rgba(180, 60, 200, 0) 70%),
+    radial-gradient(ellipse 45% 45% at 0% 100%,
+      rgba(60, 90, 200, .16) 0%, rgba(60, 90, 200, 0) 70%);
+}
+
+.tsd-setup-page {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--tsd-container);
+  margin: 0 auto;
+  padding: clamp(16px, 2.2vw, 30px) var(--tsd-gutter) clamp(34px, 5vw, 70px);
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.tsd-setup-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: clamp(10px, 1.5vw, 22px);
+  margin-bottom: clamp(18px, 2.6vw, 40px);
+}
+
+.tsd-setup-logo { justify-self: start; }
+
+.tsd-setup-logo img {
+  display: block;
+  width: auto;
+  height: clamp(34px, 3.4vw, 52px);
+}
+
+/* ---- Title with sparkles ---------------------------------------------- */
+
+.tsd-setup-title {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(8px, 1vw, 16px);
+  margin: 0;
+
+  font-size: clamp(20px, 2.5vw, 38px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--tsd-text);
+  text-shadow: var(--tsd-title-glow);
+}
+
+.tsd-setup-title .tsd-spark-mark {
+  flex: 0 0 auto;
+  width: clamp(11px, 1.1vw, 17px);
+  height: auto;
+  color: var(--tsd-star-blue);
+}
+
+.tsd-setup-title .tsd-spark-mark:first-child { color: var(--tsd-accent-pink); }
+
+/* ---- Header right cluster ---------------------------------------------- */
+
+.tsd-setup-tools {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1vw, 14px);
+}
+
+/* single-player toggle */
+.tsd-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(9px, 1vw, 16px);
+  height: clamp(38px, 3.2vw, 48px);
+  padding: 0 clamp(6px, .6vw, 9px) 0 clamp(14px, 1.3vw, 22px);
+
+  border: var(--tsd-border-hairline);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .03);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(12px, 1vw, 16px);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .2s var(--tsd-ease),
+              background-color .2s var(--tsd-ease);
+}
+
+.tsd-toggle:hover { background: rgba(255, 255, 255, .07); }
+
+.tsd-toggle:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* the switch itself */
+.tsd-toggle-track {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(42px, 3.6vw, 54px);
+  height: clamp(22px, 1.9vw, 28px);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .12);
+  transition: background-color .25s var(--tsd-ease);
+}
+
+.tsd-toggle-thumb {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: calc(clamp(22px, 1.9vw, 28px) - 6px);
+  height: calc(clamp(22px, 1.9vw, 28px) - 6px);
+  border-radius: 50%;
+  background: var(--tsd-accent-pink);
+  transform: translateY(-50%);
+  transition: left .25s var(--tsd-ease), background-color .25s var(--tsd-ease);
+}
+
+.tsd-toggle.is-on .tsd-toggle-track { background: rgba(253, 12, 117, .35); }
+
+.tsd-toggle.is-on .tsd-toggle-thumb {
+  left: calc(100% - clamp(22px, 1.9vw, 28px) + 3px);
+}
+
+/* gear button */
+.tsd-gear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(38px, 3.2vw, 48px);
+  height: clamp(38px, 3.2vw, 48px);
+  padding: 0;
+
+  border: var(--tsd-border-hairline);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .03);
+  color: var(--tsd-text-muted);
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s var(--tsd-ease),
+              transform .2s var(--tsd-ease),
+              color .2s var(--tsd-ease);
+}
+
+.tsd-gear svg {
+  width: clamp(17px, 1.5vw, 22px);
+  height: auto;
+}
+
+.tsd-gear:hover,
+.tsd-gear:focus-visible {
+  background: rgba(255, 255, 255, .1);
+  color: var(--tsd-text);
+  transform: rotate(35deg);
+}
+
+.tsd-gear:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Player arena
+   ========================================================================== */
+
+.tsd-arena {
+  max-width: 1179px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 2vw, 34px);
+  margin-bottom: clamp(20px, 3vw, 40px);
+}
+
+.tsd-player { min-width: 0; }
+
+/* ---- label + banner ---------------------------------------------------- */
+
+.tsd-player-head {
+  margin-bottom: clamp(10px, 1.2vw, 18px);
+}
+
+.tsd-player-label {
+  margin: 0 0 clamp(6px, .7vw, 12px);
+  font-size: clamp(13px, 1.25vw, 20px);
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tsd-player-label);
+}
+
+.tsd-player--p2 .tsd-player-label { text-align: right; }
+
+/* the coloured banner the avatar straddles.
+   margin-top reserves space for the half-avatar that overhangs the top. */
+.tsd-player-banner {
+  position: relative;
+  min-width: 0;
+  margin-top: clamp(55px, 6.5vw, 95px);
+  /* top padding clears the half of the avatar that now sits inside the banner */
+  padding: clamp(65px, 7.6vw, 111px) clamp(14px, 1.6vw, 26px) clamp(14px, 1.6vw, 26px);
+  border-radius: 14px;
+}
+
+.tsd-player--p1 .tsd-player-banner { background: var(--tsd-p1-gradient); }
+.tsd-player--p2 .tsd-player-banner { background: var(--tsd-p2-gradient); }
+
+/* ---- avatar ------------------------------------------------------------ */
+
+.tsd-setup-avatar {
+  position: absolute;
+  /* Centered exactly on the banner's top edge — half the circle overhangs
+     above, half sits inside the banner. */
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: clamp(110px, 13vw, 190px);
+  height: clamp(110px, 13vw, 190px);
+  border-radius: 50%;
+  overflow: hidden;
+  /* opaque, so the banner never shows through the lower half of the circle */
+  background: #1A1748;
+}
+
+.tsd-player--p1 .tsd-setup-avatar { border: 3px solid var(--tsd-blue); }
+.tsd-player--p2 .tsd-setup-avatar { border: 3px solid #E040C8; }
+
+.tsd-setup-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* placeholder shown until a photo is chosen */
+.tsd-setup-avatar .tsd-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(255, 255, 255, .35);
+}
+
+.tsd-setup-avatar .tsd-avatar-empty svg {
+  width: 42%;
+  height: auto;
+}
+
+/* ---- change-photo button ---------------------------------------------- */
+
+.tsd-change-photo {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  margin: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 1.3vw, 20px);
+  width: 100%;
+  height: clamp(42px, 3.9vw, 58px);
+  padding: 0 clamp(12px, 1.2vw, 20px);
+
+  border: var(--tsd-border-hairline);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .04);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(12px, 1.05vw, 17px);
+  font-weight: 600;
+  white-space: nowrap;
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s var(--tsd-ease),
+              border-color .2s var(--tsd-ease);
+}
+
+.tsd-change-photo svg {
+  flex: 0 0 auto;
+  width: clamp(16px, 1.4vw, 21px);
+  height: auto;
+}
+
+.tsd-change-photo:hover,
+.tsd-change-photo:focus-visible {
+  background: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 255, 255, .5);
+}
+
+.tsd-change-photo:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   VS divider column
+   ========================================================================== */
+
+.tsd-vs-col {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1vw, 16px);
+  padding-top: clamp(40px, 5vw, 92px);
+}
+
+.tsd-vs-col img {
+  display: block;
+  width: auto;
+  height: clamp(94px, 11.6vw, 189px);
+  flex: 0 0 auto;
+}
+
+/* the fading vertical rule below the VS mark */
+.tsd-vs-rule {
+  flex: 1 1 auto;
+  width: 1px;
+  min-height: clamp(60px, 12vw, 200px);
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .75) 0%,
+    rgba(255, 255, 255, 0)   100%);
+}
+
+/* ==========================================================================
+   Fields
+   ========================================================================== */
+
+.tsd-field { margin-bottom: clamp(12px, 1.5vw, 22px); }
+
+.tsd-field-label {
+  display: block;
+  margin: 0 0 clamp(6px, .7vw, 11px);
+  font-size: clamp(11px, 1vw, 15px);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+}
+
+/* shared control skin — inputs and selects */
+.tsd-control {
+  display: block;
+  width: 100%;
+  height: clamp(44px, 4vw, 60px);
+  padding: 0 clamp(14px, 1.3vw, 22px);
+
+  border: var(--tsd-field-border-w) solid var(--tsd-field-border);
+  border-radius: 10px;
+  background: var(--tsd-field-bg);
+  box-shadow: var(--tsd-field-glow);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(13px, 1.1vw, 17px);
+
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color .2s var(--tsd-ease),
+              box-shadow .2s var(--tsd-ease);
+}
+
+.tsd-control::placeholder { color: rgba(255, 255, 255, .38); }
+
+.tsd-control:hover { border-color: rgba(255, 255, 255, .45); }
+
+.tsd-control:focus {
+  border-color: var(--tsd-blue);
+  box-shadow: var(--tsd-field-glow), 0 0 0 3px rgba(6, 131, 252, .22);
+}
+
+/* selects get a pink caret drawn in the corner */
+.tsd-select-wrap {
+  position: relative;
+  display: block;
+}
+
+.tsd-select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: clamp(14px, 1.3vw, 22px);
+  width: 0;
+  height: 0;
+  margin-top: -2px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid var(--tsd-accent-pink);
+  pointer-events: none;
+}
+
+select.tsd-control {
+  padding-right: clamp(36px, 3.4vw, 52px);
+  cursor: pointer;
+}
+
+/* the dark dropdown list itself */
+select.tsd-control option {
+  background: var(--tsd-field-bg);
+  color: var(--tsd-text);
+}
+
+/* ---- custom dropdown (JS-enhanced) -------------------------------------
+   The real <select> stays in the DOM with the same id/value contract used
+   by the game logic; js/setup-dropdown.js hides it visually and drives this
+   listbox instead. If JS fails to load, the native <select> above still
+   works unstyled — this block only applies once .is-enhanced is added. */
+
+.tsd-select-wrap.is-enhanced select.tsd-control {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tsd-select-trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: clamp(44px, 4vw, 60px);
+  padding: 0 clamp(36px, 3.4vw, 52px) 0 clamp(14px, 1.3vw, 22px);
+
+  border: var(--tsd-field-border-w) solid var(--tsd-field-border);
+  border-radius: 10px;
+  background: var(--tsd-field-bg);
+  box-shadow: var(--tsd-field-glow);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(13px, 1.1vw, 17px);
+  text-align: left;
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .2s var(--tsd-ease),
+              box-shadow .2s var(--tsd-ease);
+}
+
+.tsd-select-trigger:hover { border-color: rgba(255, 255, 255, .45); }
+
+.tsd-select-wrap.is-open .tsd-select-trigger,
+.tsd-select-trigger:focus-visible {
+  border-color: var(--tsd-blue);
+  box-shadow: var(--tsd-field-glow), 0 0 0 3px rgba(6, 131, 252, .22);
+  outline: none;
+}
+
+.tsd-select-listbox {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: min(280px, 60vh);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  border: var(--tsd-field-border-w) solid rgba(255, 255, 255, .18);
+  border-radius: 12px;
+  background: #171240;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45), var(--tsd-field-glow);
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: clamp(6px, .6vw, 10px);
+  padding-inline: clamp(6px, .6vw, 10px);
+  /* scrollable, but no visible scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  opacity: 0;
+  transform: translateY(-6px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .16s var(--tsd-ease),
+              transform .16s var(--tsd-ease),
+              visibility 0s linear .16s;
+}
+
+.tsd-select-wrap.is-open .tsd-select-listbox {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity .16s var(--tsd-ease),
+              transform .16s var(--tsd-ease),
+              visibility 0s linear 0s;
+}
+
+/* scroll fade cues — sticky children of the listbox so they track real
+   content height and scroll position with no JS-measured coordinates.
+   Each has zero footprint in the flex flow (negative margin cancels its own
+   height) so it never adds scroll length or extra gap; `position: sticky`
+   then pins it to the listbox's top/bottom edge while scrolling.
+   Shown only while the list can actually scroll that way. */
+.tsd-select-scroll-fade {
+  position: sticky;
+  left: calc(-1 * clamp(6px, .6vw, 10px));
+  right: calc(-1 * clamp(6px, .6vw, 10px));
+  height: 28px;
+  flex: 0 0 auto;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s var(--tsd-ease);
+  z-index: 1;
+}
+
+.tsd-select-scroll-fade--top {
+  top: calc(-1 * clamp(6px, .6vw, 10px));
+  margin-bottom: -28px;
+  background: linear-gradient(180deg, #171240 0%, rgba(23, 18, 64, 0) 100%);
+}
+
+.tsd-select-scroll-fade--bottom {
+  bottom: calc(-1 * clamp(6px, .6vw, 10px));
+  margin-top: -28px;
+  background: linear-gradient(0deg, #171240 0%, rgba(23, 18, 64, 0) 100%);
+}
+
+.tsd-select-wrap.can-scroll-up .tsd-select-scroll-fade--top,
+.tsd-select-wrap.can-scroll-down .tsd-select-scroll-fade--bottom {
+  opacity: 1;
+}
+
+.tsd-select-option {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: clamp(38px, 3.4vw, 48px);
+  padding: 0 clamp(12px, 1.1vw, 18px);
+  border-radius: 8px;
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(13px, 1.1vw, 17px);
+  white-space: nowrap;
+
+  cursor: pointer;
+  transition: background-color .12s var(--tsd-ease);
+}
+
+.tsd-select-option:hover,
+.tsd-select-option.is-active {
+  background: rgba(6, 131, 252, .22);
+}
+
+.tsd-select-option.is-selected {
+  background: var(--tsd-blue);
+  color: #fff;
+  font-weight: 600;
+}
+
+.tsd-select-option.is-selected:hover,
+.tsd-select-option.is-selected.is-active {
+  background: var(--tsd-blue);
+}
+
+/* no visible scrollbar on the listbox (WebKit/Blink) — still scrollable via
+   wheel/touch/keyboard, just without a UI track/thumb */
+.tsd-select-listbox::-webkit-scrollbar { display: none; }
+
+/* ==========================================================================
+   Options card (bid time + set)
+   ========================================================================== */
+
+.tsd-options {
+  max-width: 1197px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  border: var(--tsd-border-hairline);
+  border-radius: 16px;
+  background: var(--tsd-panel-bg);
+  padding: clamp(18px, 2.2vw, 34px);
+  margin-bottom: clamp(20px, 3vw, 42px);
+}
+
+.tsd-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(14px, 2vw, 34px);
+}
+
+.tsd-options .tsd-field { margin-bottom: 0; }
+
+.tsd-hint {
+  margin: clamp(8px, .9vw, 14px) 0 0;
+  font-size: clamp(11px, .95vw, 15px);
+  color: var(--tsd-body-text);
+}
+
+/* ==========================================================================
+   Advanced panel (zip / grade / handicap / set info)
+   These fields feed getData() and MUST stay in the DOM.
+   ========================================================================== */
+
+.tsd-advanced {
+  display: none;
+  border: var(--tsd-border-hairline);
+  border-radius: 16px;
+  background: var(--tsd-panel-bg);
+  padding: clamp(18px, 2.2vw, 30px);
+  margin-bottom: clamp(20px, 3vw, 42px);
+}
+
+.tsd-advanced.is-open { display: block; }
+
+.tsd-advanced-title {
+  margin: 0 0 clamp(12px, 1.4vw, 20px);
+  font-size: clamp(14px, 1.2vw, 19px);
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+}
+
+.tsd-advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: clamp(12px, 1.4vw, 22px);
+}
+
+.tsd-advanced .tsd-field { margin-bottom: 0; }
+
+.tsd-advanced-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 1vw, 14px);
+  margin-top: clamp(14px, 1.6vw, 22px);
+}
+
+.tsd-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(38px, 3.2vw, 46px);
+  padding: 0 clamp(16px, 1.5vw, 24px);
+
+  border: var(--tsd-border-hairline);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .04);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(12px, 1vw, 15px);
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s var(--tsd-ease);
+}
+
+.tsd-mini-btn:hover { background: rgba(255, 255, 255, .1); }
+
+/* the set-info textarea keeps its id but is restyled */
+#infoBox {
+  display: block;
+  width: 100%;
+  min-height: 220px;
+  margin-top: clamp(12px, 1.4vw, 20px);
+  padding: clamp(12px, 1.2vw, 18px);
+
+  border: var(--tsd-field-border-w) solid var(--tsd-field-border);
+  border-radius: 10px;
+  background: var(--tsd-field-bg);
+
+  color: var(--tsd-text);
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.tsd-infobox-wrap { display: none; }
+.tsd-infobox-wrap.is-open { display: block; }
+
+/* ==========================================================================
+   Confirm bar
+   ========================================================================== */
+
+.tsd-confirm-bar {
+  display: flex;
+  justify-content: center;
+}
+
+.tsd-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.1vw, 18px);
+
+  min-width: clamp(240px, 26vw, 400px);
+  height: clamp(52px, 5vw, 74px);
+  padding: 0 clamp(24px, 2.4vw, 40px);
+
+  border: 0;
+  border-radius: 12px;
+  background: var(--tsd-primary-gradient);
+  box-shadow: 0 10px 30px rgba(6, 131, 252, .4);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(14px, 1.3vw, 21px);
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .22s var(--tsd-ease),
+              box-shadow .22s var(--tsd-ease);
+}
+
+.tsd-confirm-btn img {
+  flex: 0 0 auto;
+  width: auto;
+  height: clamp(20px, 1.9vw, 30px);
+}
+
+.tsd-confirm-btn:hover,
+.tsd-confirm-btn:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(6, 131, 252, .55);
+}
+
+.tsd-confirm-btn:active { transform: translateY(-1px); }
+
+.tsd-confirm-btn:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* sheen sweep */
+.tsd-confirm-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    rgba(255, 255, 255, 0)   35%,
+    rgba(255, 255, 255, .28) 50%,
+    rgba(255, 255, 255, 0)   65%);
+  background-size: 220% 100%;
+  background-position: 140% 0;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  transition: background-position .6s var(--tsd-ease);
+}
+
+.tsd-confirm-btn:hover::after { background-position: -40% 0; }
+
+/* ==========================================================================
+   Single-player mode — player 2 hidden
+   The live code sets display/visibility on #secondPlayer directly; this class
+   collapses the arena to one column to match.
+   ========================================================================== */
+
+.tsd-arena.is-single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 620px;
+  margin-inline: auto;
+}
+
+.tsd-arena.is-single .tsd-vs-col { display: none; }
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .tsd-arena {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tsd-vs-col {
+    flex-direction: row;
+    padding-top: 0;
+    margin: clamp(6px, 1.5vw, 14px) 0;
+  }
+
+  .tsd-vs-rule { display: none; }
+}
+
+@media (max-width: 620px) {
+  .tsd-setup-header {
+    grid-template-columns: auto 1fr;
+    row-gap: 12px;
+  }
+
+  .tsd-setup-title {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+  }
+
+  .tsd-setup-tools { justify-self: end; }
+
+  .tsd-confirm-btn { width: 100%; min-width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-gear,
+  .tsd-toggle,
+  .tsd-toggle-track,
+  .tsd-toggle-thumb,
+  .tsd-control,
+  .tsd-confirm-btn,
+  .tsd-confirm-btn::after { transition: none; }
+
+  .tsd-gear:hover { transform: none; }
+  .tsd-confirm-btn:hover { transform: none; }
+}

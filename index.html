@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="two person knowledge game">
+  <meta name="keywords" content="knowledge game,trivia">
+  <title>Welcome to Trivia-SmackDown!</title>
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/setup.css">
+</head>
+
+<body class="tsd-setup">
+
+<div class="tsd-setup-page">
+
+  <!-- ====================== header ====================== -->
+  <header class="tsd-setup-header">
+
+    <a class="tsd-setup-logo" href="start.html" aria-label="Back to menu">
+      <img src="images/new-images/back_button.svg" width="44" height="51" alt="">
+    </a>
+
+    <h1 class="tsd-setup-title">
+      <svg class="tsd-spark-mark" viewBox="0 0 12 13" fill="none" aria-hidden="true">
+        <path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"
+              d="M11.1642 6.32331C8.0762 6.32331 5.58208 3.48679 5.58208 0C5.58208 3.48679 3.07806 6.32331 0 6.32331C3.07806 6.32331 5.58208 9.14862 5.58208 12.6354C5.58208 9.14862 8.0762 6.32331 11.1642 6.32331Z"/>
+      </svg>
+      Game Setup
+      <svg class="tsd-spark-mark" viewBox="0 0 12 13" fill="none" aria-hidden="true">
+        <path fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"
+              d="M11.1642 6.32331C8.0762 6.32331 5.58208 3.48679 5.58208 0C5.58208 3.48679 3.07806 6.32331 0 6.32331C3.07806 6.32331 5.58208 9.14862 5.58208 12.6354C5.58208 9.14862 8.0762 6.32331 11.1642 6.32331Z"/>
+      </svg>
+    </h1>
+
+    <div class="tsd-setup-tools">
+
+      <!-- drives the live setSinglePlayerMode() -->
+      <button class="tsd-toggle" type="button" id="singlePlayerToggle"
+              aria-pressed="false">
+        <span>Single Player Mode</span>
+        <span class="tsd-toggle-track" aria-hidden="true">
+          <span class="tsd-toggle-thumb"></span>
+        </span>
+      </button>
+
+      <button class="tsd-gear" type="button" id="btnAdvanced"
+              aria-label="Advanced settings" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+                stroke="currentColor" stroke-width="1.7"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"
+                stroke="currentColor" stroke-width="1.7"/>
+        </svg>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- ====================== players ====================== -->
+  <div class="tsd-arena" id="playerArena">
+
+    <!-- ---------- player 1 (blue / left) ---------- -->
+    <div class="tsd-player tsd-player--p1">
+      <div class="tsd-player-head">
+        <p class="tsd-player-label">Player 1</p>
+
+        <div class="tsd-player-banner">
+          <span class="tsd-setup-avatar" id="avatar0">
+            <span class="tsd-avatar-empty">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
+                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </span>
+          </span>
+
+          <button class="tsd-change-photo" type="button" data-photo-for="0">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM2.5 20a7.5 7.5 0 0 1 11.9-6.06"
+                    stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <path d="m17.2 16.1 4.1-4.1 2.1 2.1-4.1 4.1-2.6.5.5-2.6Z"
+                    stroke="currentColor" stroke-width="1.6"
+                    stroke-linejoin="round"/>
+            </svg>
+            <span>Change Profile Image</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" for="p0">Name</label>
+        <input class="tsd-control" type="text" id="p0" value="Peter"
+               placeholder="Enter Name" autocomplete="off">
+      </div>
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" id="s0-label" for="s0">Your Time</label>
+        <span class="tsd-select-wrap">
+          <select class="tsd-control" id="s0" name="Grade">
+            <option value="1">Not Much</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option selected value="10">A lot</option>
+          </select>
+        </span>
+      </div>
+    </div>
+
+    <!-- ---------- VS ---------- -->
+    <div class="tsd-vs-col" aria-hidden="true">
+      <img src="images/new-images/vs_image.svg" width="57" height="94" alt="">
+      <span class="tsd-vs-rule"></span>
+    </div>
+
+    <!-- ---------- player 2 (red / right) ----------
+         id="secondPlayer" is required: setSinglePlayerMode() hides it. -->
+    <div class="tsd-player tsd-player--p2" id="secondPlayer">
+      <div class="tsd-player-head">
+        <p class="tsd-player-label">Player 2</p>
+
+        <div class="tsd-player-banner">
+          <span class="tsd-setup-avatar" id="avatar1">
+            <span class="tsd-avatar-empty">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
+                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </span>
+          </span>
+
+          <button class="tsd-change-photo" type="button" data-photo-for="1">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM2.5 20a7.5 7.5 0 0 1 11.9-6.06"
+                    stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <path d="m17.2 16.1 4.1-4.1 2.1 2.1-4.1 4.1-2.6.5.5-2.6Z"
+                    stroke="currentColor" stroke-width="1.6"
+                    stroke-linejoin="round"/>
+            </svg>
+            <span>Change Profile Image</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" for="p1">Name</label>
+        <input class="tsd-control" type="text" id="p1" value="Helen"
+               placeholder="Enter Name" autocomplete="off">
+      </div>
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" id="s1-label" for="s1">Your Time</label>
+        <span class="tsd-select-wrap">
+          <select class="tsd-control" id="s1" name="Grade">
+            <option value="1">Not Much</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option selected value="10">A Lot</option>
+          </select>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ====================== bidding + set ====================== -->
+  <div class="tsd-options">
+    <div class="tsd-options-grid">
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" for="bidTime">Time Allowed to Bidding</label>
+        <span class="tsd-select-wrap">
+          <select class="tsd-control" name="bidTime" id="bidTime">
+            <option value="5">5 sec</option>
+            <option value="10">10 sec</option>
+            <option value="15">15 sec</option>
+            <option value="20">20 sec</option>
+            <option value="25">25 sec</option>
+            <option selected value="30">30 sec</option>
+            <option value="45">45 sec</option>
+          </select>
+        </span>
+        <p class="tsd-hint">
+          Leave this as is until you have played the game a few times
+        </p>
+      </div>
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" for="setSerNbr">Select Set</label>
+        <span class="tsd-select-wrap">
+          <select class="tsd-control" name="List of Sets" id="setSerNbr">
+            <option value="PRA1_1887">3GameIForTesting</option>
+            <option value="PRA1_1890">3GameNLDForTesting</option>
+            <option value="PRA1_1782">Sports Sports Sports Sports</option>
+            <option value="PRA1_1783">History</option>
+            <option value="PRA1_1780">Geography</option>
+            <option value="PRA1_1781">Current Events</option>
+            <option selected value="PRA1_1794">RndSelectTest</option>
+            <option value="PRA1_1864">Demo Of Each Game Type</option>
+            <option value="PRA1_1837">TwoRndTest</option>
+            <option value="PRA1_1842">Display Set</option>
+            <option value="PRA1_1845">Display Set</option>
+            <option value="PRA1_1844">Sample Set</option>
+            <option value="PRA1_1841">L M L</option>
+            <option value="PRA1_1835">Beta Test B</option>
+            <option value="PRA1_1838">Test Of T1</option>
+            <option value="PRA1_1839">Test Of T2</option>
+            <option value="PRA1_1857">Test Of 6Subsets</option>
+            <option value="PRA1_1858">Test Of 2Subsets</option>
+            <option value="PRA1_1859">Test Of 2SubsetsPlusRndsAndCmts</option>
+            <option value="PRA1_1860">Test Of 1SubsetsPlusRndsAndCmts</option>
+            <option value="PRA1_1861">RSSIR</option>
+            <option value="PRA1_1862">RSSSIRR</option>
+            <option value="PRA1_1863">TwoGamePrnds</option>
+            <option value="RndSelTest">RndSelTest</option>
+          </select>
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ====================== advanced (gear) ======================
+       These controls feed getData() and MUST remain in the DOM.
+       They are collapsed by default to match the design. -->
+  <div class="tsd-advanced" id="advancedPanel">
+
+    <h2 class="tsd-advanced-title">Advanced</h2>
+
+    <div class="tsd-advanced-grid">
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" for="z0">Player 1 Zip Code</label>
+        <input class="tsd-control" type="text" id="z0" value="94566"
+               placeholder="Optional" autocomplete="off">
+      </div>
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" id="g0-label" for="g0">Player 1 Highest Grade</label>
+        <span class="tsd-select-wrap">
+          <select class="tsd-control" id="g0" name="Grade">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option selected value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="14+">14+</option>
+          </select>
+        </span>
+      </div>
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" for="z1">Player 2 Zip Code</label>
+        <input class="tsd-control" type="text" id="z1" value="94066"
+               placeholder="Optional" autocomplete="off">
+      </div>
+
+      <div class="tsd-field">
+        <label class="tsd-field-label" id="g1-label" for="g1">Player 2 Highest Grade</label>
+        <span class="tsd-select-wrap">
+          <select class="tsd-control" id="g1" name="Grade">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option selected value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="14+">14+</option>
+          </select>
+        </span>
+      </div>
+
+    </div>
+
+    <p class="tsd-hint">
+      The Zip Code is optional. Grade level lets the content difficulty be
+      tuned. <em>Your Time</em> should stay at <em>A Lot</em> until you get the
+      hang of the game.
+    </p>
+
+    <div class="tsd-advanced-actions">
+      <button class="tsd-mini-btn" type="button" onclick="showSetInfo()">Set Info</button>
+      <a class="tsd-mini-btn" href="Help/SimpleRules.html">Ground Rules</a>
+      <a class="tsd-mini-btn" href="overview.html">Game Overview</a>
+    </div>
+
+    <div class="tsd-infobox-wrap" id="infoInsertPt">
+      <textarea id="infoBox" rows="30" cols="100"></textarea>
+    </div>
+  </div>
+
+  <!-- ====================== confirm ====================== -->
+  <div class="tsd-confirm-bar">
+    <button class="tsd-confirm-btn" type="button" onclick="storeDataAndGoToGame()">
+      <img src="images/new-images/icons/confirm_start_icon.svg"
+           width="32" height="32" alt="">
+      <span>Confirm &amp; Start Game</span>
+    </button>
+  </div>
+
+</div>
+
+<script src="js/script.js"></script>
+<script src="js/setup-dropdown.js"></script>
+<script>
+
+    document.getElementById("z0").size = "4";
+    document.getElementById("z1").size = "4";
+    document.getElementById("p0").size = "10";
+    document.getElementById("p1").size = "10";
+
+
+    function setSinglePlayerMode(){console.log("setSinglePlayerMode() " )
+            const sndPlyr = document.getElementById("secondPlayer")
+            sndPlyr.style.display = "none";
+            sndPlyr.style.visibility = "hidden";
+            singlePlayerMode = true;
+
+     }
+
+
+
+
+    function insertIntoInfoBox(txt){
+        const infoBox = document.getElementById("infoBox");
+        infoBox.style.width = "1000px";
+        infoBox.style.height = "500px";
+        infoBox.style.fontSize = "16px";
+        // Optional: make text wrap or not
+        //infoBox.style.whiteSpace = "nowrap"; // prevents wrapping
+
+        infoBox.value=txt;
+
+    }
+
+
+
+    function showSetInfo() {
+        const setSerNbr = document.getElementById("setSerNbr").value;
+        console.log("showSetInfo() " + setSerNbr)
+
+        const url = '/cgi-bin/GetASetTSD.pl?' + setSerNbr;
+        console.log("url = " + url);
+        fetch(url)
+            .then(response => response.text())
+            .then(data => {
+                if (data != null) {
+                    console.log("CP.fetch data=  " + data.substring(0, 36));
+                    data = deComma(data);
+                    //console.log("set data= " + data);
+                    const arr = data.split(",");
+                    for (let i = 0; i < arr.length; i++) {
+                        console.log(i + "= " + arr[i] + "\n<br>");
+                    }
+
+                    //console.log("arr = " + arr);
+                    let buf = ""
+                    buf += "Basic Data:  " + arr[4] + "\n**************The Challenge************** \n";
+                    let rndNbr = 1;
+
+                    for (let i = 9; i < arr.length; i++) {
+                        const arr2 = arr[i].split(";");
+                        const type = arr2[0];
+                        if (type == "Set") {//14= Set;PRA1_1778;6;9.166667;600;-;;TSD6UgamesTest;:ZoneBreakDown=2.:NbrRndsToPlay=1;2
+                            let buf3 = "";
+                            for (let j = 0; j < arr2.length; j++) {
+                                buf3 += j + "=" + arr2[j] + "\n<br>";
+                            }
+                            console.log("Set arr2 = " + buf3);
+
+                            const totNbrOfRnds = arr2[2];
+                            const rndBrkDwn = arr2[2];
+                            buf+= (rndNbr++) + " = Set # " + arr2[1] +  " Titled " + arr2[7] + ", consists of " + totNbrOfRnds + " Rounds, of which ";
+                            const n = arr2[8].indexOf("NbrRndsToPlay=")
+                            console.log("n = " + n + "  -- " + arr2[8]);
+                            const nbrRndsToPlay = arr2[8].substring(n + 14,n + 15);
+
+
+                            buf += nbrRndsToPlay + " Round(s) are to be selected at random to be played. \n\n";
+
+                            const rndBrkDwnArr = rndBrkDwn.split(":");
+                            for (let k = 0; k < rndBrkDwnArr.length; k++) {
+                                const rndBrkDwnArr2 = rndBrkDwnArr[k].split("=");
+                                //buf += rndBrkDwnArr2[0] + " = " + rndBrkDwnArr2[1] + "\n";
+                                console.log("rndBrkDwnArr2 = " + rndBrkDwnArr2[0] + " = " + rndBrkDwnArr2[1]);
+                            }
+                        } else if (type == "Rnd") {
+                            buf += rndNbr++ + " =  " + arr2[1] + "-" + arr2[7] + "\n\n";
+                        }
+                    }
+                    //alert(buf);
+                    insertIntoInfoBox(buf);
+                    console.log(buf);
+                } else {
+                    alert("Something went wrong and the Set could not be downloaded");
+                    return;
+                }
+            });
+    }
+
+    /*
+    PRA1_1794,2024.05.28,PRA1_1794;Set;12;9.166667;1200;TestSet/;TestOfAllTSDGameTypes
+    ,
+    ,AvgGrade=9.166667 Points=1200 TotalRounds=12 SubSets=0 SubSetRnds=0 WebPages=0 Instructions=0 Commands=0 Comments=0
+    ,AbTe;;;;,gPRA1_110 ,,Fu2
+    ,Rnd;AA.Ben00001;1;9;100;0;US Presidents;Which seven presidents are Democrats?;,
+
+    */
+
+
+
+    function getSetInfo() {
+        console.log("getSetInfo  ")//PRA1_1795,Set,8,9.5,800,,TSD_TestA
+        const setSerNbr = document.getElementById("setSerNbr").value;
+        console.log("setSerNbr  " + setSerNbr)
+        if (onNet) {
+            fetch('/edugames.com/cgi-bin/GetSetLinesFromDB.pl?' + setSerNbr)
+                .then(response => response.text())
+                .then(data => {
+                    console.log("fetch **" + data + "**");
+
+                    this.startRound(data);
+                });
+            return;
+        } else {
+
+            const arr = "PRA1_1795,Set,8,9.5,800,,TSD_TestA ".split(",");
+            let buf = ""
+            buf += "Set Serial Number = " + arr[0] + "\n";
+            buf += "Number of Rounds = " + arr[2] + "\n";
+            buf += "Average Grade Level = " + arr[3] + "\n";
+            buf += "Max Points = " + arr[4] + "\n";
+            buf += "Description = " + arr[6] + "\n";
+            alert(buf);
+        }
+    }
+
+    function storeDataAndGoToGame() {
+        console.log("storeDataAndGoToGame  ")
+        const theData = getData(false);
+        console.log("theData  " + theData)
+        localStorage.setItem("regData", theData);
+        //setRegData(theData);
+
+        window.location.href = "GamePanel.html";
+
+    }
+    function goToSubSel() {
+        console.log("goToSubSel()  ")
+        const theData = getData(true);
+        localStorage.setItem("regData", theData);
+        //setRegData(theData);
+        window.location.href = "RndSel.html";
+
+    }
+
+    function getData(goToRndSel) {
+        console.log("getData  " + goToRndSel)
+        let data = document.getElementById("bidTime").value + "|0;";
+        data += document.getElementById("p0").value + ";"
+        data += document.getElementById("z0").value + ";"
+        data += document.getElementById("g0").value + ";"
+        data += document.getElementById("s0").value + "|"
+        data += "1;";
+        data += document.getElementById("p1").value + ";"
+        data += document.getElementById("z1").value + ";"
+        data += document.getElementById("g1").value + ";"
+        data += document.getElementById("s1").value + ","
+        if (goToRndSel) {
+            //data += document.getElementById("bidTime").value;
+        } else {
+            data += "FromReg,"
+            data +=   singlePlayerMode + ","
+            data += document.getElementById("setSerNbr").value + ",";
+            //data+= document.getElementById("bidTime").value;
+        }
+
+        return data;
+
+    }
+
+
+
+</script>
+<script src="js/NetTest.js"></script>
+
+<!-- ==========================================================================
+     NEW UI behaviour only. Nothing below changes game logic — it drives the
+     presentation and delegates to the live functions defined above.
+     ========================================================================== -->
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- single-player toggle ---------- */
+  var toggle = document.getElementById("singlePlayerToggle");
+  var arena  = document.getElementById("playerArena");
+  var second = document.getElementById("secondPlayer");
+
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var on = toggle.getAttribute("aria-pressed") === "true";
+      var next = !on;
+
+      toggle.setAttribute("aria-pressed", String(next));
+      toggle.classList.toggle("is-on", next);
+      arena.classList.toggle("is-single", next);
+
+      if (next) {
+        /* the live function hides #secondPlayer and sets the global */
+        setSinglePlayerMode();
+      } else {
+        second.style.display = "";
+        second.style.visibility = "";
+        singlePlayerMode = false;
+      }
+    });
+  }
+
+  /* ---------- advanced panel ---------- */
+  var gear  = document.getElementById("btnAdvanced");
+  var panel = document.getElementById("advancedPanel");
+
+  if (gear && panel) {
+    gear.addEventListener("click", function () {
+      var open = panel.classList.toggle("is-open");
+      gear.setAttribute("aria-expanded", String(open));
+    });
+  }
+
+  /* ---------- profile images ----------
+     Purely cosmetic: the picked image is shown in the ring. It is not sent
+     anywhere, because the registration payload has no field for it. */
+  document.querySelectorAll("[data-photo-for]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var slot  = btn.getAttribute("data-photo-for");
+      var ring  = document.getElementById("avatar" + slot);
+      var input = document.createElement("input");
+
+      input.type   = "file";
+      input.accept = "image/*";
+
+      input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        if (!file || !ring) { return; }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          ring.innerHTML = "";
+          var img = document.createElement("img");
+          img.src = e.target.result;
+          img.alt = "";
+          ring.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      input.click();
+    });
+  });
+
+  /* ---------- reveal the info box once Set Info has run ---------- */
+  var infoWrap = document.getElementById("infoInsertPt");
+  var infoBox  = document.getElementById("infoBox");
+
+  if (infoWrap && infoBox) {
+    var reveal = function () {
+      if (infoBox.value && infoBox.value.trim() !== "") {
+        infoWrap.classList.add("is-open");
+      }
+    };
+    /* showSetInfo() fills it asynchronously, so poll briefly after a click */
+    document.addEventListener("click", function (e) {
+      if (e.target && e.target.textContent === "Set Info") {
+        var tries = 0;
+        var t = setInterval(function () {
+          reveal();
+          if (++tries > 20 || infoWrap.classList.contains("is-open")) {
+            clearInterval(t);
+          }
+        }, 250);
+      }
+    });
+  }
+}());
+</script>
+
+</body>
+</html>

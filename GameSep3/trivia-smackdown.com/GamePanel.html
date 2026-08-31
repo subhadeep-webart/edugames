@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Mon, 04 Dec 2023 22:08:21 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content=""> 
+    <link rel="stylesheet" href="css/style.css" >
+    <link rel="icon" type="image/android-icon-36x36.png" sizes="36x36" href="/favicon-36x36.png">
+  <!-- /public_html/edugames.com/JStest/EdUGamesJS /> -->         
+ 
+<p id="tempImageInsrtPt"> </p>   
+<title>EdUGames.com</title>
+<style> 
+
+#mainTable{
+ border: 5px dashed red;
+}
+#tf{
+
+ height:5px;
+ color: yellow;
+}
+
+.tightSpaceing{
+   padding: 0;
+   margin: 0;
+   font-size:x-small;
+
+ }
+
+</style>
+   
+<head></head> 
+ <!-- <p id="trvSmd" >Trivia SmackDown</p> -->
+
+<body>
+
+  
+
+
+
+
+ <!--style=" font-Size:xx-large;"  -->
+ 
+<div id="styleInsrtPt"></div>
+<div>
+<input type="checkbox" name="OnNet" id="onNet" value="OnNet">
+<input type="button" name="Register" onclick="setUpPlayers()" id="butRegister"  value="Reg">
+<input type="text" id="strtNbr" value="0" size="1px">
+<input type="button" name="startSet" onclick="startSet()" id="butStartSet" disabled value="StrtSet">
+
+<td><input type="text" name="" style="width:90px;" id="serNbr" value="PRA1_1826"></td>
+
+
+<input type="button" name="start" id="butStartRound"  onclick="startRnd()" disabled value="StrtRnd">
+
+<select id='rndMenu' name='rndMenu' align='left' >
+<option value=AA.Len00020>1  AA.Len00020 Match</option>
+<option value=AA.Ben00806>1  AA.Ben00806 Match</option>
+<option value=AA.Cen00042>1  AA.Cen00042 Match</option>
+<option value=AA.Men00006>1  AA.Men00006 Match</option>
+<option  value=AA.Ben00001>1  AA.Ben00001 PresidentGrid</option> 
+<option value=AA.Ben00002>2  AA.Ben000002 kings</option>
+<option value=AA.Ben00244>3  AA.Ben00244 12 coins</option>
+<option value=AA.Ben00003>4  AA.Ben00003 USMap</option>
+<option value=AA.Ben00004>5  AA.Ben00004</option>
+<option value=AA.Ben00011>5  AA.Ben00011 Venus</option>
+<option value=AA.Ben00478>6  AA.Ben00479 3 yes Coins</option>
+<option value=AA.Cen00004>7  AA.Cen00004 NatPks</option>
+<option value=AA.Cen00006>8  AA.Cen00006</option>
+<option value=AA.Cen00100>9  AA.Cen00100 Sports</option>
+<option  selected  value=AA.Den00002>10  AA.Den00002 MoonLanding</option>
+<option value=AA.Een00002>11  AA.Een00002 Letters</option>
+<option value=AA.Een00010>12  AA.Een00010 famous Things</option>
+<option value=AA.Een00012>13  AA.Een00012</option>
+<option value=AA.Een00016>14  AA.Een00016</option>
+<option value=AA.Een00024>15  AA.Een00024 spelling</option>
+<option  value=AA.Ien00005>16  AA.Ien00005 MtR</option>
+<option  value=AA.Ien00006>17  AA.Ien00006-IJMem</option>
+<option value=AA.Ien00008>18  AA.Ien00008 author Select</option>
+<option value=AA.Ien00022>19  AA.Ien00022JFK</option>
+<option value=AA.Ien00025>20  AA.Ien00025WashDC</option>
+<option value=AA.Len00002>21  AA.Len00002 Custer  </option>
+<option  value=AA.Len00021>21  AA.Len00021 WWII  </option>
+<option value=AA.Men00021>23  AA.Men00021</option>
+<option value=AA.Men00001>23  AA.Men00001</option>
+<option value=AA.Men00002>23  AA.Men00002</option>
+<option  value=AA.Nen00001>24  AA.Nen00001 MemDay</option>
+<option  value=AA.Oen00001>25  AA.Oen00001 Numbers</option>
+<option value=AA.Oen00002>26  AA.Oen00002</option>
+<option value=AA.Oen00005>27  AA.Oen00005</option>
+<option value=AA.Oen00014>28  AA.Oen00014</option>
+<option value=AA.Pen00006>29  AA.Pen00006Even Numbers</option>
+<option value=AA.Pen00016>30  AA.Pen00016</option>
+<option value=AA.Pen00018>31  AA.Pen00018</option>
+<option value=AA.Qen00003>33  AA.Qen00003</option>
+<option value=AA.Qen00003>34  AA.Qen00003PTblOfElements</option>
+<option value=AA.Qen00004>35  AA.Qen00004 US Map</option>
+<option value=AA.Qen00009>36  AA.Qen00009</option>
+<option value=AA.Qen00009>37  AA.Qen00009Labels</option>
+<option value=AA.Qen00021>38  AA.Qen00021</option>
+<option value=AA.Qen00027>39  AA.Qen00027</option>
+<option value=AA.Qen00034>40  AA.Qen00034</option>
+<option value=AA.Qen00076>41  AA.Qen00076</option>
+<option value=AA.Qen00076>42  AA.Qen00076RevWar</option>
+<option value=AA.Uen00017>43  AA.Uen00017</option>
+<option value=AA.Uen00022>44  AA.Uen00022</option>
+<option value=AA.Uen00030>45  AA.Uen00030</option>
+<option value=AA.Uen00045>46  AA.Uen00045</option>
+<option value=AA.Uen01219>47  AA.Uen01219</option>
+<option value=AA.Xen00003>48  AA.Xen00003</option>
+
+</div><div><table border="1"  width="80%">
+  <tr>
+     <td><input type="button" color="#0000ff"  onclick="cp.startRnd()"  value="Nxt"></td>      
+     <td><input type="button" color="#0000ff"  onclick="cp.setBeingPlayed.listRnds"  value="LstRnds"></td>
+     <td><input type="button" onclick="cleanPlayArea()"  value="Clen"></td>
+     <td><input type="button" onclick="clearInterval(interval)"  value="clearInterval"></td>
+     <td><input type="button" onclick="clearScore()"  value="ClearScore"></td>     
+     <td><input type="button" onclick="cp.theGameInPlay.continueToSecondPlayer()"  value="continueToSecondPlayer"></td>    
+     <td><input type="button" onclick="settings.fillBoxes('B',8,5,4)"  value="fillBoxes"></td>
+     <!-- gameType,totalButs,pNbr0Speed,pNbr1Speed,rows -->
+      <td><input type="button" onclick="cp.itf.ub.show()"  value="show"></td>
+      <td><input type="button" onclick="cp.itf.ub.hide()"  value="hide"></td>          
+       <td><input type="button" style='background-color:aquamarine; fontSize:large; onclick="cp.itf.ub.setfunction'next')"  value="next"></td>
+     <td><input type="button" onclick="showResults()"  value="showResults"></td> 
+      <input type="text" id="display" value="0" size="1px">
+                               
+</tr> 
+
+
+<br>  <br> 
+ <div id="ptAndTimeInsrtPt"></div>
+ <div id="helpInsrtPt"></div>
+ 
+ 
+
+<table border='1'  width='50%'><tr> 
+      
+</td></tr> 
+                    
+</table><table border='3'  width='100%'><td colSpan="3"><span id="notice"></span>
+</tr></tr>  <!-- <tr> id="serNbr"-->
+        <td><table border='1'  width='100%'>
+      <tr> <td colSpan="2" id='insrtpt0X'>-abc</td>
+      </tr>       
+           <!-- <tr> -->
+                                                            
+        <td><div style='width:100px' ><p id='player0' class='playerName'>--</p></div>
+        <td><div><table class='pt' width='100%'><tr><td><p id='rndTotL' class='pt'>0</p></td></tr>
+         
+        <tr><td><p class='pt'>Points</p></td></tr>
+        
+        </table><tr><td colSpan="2"><div width='100%' id="setTotL">Set Total =</div></td></tr></div></td></td></tr></table>
+       
+<td><div style=" text-align: center;  margin: 0px 0px 0px 0px;"><table id="mainTable" width="100%" border="1"
+ cellpadding="2" cellspacing="2" style="border-color: #000080;  background-color: #ccffcc;">
+ 
+<tr valign="top">
+
+<td colspan="2" width="50%" style="border-color :green; " id="nowPlayWin"><p style=" text-align: center;  >Now Playing: </td>
+<td width="50%" style="border-color :green; "><p style=" text-align: center;  margin: 0px 0px 0px 0px;">
+</tr>
+<tr valign="top">
+
+<td width="33%" height="16" class="tightSpaceing" valign="middle" style="border-color :green; ">
+
+<span></span>
+
+<select name="Help" id="helpDropDown" onchange="getHelp(value)">
+  <option  selected value="--" ><p>H  E  L P &nbsp;&nbsp; M E N U</p></option>
+  <option value="bidding">Bidding Process</option>
+  <option value="roundThis">Help With This Round</option>
+  <option value="roundNext">Help With Next Round</option> 
+</select>  
+
+  <!--  -->
+</div>
+
+</td>
+<td width="33%" height="16" style="border-color :green; "><p style=" text-align: center;
+  margin: 0px 0px 0px 0px;"><span style=" font-size: 18Pt; font-family: 'Arial', 'Helvetica',
+   sans-serif;  font-weight: normal; color: #000000;  " id='nowPlaying' ><br /></span></p>
+</td>
+</td></tr>   <tfoot><tf>
+
+<td ><span style=" font-size: 16Pt; font-family: 'Arial', 'Helvetica', sans-serif; id='nowPlaying' 
+font-weight: bold; color: #000000;  "  id="nextAndTime">
+
+
+<input type="button" style=" font-size: 12Pt; font-family: 'Arial', 'Helvetica', sans-serif, ; style.display="none" "; width="100%" onclick="check()" id='checkBut' "  value="CHECK">
+<input type="button" style.display="none" style=" font-size: 12Pt; font-family: 'Arial', 'Helvetica', sans-serif, ; style.display="none" "; width="100%" onclick="nextRound()" id='nextRoundBut' "  value="NEXT ROUND">
+</td></span></td><td id="timeBox">TimeBox</td></tf>
+
+</tfoot>
+</table>
+</div></td>  <!-- id="display" -->
+     
+        <td><table border='1'  width='100%'>
+        <tr><td colSpan="2" id='insrtpt1X' >-xyz</td></tr>
+        <tr><td><div  ></div>
+        
+        <div style='width:100px' ><p id='player1' class='playerName'>--</p></div>
+        <td><div><table class='pt' width='100%'><tr><td><p  id='rndTotR' class='pt'>0</p></td></tr>
+        <tr><td><p class='pt'>Points</p></td></tr></table></div></td></td><tr><td colSpan="2"><div width='100%' id="setTotR">Set Total =</div></td></tr></tr></table>
+
+        <p class='playerName' id='player1'>
+        </p></div></td></tr></table>
+         <div ><p id='qBox'> The challenge is...</p><div>
+         <div ><p id='ansBar'></p><div>                                         
+
+
+<div height="20px" id="gameInsrtPt"></div></td>
+<div id="regFormInsrtPt"></div>
+<div id="selFormInsrtPt"></div> 
+<div id="itfInsrtPt"></div>
+
+<div width="181px" id="ansBar"  ></div>
+<div id="gameInsrtPt"></div></td> 
+
+
+<div id="imageInsertPt" class='imageInsertPt'></div> 
+<div id="gameLInsrtPtA" class='imageInsertPt'></div> 
+<div id="gameLInsrtPtB" class='imageInsertPt'></div>
+<div id='gamePlayArea' font-size='64px'></div> 
+
+<div id="insrtPtA">a</div>
+<div id="nbrLineInsrtPt"></div> 
+
+<div id="insrtPtB"></div>
+<div id="insrtPtC"></div>
+<div id="insrtPtD"></div>
+<div id="insrtPtE"></div>
+<div id="insrtPtF"></div> 
+</body> 
+ 
+</html>
+<script>                                                 
+console.log("Top of GamePanel " );
+
+function setUpPlayers(){  console.log(" setUpPlayers " );
+    const data =  localStorage.getItem("regData");
+    if(data == null){
+       alert("You will need to register first. \n\n(We only ask for a first or nick name.");
+       window.location.href = "index.html";
+       return;
+    }
+    console.log(" data  = " + data);
+    const arr= data.split(",");
+    let junk = arr.shift(); //The setSerNbr
+    constructClasses();      
+    plu.setPlayerNames(arr); 
+    console.log(" cp.itf " + cp.itf);    
+    cp.itf.insertPlayersInto2PlayerDisplay();
+    const netTest = new NetTest();
+    netTest.test();
+}
+
+
+function getHelp(){ console.log(" getHelp" );
+       //window.location.href = 
+       const   theURL = "Help/OverView.html";
+      window.open(theURL, '_blank').focus();
+}
+
+function setTest(){console.log(" setTest " );
+
+const sets = new Sets();
+    const theSetStr = sets.getData("PRA1_1781");
+    //console.log(" theSetStr="  + theSetStr)   
+    const set = new Set(theSetStr);
+    
+    console.log(" ________|||__________" );
+    const xx = set.listRnds("ABC"); 
+     console.log( xx );    
+    console.log(" ________|||__________\n" + xx );    
+    //console.log(" theSetStr " + theSetStr );
+}
+</script>
+
+
+ 
+<script src="js/script.js"></script>
+<script src="js/Interface.js"></script>
+<script src="js/PlayerLineUp.js"></script>
+<script src="js/Game.js"></script>
+<script src="js/ControlPanel.js"></script>
+<script src="js/SelectionPanel.js"></script>
+<script src="js/RndMenu.js"></script>
+<script src="js/BoxGame.js"></script>
+<script src="js/Rounds.js"></script>
+<script src="js/AnsButtons.js"></script>
+<script src="js/Sets.js"></script>
+<script src="js/SetMenu.js"></script>
+<script src="js/GameA.js"></script>
+<script src="js/GameB.js"></script>
+<script src="js/GameC.js"></script>
+<script src="js/GameD.js"></script>
+<script src="js/GameE.js"></script>
+<script src="js/GameI.js"></script>
+<script src="js/GameL.js"></script>
+<script src="js/GameM.js"></script>
+<script src="js/GameN.js"></script>
+<script src="js/GameO.js"></script>
+<script src="js/GameP.js"></script>
+<script src="js/GameQ.js"></script>
+<script src="js/GameU.js"></script>
+<script src="js/GameX.js"></script>
+<script src="js/Player.js"></script>
+ <script src="js/Round.js"></script>
+<script src="js/RoundB.js"></script>
+<script src="js/RoundC.js"></script>
+<script src="js/RoundD.js"></script>
+<script src="js/RoundE.js"></script>
+<script src="js/RoundI.js"></script>
+<script src="js/RoundL.js"></script>
+<script src="js/RoundM.js"></script>
+<script src="js/RoundN.js"></script>
+<script src="js/RoundO.js"></script>
+<script src="js/RoundP.js"></script>
+<script src="js/RoundQ.js"></script>
+<script src="js/RoundU.js"></script> 
+<script src="js/Set.js"></script> 
+<script src="js/Rnd.js"></script>
+<script src="js/Help.js"></script>
+<script src="js/HelpBut.js"></script>
+<script src="js/Explain.js"></script>
+<script src="js/AudX.js"></script>
+<script src="js/SetPRA.js"></script>
+<script src="js/SubSet.js"></script>
+<script src="js/Utl.js"></script>
+<script src="js/AlphaBar.js"></script>
+<script src="js/NetTest.js"></script>
+<script src="js/Settings.js"></script>
+<script >
+setUpPlayers();
+
+const ss = new SubSet("abc");
+</script>
+
+
+

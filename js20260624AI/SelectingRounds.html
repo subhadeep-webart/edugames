@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Thu, 24 Oct 2024 18:13:41 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title></title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+  <body> 
+  <input type="button" value="DownLoad Game Type" onclick="downLoadCats()">
+  <input type="button" value="Test" onclick="test()">
+  <!-- <input type="text" name="cat" value="A"  id="catLtr"> -->  
+  
+   
+   <select name="Rounds" align="left" size="10" id="rndLst">
+  
+</select>
+
+
+  </body>
+</html>       <!-- http://edugames.com/cgi-bin/GetRnds.pl?1.00,16.00,Type,AA.Cen00026,false,AA -->
+
+<script>
+   function downLoadCats(){console.log("downLoadCats"  )
+     const catLtr= document.getElementById("catLtr").value;
+      
+     console.log("catLtr = " + catLtr )
+     const url = "/edugames.com/cgi-bin/GetRnds.pl?1.00,16.00,Type,AA." + catLtr + "en00001,false,AA"
+      console.log("url = " + url )  
+      
+      fetch(url)     
+         .then(response => response.text())
+         .then(data => {
+         console.log("fetch **" + data +"**");
+         displayRounds(data);
+        });  
+      return;
+   } 
+   
+   
+ function test(){            console.log("test "  )
+    const lstBox= document.getElementById("rndLst");
+    console.log("lstBox " + lstBox.value ) ;
+    let option =   document.createElement("option");
+    
+    option.text = "ABC" ;
+    lstBox.add(option) ; 
+    option =   document.createElement("option");   
+    option.text = "123" ;   
+    lstBox.add(option) ;
+    console.log("Bottom"  )
+ 
+ }  
+   
+   
+   
+function displayRounds(rounds){console.log("AA displayRounds\n " + rounds )
+
+    const lstBox= document.getElementById("rndLst");
+    console.log("lstBox " + lstBox ) ;
+    const lst = rounds.split("\n") 
+    console.log("lst.length " + lst.length )
+    for(let i = 0;i< lst.length;i++){ 
+        console.log(" " + lst[i]);
+        let option =   document.createElement("option");
+        option.text = lst[i];
+        lstBox.add(option) ;
+    }
+    
+    console.log("Bottom"  )  
+}
+   
+    
+   
+   
+
+
+
+</script>

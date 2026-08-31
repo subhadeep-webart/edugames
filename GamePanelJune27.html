@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TriviaSmackdown – Game Panel</title>
+    <link rel="stylesheet" href="TSDstyle.css">
+
+    <script>
+        
+</script>
+
+
+</head>
+
+<body>
+
+    <!-- ========================= -->
+    <!-- HEADER AREA               -->
+    <!-- ========================= -->
+    <div id="headerBar">
+        <button id="copyrightBut" onclick="showToolBar()">Copyright Pete Antoniak 2026</button>
+    </div>
+
+    <!-- ========================= -->
+    <!-- DEBUG TOOLBAR (hidden)    -->
+    <!-- ========================= -->
+    <div id="debugTools" style="display:none;">
+        <button id="stopClock">stopClock</button>
+        <button id="hideTools" onclick="hideTools()">hideTools</button>
+        <button id="hideAlphaBar" onclick="hideAlphaBar()">hideAlphaBar" </button>
+        <button id="ToggleClk">ToggleClk</button>
+        <button id="Hide2NdPlyr">Hide2NdPlyr</button>
+        <button id="togTheAnsBut">togTheAnsBut</button>
+    </div>
+
+
+    <!-- Main Game Layout -->
+    <div id="mainRow">
+        <!-- left, center, right panels -->
+    </div>
+    <div id="ptAndTimeInsrtPt"></div>
+    <div id="mainRow">
+
+        <!-- ========================= -->
+        <!-- LEFT PLAYER PANEL         -->
+        <!-- ========================= -->
+        <div class="playerPanel">
+
+            <!-- AlphaBar (Game I only) -->
+            <div id="alphaBarInsrtPtLeft"></div>
+
+            <!-- BidButs (B/E/Q/U games) -->
+            <div id="insrtpt0X"></div>
+
+            <!-- Player Name -->
+            <div id="player0Name" class="playerName">Peter</div>
+
+            <!-- Score -->
+            <div class="scoreBox">
+                <div id="player0Score">0 Points</div>
+                <div>Set Total =</div>
+            </div>
+        </div>
+
+        <!-- ========================= -->
+        <!-- CENTER PANEL              -->
+        <!-- ========================= -->
+        <div id="centerPanel">
+            <div id="centerDisplay">---</div>
+
+            <select id="helpMenu">
+                <option>Help Menu</option>
+                <option value="general">General</option>
+                <option value="bidding">Bidding</option>
+                <option value="roundThis">This Round</option>
+                <option value="roundNext">Next Round</option>
+            </select>
+
+            <button id="nextRoundBut">Next Round</button>
+            <input id="timeBox"
+                   type="text"
+                   value="--"
+                   readonly
+                   style="width:80px; font-size:20px; text-align:center; margin-left:10px;">
+        </div>
+
+        <!-- ========================= -->
+        <!-- RIGHT PLAYER PANEL        -->
+        <!-- ========================= -->
+        <div class="playerPanel">
+
+            <!-- AlphaBar (Game I only) -->
+            <div id="alphaBarInsrtPtRight"></div>
+
+            <!-- BidButs (B/E/Q/U games) -->
+            <div id="insrtpt1X"></div>
+
+            <!-- Player Name -->
+            <div id="player1Name" class="playerName">Helen</div>
+
+            <!-- Score -->
+            <div class="scoreBox">
+                <div id="player1Score">0 Points</div>
+                <div>Set Total =</div>
+            </div>
+        </div>
+
+    </div>
+    <!-- added  -->
+
+    <p id='qBox'> The challenge is...</p>
+
+    <p id='ansBar'></p>
+
+
+
+    <div width="181px" id="ansBar">ansBar</div>
+    <div id="gameInsrtPt">gameInsrtPt</div>
+    <div id="imageInsertPt" class='imageInsertPt'>imageInsertPt</div>
+    <div id="gameLInsrtPtA" class='imageInsertPt'>gameLInsrtPtA</div>
+    <div id='gamePlayArea' font-size='64px'>gamePlayArea</div>
+    <div id="insrtPtA">insrtPtA</div>
+    <div id="insrtPtB">insrtPtB</div>
+
+    <div id="ansBoxDiv">ansBoxDiv"</div>
+
+
+
+    <!-- ========================= -->
+    <!-- SCRIPT LOAD ORDER         -->
+    <!-- ========================= -->
+    <!-- CSS already loaded above -->
+    <!-- CORE UI + ENGINE -->
+    <script src="js/AlphaBar.js"></script>
+    <script src="js/ControlPanel.js"></script>
+    <script src="js/PlayerLineUp.js"></script>
+    <script src="js/Settings.js"></script>
+    <script src="js/Interface.js"></script>
+
+    <!-- PANELS + MENUS -->
+    <script src="js/SelectionPanel.js"></script>
+    <script src="js/RndMenu.js"></script>
+    <script src="js/SetMenu.js"></script>
+
+    <!-- CORE GAME STRUCTURES -->
+    <script src="js/Set.js"></script>
+    <script src="js/Round.js"></script>
+    <script src="js/AnsButtons.js"></script>
+    <script src="js/BidButs.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/Help.js"></script>
+    <script src="js/AudX.js"></script>
+    <script src="js/Explain.js"></script>
+
+    <!-- BASE GAME CLASS -->
+    <script src="js/Game.js"></script>
+    <script src="js/BoxGame.js"></script>
+
+    <!-- ALL GAME TYPES -->
+    <script src="js/GameA.js"></script>
+    <script src="js/GameB.js"></script>
+    <script src="js/GameC.js"></script>
+    <script src="js/GameD.js"></script>
+    <script src="js/GameE.js"></script>
+    <script src="js/GameI.js"></script>
+    <script src="js/GameL.js"></script>
+    <script src="js/GameN.js"></script>
+    <script src="js/GameO.js"></script>
+    <script src="js/GameP.js"></script>
+    <script src="js/GameQ.js"></script>
+    <script src="js/GameU.js"></script>
+    <script src="js/GameX.js"></script>
+
+    <!-- UTILITIES -->
+    <script src="js/Utl.js"></script>
+    <script src="js/NetTest.js"></script>
+
+    <!-- MAIN (MUST BE LAST) -->
+    <script src="js/script.js"></script>
+
+</body>
+</html>
+<script>
+
+    const ptAndTimeInsrtPt = document.getElementById("ptAndTimeInsrtPt");
+    const ansBar = document.getElementById("ansBar");
+    const gameInsrtPt = document.getElementById("gameInsrtPt");
+    const gamePlayArea = document.getElementById("gamePlayArea");
+    const gameLInsrtPtA = document.getElementById("gameLInsrtPtA");
+    const insrtPtA = document.getElementById("insrtPtA");
+    const insrtPtB = document.getElementById("insrtPtB");
+
+    console.log("script");
+    //let helpDropDownMenu.selectedIndex = 2;
+
+    /*
+    tools.hidden = true;
+    tools.style.display = "none";
+    tools.style.visibility = "hidden"
+    */
+
+    function hideAlphaBar() {
+        console.log("hideAlphaBar() ");
+        if (alphaBarInsrtPtLeft.style.display == "block") {
+            alphaBarInsrtPtLeft.style.display = "none"
+            alphaBarInsrtPtRight.style.display = "none"
+        } else {
+            alphaBarInsrtPtLeft.style.display = "block"
+            alphaBarInsrtPtRight.style.display = "block"
+        }
+    }
+
+    function togleClock() {
+        console.log("togleClock() ");
+
+
+
+    }
+
+    function hide2nPlyr() {
+        console.log("hide2nPlyr() ");
+        if (player1.style.display == "block") {
+            player1.style.display = "none"
+        } else {
+            player1.style.display = "block"
+        }
+    }
+
+    //const  = document.getElementById("");
+    let pauseGame = false;
+    let cCount = 0;
+
+    function showToolBar() {
+        console.log("showToolBar() " + cCount);
+        if (cCount++ > 2) {
+            debugTools.style.display = "block";
+            debugTools.style.visibility = "visible"
+            debugTools.hidden = false;
+        }
+    }
+
+    function stopClock() {
+        console.log("stopClock() ");
+        bidButs.startStopBidClock();
+    }
+
+    function hideTools() {
+        console.log("hideTools() ");
+        debugTools.style.display = "none";
+        debugTools.style.visibility = "hidden"
+        debugTools.hidden = true;
+        aCount = 0;
+    }
+
+    function getRound() {
+        console.log("gp.getRound() ");
+        const rndSerNbr = document.getElementById("rndSerNbr");
+        const aSerNbr = rndSerNbr.value;
+
+        console.log("aSerNbr =" + aSerNbr);
+        if (onNet == true) {
+            const url = 'https://www.edugames.com/cgi-bin/GetRoundsTSD.pl?' + aSerNbr;
+            console.log("Sp.url =" + url + "**");
+            fetch(url, {
+            })
+                .then(response => response.text())
+                .then(data => {
+                    cp.itf.cleanPlayArea();
+                    const round = new Round(data);
+                    theQuestion = round.getTheQuestion();
+                    console.log("-@@-sp.getRoundFmRnd QQQQ=  " + round.getTheQuestion())
+                    cp.startGame(round);
+                })
+                .catch(error => console.log('Error fetching data:', error));
+            return;
+        }
+
+    }//
+
+    function starSRnd() {
+        console.log("gp.startRnd() ");
+        const rndSerNbr = document.getElementById("rndMenu").value;
+        console.log("rndSerNbr =" + rndSerNbr);
+        cp.startSetRoundBySerNbr(rndSerNbr);
+    }
+
+
+
+    function getHelpXX() {
+        console.log("gp.getHelp() ");
+        document.getElementById('customAlert').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function biddingXX() {
+        console.log("  ++++ ");
+        const xx = help.getHelp("bidding", "xx");
+        alert(xx);
+        return;
+    }
+
+    function thisRoundXX() {
+        const rnd = cp.theRoundInPlay;
+        if (rnd == null) {
+            alert("There is no Round in play at this time.");
+            closeAlert();
+            return;
+        }
+        console.log("rnd  " + rnd.serNbr);
+        const rndLtr = rnd.serNbr.charAt(3);
+        const xx = help.getHelp(txt, rndLtr);
+        console.log("xx  " + xx);
+        alert(xx);
+    }
+
+    function nextRoundXX() {
+        if (cp.setBeingPlayed == null) {
+            alert("There is no Set in play at this time.");
+            return;
+        } else {
+            const rndLtr = cp.setBeingPlayed.getTypeOfNextRnd();
+            console.log("rndLtr  " + rndLtr);
+            const xx = help.getHelp("round", rndLtr);
+            alert(xx);
+            return;
+        }
+
+    }
+
+    function close() {
+        closeAlert();
+    }
+
+    function closeAlert() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('customAlert').style.display = 'none';
+    }
+
+    function showHelpMenu() {
+        console.log("showHelpMenu  ");
+        getHelp();
+    }
+
+
+    function setPlayClockTo2Sec() {
+
+
+    }
+
+    function nextRound() {
+        console.log("nextRound()  ");
+
+        cp.playNextRound();
+    }
+
+
+
+
+
+    function allStop() {
+        console.log("GP allStop()  ")
+        throw new Error("Script stopped due to an error.");
+    }
+
+    function showAnswers() {
+        console.log(" GP showAnswers()");
+        cp.theGameInPlay.showAnswers();
+    }
+
+
+
+
+    function hideWkButs() {
+        console.log(" hideWkButs()  ")
+        document.getElementById("butWkArea").style.display = 'none';
+    }
+
+    function showWkButs() {
+        console.log(" showWkButs()  ")
+        document.getElementById("butWkArea").style.display = 'block';
+    }
+
+    function getHelpXX() {
+        console.log(" getHelp");
+        //window.location.href =
+        const theURL = "Help/OverView.html";
+        window.open(theURL, '_blank').focus();
+    }
+
+
+    function togTheAnsBut() {
+        console.log("TheAnsBut()");
+
+        if (ansBut.style.display == "block") {
+            ansBut.style.display = "none"
+        } else {
+            ansBut.style.display = "block"
+        }
+    }
+
+    function setBidClockTo2Sec() {
+        console.log(" setBidClockTo2Sec()  " + bidClockTime)
+        bidSeconds = 2;
+    }
+
+
+    function stopBidding() {
+        console.log("GP stopBidding ");
+        bidButs.setBidSeconds(2)
+    }
+
+    function goToSummary() {
+        console.log("gp.egoToSummary()");
+        window.location.href = "GameOver.html";
+    }
+
+
+    function enableAnsButXX() {
+        console.log("gp.enableAnsBut() ");
+        ansBut.style.visibility = "visible";
+        visibilityTestOfButton();
+        ansBut.disabled = false;
+        ansBut.style.display = "block";
+        ansBut.style.backgroundColor = "lightgrey";
+        visibilityTestOfButton();
+    }
+
+    function pauseTheGame() {
+        console.log("GP pauseGame()  " + pauseGame);
+        const but = document.getElementById("pauseBut");
+        if (pauseGame) {
+            pauseGame = false;
+            but.value = "PAUSE OFF"
+            but.style.backgroundColor = "lightgrey";
+        } else {
+            pauseGame = true;
+            but.value = "PAUSE ON"
+            but.style.backgroundcolor = "red";
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+</script>
+
+

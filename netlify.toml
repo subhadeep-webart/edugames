@@ -1,0 +1,52 @@
+# ==========================================================================
+# netlify.toml — deploy config for Trivia-SmackDown (client preview builds)
+#
+# This repo is a plain static site: no build step, no bundler, no modules.
+# Netlify simply publishes the repo root as-is.
+#
+# The one thing Netlify cannot do is run the Perl CGI the game reads its
+# data from:
+#
+#   /cgi-bin/GetASetTSD.pl?<setSerNbr>     the set and its round list
+#   /cgi-bin/GetRoundsTSD.pl?<rndSerNbr>   one round's data
+#   /cgi-bin/GetTextFileTSD.pl?<path>      answer-button CSV files
+#   /DataBase/A65AA65A/ResLibry/...        images, maps and icons
+#
+# Those are Perl scripts backed by a database that lives only on
+# edugames.com. Netlify is static hosting — it would serve the Perl source
+# text instead of running it. The redirects below forward those two path
+# prefixes to the real server, which is the same thing dev-server.js does
+# locally. See the header comment in dev-server.js for the full story.
+# ==========================================================================
+
+[build]
+  # Nothing to build — publish the repo root exactly as it sits.
+  publish = "."
+  command = ""
+
+# --------------------------------------------------------------------------
+# Proxy the remote data calls to the live server.
+# status = 200 makes these a true proxy (the browser never sees a redirect,
+# so no CORS preflight applies) rather than a 301/302 bounce.
+# --------------------------------------------------------------------------
+
+[[redirects]]
+  from   = "/cgi-bin/*"
+  to     = "https://www.edugames.com/cgi-bin/:splat"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/DataBase/*"
+  to     = "https://www.edugames.com/DataBase/:splat"
+  status = 200
+  force  = true
+
+# --------------------------------------------------------------------------
+# Keep the client preview out of search results.
+# --------------------------------------------------------------------------
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

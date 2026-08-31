@@ -1,0 +1,264 @@
+/* ========================= */
+/* GLOBAL PAGE LAYOUT        */
+/* ========================= */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* ========================= */
+/* TOP CONTROL BAR           */
+/* ========================= */
+#topControls {
+    width: 100%;
+    text-align: left;
+    padding: 6px;
+    background-color: #e9ecef;
+    border-bottom: 2px solid #ccc;
+    font-size: 14px;
+}
+
+    #topControls button,
+    #topControls select,
+    #topControls input {
+        margin: 2px;
+        font-size: 14px;
+    }
+
+/* ========================= */
+/* MAIN GAME ROW             */
+/* ========================= */
+#mainRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 6px;
+}
+
+/* ========================= */
+/* PLAYER PANELS             */
+/* ========================= */
+.playerPanel {
+    width: 30%;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.playerName {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    padding: 4px;
+    margin-bottom: 4px;
+}
+
+#player0Name {
+    background-color: #002bff;
+}
+/* Peter */
+#player1Name {
+    background-color: #b30000;
+}
+/* Helen */
+
+.scoreBox {
+    text-align: center;
+    font-size: 16px;
+    margin-top: 4px;
+}
+
+/* ========================= */
+/* ALPHABAR INSERT POINTS    */
+/* ========================= */
+#alphaBarInsrtPtLeft,
+#alphaBarInsrtPtRight {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 4px;
+    min-height: 40px;
+}
+/* ========================= */
+/* ALPHABAR CONTAINER        */
+/* ========================= */
+.alphaBarContainer {
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+/* ========================= */
+/* ROW OF LETTER BUTTONS     */
+/* ========================= */
+.alphaRow {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 2px 0;
+}
+
+/* ========================= */
+/* INDIVIDUAL LETTER BUTTONS */
+/* ========================= */
+.alphaBut {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 4px;
+    border: 1px solid #888;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+    /* Hover effect */
+    .alphaBut:hover {
+        background-color: #d6ffd6;
+        border-color: #28a745;
+    }
+
+/* When selected */
+.alphaButSelected {
+    background-color: #28a745;
+    color: white;
+    border-color: #1e7e34;
+}
+
+/* Disabled state */
+.alphaButDisabled {
+    background-color: #cccccc;
+    color: #666;
+    border-color: #999;
+    cursor: default;
+}
+
+/* ========================= */
+/* LEFT / RIGHT PLAYER STYLE */
+/* ========================= */
+.alphaBarLeft .alphaBut {
+    background-color: #e6ecff; /* Light blue tint */
+    border-color: #002bff;
+}
+
+    .alphaBarLeft .alphaBut:hover {
+        background-color: #cddaff;
+    }
+
+.alphaBarRight .alphaBut {
+    background-color: #ffe6e6; /* Light red tint */
+    border-color: #b30000;
+}
+
+    .alphaBarRight .alphaBut:hover {
+        background-color: #ffcccc;
+    }
+
+/* Selected states match player color */
+.alphaBarLeft .alphaButSelected {
+    background-color: #002bff;
+    color: white;
+}
+
+.alphaBarRight .alphaButSelected {
+    background-color: #b30000;
+    color: white;
+}
+
+/* ========================= */
+/* SPACING ABOVE PLAYER NAME */
+/* ========================= */
+#alphaBarInsrtPtLeft,
+#alphaBarInsrtPtRight {
+    min-height: 40px;
+    margin-bottom: 6px;
+}
+
+
+/* ========================= */
+/* CENTER PANEL              */
+/* ========================= */
+#centerPanel {
+    width: 35%;
+    text-align: center;
+    padding: 10px;
+}
+
+#centerDisplay {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+/* ========================= */
+/* BUTTONS                   */
+/* ========================= */
+#helpMenu,
+#nextRoundBut {
+    font-size: 18px;
+    padding: 8px 16px;
+    margin: 4px;
+    border-radius: 6px;
+    border: none;
+}
+
+#helpMenu {
+    background-color: #28a745;
+    color: white;
+}
+
+#nextRoundBut {
+    background-color: #007bff;
+    color: white;
+}
+
+#helpMenu:hover {
+    background-color: #218838;
+}
+
+#nextRoundBut:hover {
+    background-color: #0069d9;
+}
+
+/* ========================= */
+/* CENTER DISPLAY TEXT       */
+/* ========================= */
+#centerDisplay {
+    font-weight: bold;
+    color: #333;
+}
+
+/* ========================= */
+/* RESPONSIVE TWEAKS         */
+/* ========================= */
+@media (max-width: 900px) {
+    #mainRow {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .playerPanel, #centerPanel {
+        width: 90%;
+        margin-bottom: 10px;
+    }
+}
+#debugTools {
+    width: 100%;
+    text-align: left;
+    background-color: #e9ecef;
+    border-bottom: 1px solid #ccc;
+    padding: 4px;
+}
+
+#mainRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+}
+

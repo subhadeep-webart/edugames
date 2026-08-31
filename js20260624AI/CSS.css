@@ -1,0 +1,251 @@
+﻿/* ============================================================
+   GLOBAL LOOK & FEEL
+   ============================================================ */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f4f4;
+    color: #000;
+}
+
+/* ============================================================
+   TOP PANEL (Score Boxes + Control Buttons)
+   ============================================================ */
+#topPanel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 3px solid #666;
+    padding: 6px;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* -------------------------
+   PLAYER SCORE BOXES
+   ------------------------- */
+.scoreBox {
+    width: 140px;
+    text-align: center;
+    border: 2px solid #444;
+    padding: 6px;
+    background: #fafafa;
+    border-radius: 4px;
+}
+
+.colorBox {
+    height: 42px;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 42px;
+    margin-bottom: 6px;
+    border-radius: 3px;
+}
+
+.blueBox {
+    background: #002b80;
+}
+/* Deep navy */
+.redBox {
+    background: #8b0000;
+}
+/* Dark red */
+
+.points {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+/* -------------------------
+   CONTROL BUTTONS
+   ------------------------- */
+#controlButtons {
+    display: flex;
+    gap: 10px;
+}
+
+.ctrlBtn {
+    background: #2e8b57; /* Classic green */
+    color: white;
+    border: 3px solid #1e5b3a;
+    border-radius: 5px;
+    padding: 10px 18px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 110px;
+    text-shadow: 1px 1px 1px #000;
+}
+
+    .ctrlBtn:hover {
+        background: #3fa76b;
+        border-color: #2f7d4d;
+    }
+
+    .ctrlBtn:active {
+        transform: scale(0.96);
+        background: #2a7a4f;
+    }
+
+/* ============================================================
+   CHALLENGE BAR (Yellow Strip)
+   ============================================================ */
+#challengeBar {
+    background: #ffeb3b; /* Bright yellow */
+    color: #000;
+    font-weight: bold;
+    padding: 8px;
+    border-top: 3px solid #666;
+    border-bottom: 3px solid #666;
+    font-size: 18px;
+    text-align: center;
+}
+
+/* ============================================================
+   MAIN GAME AREA
+   ============================================================ */
+#gamePlayArea {
+    width: 900px;
+    margin: 20px auto;
+    border: 3px solid #444;
+    padding: 12px;
+    background: #ffffff;
+    position: relative;
+    border-radius: 4px;
+}
+
+/* Where GameB inserts images/grids */
+#gameInsrtPt {
+    position: relative;
+    min-height: 300px;
+}
+
+/* Type T answer images */
+#imageInsertPt {
+    position: relative;
+    min-height: 60px;
+    margin-top: 10px;
+}
+
+/* Answer bar */
+#ansBar {
+    background: #e6e6e6;
+    border: 2px solid #999;
+    padding: 10px;
+    margin-top: 12px;
+    font-size: 16px;
+    display: none;
+    border-radius: 4px;
+}
+
+/* ============================================================
+   IMAGE DOTS / CHECKMARKS
+   ============================================================ */
+.dot, .yellowSquare, .ckMrk {
+    position: absolute;
+    z-index: 50;
+}
+
+/* ============================================================
+   OPTIONAL: GENERAL BUTTON STYLE (if needed elsewhere)
+   ============================================================ */
+button {
+    cursor: pointer;
+    font-family: inherit;
+}
+/* ============================================================
+   BOTTOM PANEL
+   ============================================================ */
+#bottomPanel {
+    width: 900px;
+    margin: 20px auto;
+    padding: 12px;
+    border: 3px solid #666;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* -------------------------
+   PLAYER LINEUP
+   ------------------------- */
+#playerLineup {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.playerSlot {
+    flex: 1;
+    margin: 0 6px;
+    padding: 10px;
+    text-align: center;
+    background: #e8e8e8;
+    border: 2px solid #777;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* -------------------------
+   ROUND + TIMER BAR
+   ------------------------- */
+#roundTimerBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffeb3b;
+    border: 2px solid #999;
+    padding: 8px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+#roundInfo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#timerDisplay {
+    font-size: 24px;
+    font-weight: bold;
+    color: #8b0000;
+    text-shadow: 1px 1px 1px #000;
+}
+
+/* -------------------------
+   FOOTER CONTROLS
+   ------------------------- */
+#footerControls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.footerBtn {
+    background: #2e8b57;
+    color: white;
+    border: 3px solid #1e5b3a;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 120px;
+    text-shadow: 1px 1px 1px #000;
+}
+
+    .footerBtn:hover {
+        background: #3fa76b;
+    }
+
+    .footerBtn:active {
+        transform: scale(0.96);
+        background: #2a7a4f;
+    }
+
+#startRoundBut {
+    position: relative;
+    z-index: 999999;
+}

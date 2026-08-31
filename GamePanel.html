@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Mon, 04 Dec 2023 22:08:21 GMT">
+    <meta name="description" content="Fast paced two person Trivia/Knowlage Game">
+    <meta name="keywords" content="trivia,knowledge,challenge,game">
+    <link rel="icon" type="image/android-icon-36x36.png" sizes="36x36" href="/favicon-36x36.png">
+    <!-- /public_html/edugames.com/JStest/EdUGamesJS /> -->
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/gamepanel.css">
+
+    <title>Trivia SmackDown</title>
+</head>
+
+
+<body class="tsd-panel">
+
+<div class="tsd-panel-page">
+
+  <!-- ====================== header ====================== -->
+  <header class="tsd-panel-header">
+
+    <span class="tsd-panel-logo">
+      <img src="images/new-images/logo.png" width="44" height="44" alt="">
+    </span>
+
+    <!-- The game scripts write the round/mode wording into #centerDisplay,
+         not here. This pill is the static frame around the title. -->
+    <p class="tsd-panel-status" id="panelStatus">Trivia SmackDown</p>
+
+    <div class="tsd-panel-tools">
+
+      <button class="tsd-icon-but" type="button" onclick="showHelpMenu()"
+              aria-label="Help">
+        <img src="images/new-images/icons/help_icon.svg" alt="">
+      </button>
+
+      <button class="tsd-icon-but" type="button" aria-label="Sound">
+        <img src="images/new-images/icons/voulme_icon.svg" alt="">
+      </button>
+
+      <button class="tsd-exit-but" type="button" onclick="goToSummary()">
+        Exit Game
+        <img src="images/new-images/icons/exit_icon.svg" alt="">
+      </button>
+
+    </div>
+  </header>
+
+  <!-- ====================== scoreboard ======================
+       Five across: player 1 · bid grid · clock · bid grid · player 2 -->
+  <div class="tsd-scorebar">
+
+    <!-- ---------- player 1 (blue / left) ---------- -->
+    <div class="tsd-pl-card tsd-pl-card--p1">
+      <span class="tsd-pl-avatar" id="avatar0">
+        <span class="tsd-avatar-empty">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </span>
+
+      <div class="tsd-pl-body">
+        <p class="tsd-pl-slot">Player 1</p>
+        <p id="player0" class="playerName">--</p>
+        <p class="tsd-pl-caption">Total Point</p>
+        <p id="rndTotL" class="pt">0</p>
+        <div id="setTotL" class="tsd-pl-total">Set Total =</div>
+      </div>
+    </div>
+
+    <!-- ---------- player 1 bid grid ----------
+         #insrtpt0X is filled by BidButs.js -->
+    <div class="tsd-bid-panel tsd-bid-panel--p1">
+      <p class="tsd-bid-title">Place Your Bid</p>
+      <div id="butLeft">
+        <div id="insrtpt0X" class="butHolder"></div>
+      </div>
+    </div>
+
+    <!-- ---------- bidding clock ---------- -->
+    <div class="tsd-bid-clock">
+
+      <div id="centerDisplay"></div>
+
+      <div class="tsd-clock-row">
+        <img src="images/new-images/icons/timer_icon.svg" alt="">
+        <input type="button" id="timeBox" onclick="setBidClockTo2Sec()" value="30 Sec">
+      </div>
+
+      <div class="tsd-clock-bar"><i></i></div>
+
+      <input type="button" class="btn" onclick="nextRound()"
+             value="Next Round" id="nextRoundBut">
+    </div>
+
+    <!-- ---------- player 2 bid grid ----------
+         #insrtpt1X is filled by BidButs.js -->
+    <div class="tsd-bid-panel tsd-bid-panel--p2">
+      <p class="tsd-bid-title">Place Your Bid</p>
+      <div id="butRight">
+        <div id="insrtpt1X" class="butHolder"></div>
+      </div>
+    </div>
+
+    <!-- ---------- player 2 (red / right) ---------- -->
+    <div class="tsd-pl-card tsd-pl-card--p2" id="secondPlayerBox">
+      <div class="tsd-pl-body">
+        <p class="tsd-pl-slot">Player 2</p>
+        <p id="player1" class="playerName">--</p>
+        <p class="tsd-pl-caption">Total Point</p>
+        <p id="rndTotR" class="pt">0</p>
+        <div id="setTotR" class="tsd-pl-total">Set Total =</div>
+      </div>
+
+      <span class="tsd-pl-avatar" id="avatar1">
+        <span class="tsd-avatar-empty">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </span>
+    </div>
+
+  </div>
+
+  <!-- ====================== actions ====================== -->
+  <div class="tsd-panel-actions">
+
+    <form id="helpDropDownMenu" method="post" action="">
+      <select class="btn" onchange="getHelpFromMenu(value)">
+        <option selected value="--">Help Menu</option>
+        <option value="general">General</option>
+        <option value="bidding">Bidding</option>
+        <option value="roundThis">This Round</option>
+        <option value="roundNext">Next Round</option>
+      </select>
+    </form>
+
+    <input type="button" class="btn" onclick="showAnswers()" value="Answers" id="ansBut">
+    <input type="button" class="btn" onclick="checkPlay()" id="checkBut" value="Check">
+  </div>
+
+  <div id="noticeA">ALREADY SELECTED!</div>
+  <!-- <p id="tempImageInsrtPt"> </p> -->
+  <div id="helpInsrtPt"></div>
+  <div id="ptAndTimeInsrtPt"></div>
+
+  <!-- ====================== question ====================== -->
+  <div class="tsd-question-bar">
+
+    <div class="tsd-question-main">
+      <p id="qBox">The challenge is...</p>
+
+      <p class="tsd-question-hint">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 11v5.5M12 7.6v.9" stroke="currentColor"
+                stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Drag each item from the left box to the right box and arrange them in the correct order.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- ====================== play area ======================
+       Filled by the Game* renderers. Ids must stay exactly as they are. -->
+  <div class="tsd-play-area">
+    <p id="ansBar"></p>
+    <div id="gameInsrtPt"></div>
+    <div id="imageInsertPt" class="imageInsertPt"></div>
+    <div id="gameLInsrtPtA" class="imageInsertPt"></div>
+    <div id="gamePlayArea"></div>
+    <div id="insrtPtA"></div>
+    <div id="insrtPtB"></div>
+  </div>
+
+  <div id="ansBoxDiv">
+    <textarea id="ansBox" name="ansBox" rows="10" cols="80"
+              style="font-size:18pt;line-height:115%"></textarea>
+  </div>
+
+  <!-- ====================== developer tools ======================
+       Hidden bar, revealed by the copyright() easter egg. Unchanged. -->
+  <p id="tools" style="display:none">
+    <input type="button" value="Copyright Pete Antoniak 2026" onclick="copyright()">
+    <input type="button" name="start" id="butStartSet" onclick="startSet()" value="StrtSet">
+    <select id='setMenu' name='setMenu'>
+      <option value=PRA1_1835>1- SampleFor2PeopleTest</option>
+      <option value=PRA1_1864>1- FullDemoOfEactype</option>
+      <option value=PRA1_1778>1- PRA1_1778 GameU</option>
+      <option value=PRA1_1835>1- PRA1_1835</option>
+      <option value=PRA1_1783>2- PRA1_1783</option>
+      <option value=PRA1_1780>3- PRA1_1780</option>
+      <option value=PRA1_1777>3a- PRA1_1777 ref in 1780</option>
+      <option value=PRA1_1781>4- PRA1_1781</option>
+      <option value=PRA1_1794>5- PRA1_1794</option>
+      <option value=PRA1_1796>6- PRA1_1796</option>
+      <option value=PRA1_1797>7- PRA1_1797</option>
+      <option value=PRA1_1798>8- PRA1_1798</option>
+      <option value=PRA1_1799>9- PRA1_1799</option>
+      <option value=PRA1_1826>10- PRA1_1826</option>
+      <option value=PRA1_1835>11- PRA1_1835</option>
+    </select>
+
+    <input type="button" name="start" id="butStartRound" value="StrtRnd" onclick="startRnd()">
+
+    <select id='rndMenu' name='rndMenu'>
+      <option value=AA.Ien00005>16  AA.Ien00005 MtR</option>
+      <option value=AA.Nen00001>24  AA.Nen00001 MemDay</option>
+      <option value=AA.Len00020>222  AA.Len00020 WWII</option>
+      <option value=AA.Den00002>10  AA.Den00002 MoonLanding</option>
+      <option value=AA.Len00005>1  AA.len00005 San Diego</option>
+      <option value=AA.Len00023>1  AA.len00007 D-Day</option>
+      <option value=AA.Ben00806>1  AA.Ben00806 Match</option>
+      <option value=AA.Cen00042>1  AA.Cen00042 Match</option>
+      <option value=AA.Men00006>1  AA.Men00006 Match</option>
+      <option selected value=AA.Ben00001>1111  AA.Ben00001 PresidentGrid</option>
+      <option value=AA.Ben00002>2  AA.Ben000002 kings</option>
+      <option value=AA.Ben00244>3  AA.Ben00244 12 coins</option>
+      <option value=AA.Ben00003>4  AA.Ben00003 USMap</option>
+      <option value=AA.Ben00004>5  AA.Ben00004</option>
+      <option value=AA.Ben00011>5  AA.Ben00011 Venus</option>
+      <option value=AA.Ben00478>6  AA.Ben00479 3 yes Coins</option>
+      <option value=AA.Cen00004>333  AA.Cen00004 NatPks</option>
+      <option value=AA.Cen00006>8  AA.Cen00006</option>
+      <option value=AA.Cen00100>9  AA.Cen00100 Sports</option>
+      <option value=AA.Een00002>11  AA.Een00002 Letters</option>
+      <option value=AA.Een00010>12  AA.Een00010 famous Things</option>
+      <option value=AA.Een00012>13  AA.Een00012</option>
+      <option value=AA.Een00016>14  AA.Een00016</option>
+      <option value=AA.Een00024>15  AA.Een00024 spelling</option>
+      <option value=AA.Ien00006>777  AA.Ien00006-IJMem</option>
+      <option value=AA.Ien00008>18  AA.Ien00008 author Select</option>
+      <option value=AA.Ien00022>19  AA.Ien00022JFK</option>
+      <option value=AA.Ien00025>20  AA.Ien00025WashDC</option>
+      <option value=AA.Men01776>666  AA.Men01776 Match Authors  </option>
+      <option value=AA.Men00021>23  AA.Men00021</option>
+      <option value=AA.Men00001>23  AA.Men00001</option>
+      <option value=AA.Men00002>23  AA.Men00002</option>
+      <option value=AA.Men00002>23  AA.Men00002</option>
+      <option value=AA.Oen00001>25  AA.Oen00001 Numbers</option>
+      <option value=AA.Oen00002>26  AA.Oen00002</option>
+      <option value=AA.Oen00005>27  AA.Oen00005</option>
+      <option value=AA.Oen00014>888 AA.Oen00014</option>
+      <option value=AA.Pen00006>29  AA.Pen00006Even Numbers</option>
+      <option value=AA.Pen00016>30  AA.Pen00016</option>
+      <option value=AA.Pen00018>31  AA.Pen00018</option>
+      <option value=AA.Qen00003>33  AA.Qen00003</option>
+      <option value=AA.Qen00003>4444  AA.Qen00003PTblOfElements</option>
+      <option value=AA.Qen00004>35  AA.Qen00004 US Map</option>
+      <option value=AA.Qen00010>35a  AA.Qen00009PresidentGrid</option>
+      <option value=AA.Qen00004>555 AA.Qen00004 US Map</option>
+      <option value=AA.Qen00009>37  AA.Qen00009Labels</option>
+      <option value=AA.Qen00021>38  AA.Qen00021</option>
+      <option value=AA.Qen00027>39  AA.Qen00027</option>
+      <option value=AA.Qen00034>40  AA.Qen00034</option>
+      <option value=AA.Qen00076>41  AA.Qen00076</option>
+      <option value=AA.Qen00076>42  AA.Qen00076RevWar</option>
+      <option value=AA.Uen00017>43  AA.Uen00017</option>
+      <option value=AA.Uen00022>44  AA.Uen00022</option>
+      <option value=AA.Uen00030>45  AA.Uen00030</option>
+      <option value=AA.Uen00045>46  AA.Uen00045</option>
+      <option value=AA.Uen01219>47  AA.Uen01219</option>
+      <option value=AA.Xen00003>48  AA.Xen00003</option>
+    </select>
+
+    <input type="button" onclick="getRound()" value="GetRound">
+    <input type="button" onclick="showAlphaButtons()" value="ShowABP">
+    <input type="button" onclick="hideAlphaButtons()" value="HideABP">
+    <input type="button" onclick="testphaButtons()" value="testABP">
+    <input type="text" id="rndSerNbr" value="RoundSerNbr">
+    <input type="button" onclick="hideTools()" value="hideTools">
+    <input type="button" onclick="abp.testA()" value="TestA">
+    <input type="button" onclick="togTheAnsBut()" value="TestAnsBut">
+    <input type="button" onclick="togglePlayerMode()" value="TogglePlayerMode">
+  </p>
+
+</div>
+
+</body>
+</html>
+
+
+<script>
+    const ansBar = document.getElementById("ansBar");
+    const ansBoxDiv = document.getElementById("ansBoxDiv");
+    const ansBut = document.getElementById("ansBut");
+    const butLeft = document.getElementById("butLeft");
+    const butRight = document.getElementById("butRight");
+    const butStartRound = document.getElementById("butStartRound");//
+    const centerDisplay = document.getElementById("centerDisplay");
+    const checkBut = document.getElementById("checkBut");
+    const gameInsrtPt = document.getElementById("gameInsrtPt");
+    const gameISelBox = document.getElementById("gameISelBox");
+    const gameLInsrtPtA = document.getElementById("gameLInsrtPtA");
+    const gameLInsrtPtB = document.getElementById("gameLInsrtPtB");
+    const gamePlayArea = document.getElementById("gamePlayArea");
+    const helpDropDown = document.getElementById("helpDropDown");
+    const helpInsrtPt = document.getElementById("helpInsrtPt");
+    const imageInsertPt = document.getElementById("imageInsertPt");
+    const insrtpt0X = document.getElementById("insrtpt0X");
+    const insrtpt1X = document.getElementById("insrtpt1X");
+    const insrtPtA = document.getElementById("insrtPtA");
+    const insrtPtB = document.getElementById("insrtPtB");
+    const menuBox = document.getElementById("menuBox");
+    const nextRoundBut = document.getElementById("nextRoundBut");
+    const player0 = document.getElementById("player0");
+    const player1 = document.getElementById("player1");
+    const ptAndTimeInsrtPt = document.getElementById("ptAndTimeInsrtPt");
+    const qBox = document.getElementById("qBox");
+    const rndMenu = document.getElementById("rndMenu");
+    const rndTotL = document.getElementById("rndTotL");
+    const rndTotR = document.getElementById("rndTotR");
+    const setMenu = document.getElementById("setMenu");
+    const setTotL = document.getElementById("setTotL");
+    const setTotR = document.getElementById("setTotR");
+    const tempImageInsrtPt = document.getElementById("tempImageInsrtPt");
+    const timeBox = document.getElementById("timeBox");
+    const noticeA = document.getElementById("noticeA");
+    const justAnswered = document.getElementById("justAnswered");
+    const rndSerNbr = document.getElementById("rndSerNbr");
+    const helpDropDownMenu = document.getElementById("helpDropDownMenu");
+    const tools = document.getElementById("tools");
+    const secondPlayerBox = document.getElementById("secondPlayerBox");
+
+
+    const alphaBarInsrtPtLeft = document.getElementById("insrtpt0X");
+    const alphaBarInsrtPtRight = document.getElementById("insrtpt1X");
+
+
+    helpDropDownMenu.selectedIndex = 2;
+
+    function testphaButtons() {
+        const style = window.getComputedStyle(alphaBarInsrtPtLeft);
+        console.log('none  ' + (style.display == 'none'));
+        console.log('hidden   ' + (style.visibility == 'hidden'));
+        console.log('0   ' + (style.opacity == '0'));
+    }
+
+    function showAlphaButtons() {
+        console.log('(show abp === null) ' + (abp === null));
+        abp.showAlphaButtons();
+        alphaBarInsrtPtLeft.style.display = 'block';
+        alphaBarInsrtPtLeft.style.visibility = 'visibility';
+    }
+
+    function hideAlphaButtons() {
+        console.log('hide (abp === null) ' + (abp === null));
+        abp.hideAlphaButtons();
+        alphaBarInsrtPtLeft.style.display = 'none';
+        alphaBarInsrtPtLeft.style.visibility = 'hidden';
+    }
+
+
+    function togglePlayerMode() {
+        singlePlayerMode = !singlePlayerMode;
+        console.log("singlePlayerMode is now " + singlePlayerMode);
+    }
+
+
+
+
+    function togleClock() {
+        console.log("togleClock() ");
+
+    }
+
+
+
+    //const  = document.getElementById("");
+    let pauseGame = false;
+    let cCount = 0;
+    function copyright() {
+        console.log("copyright() " + cCount);
+        if (cCount++ > 2) {
+            tools.style.display = "block";
+            tools.style.visibility = "visible"
+            tools.hidden = false;
+        }
+    }
+
+    function stopClock() {
+        console.log("stopClock() ");
+        bidButs.startStopBidClock();
+    }
+
+    function hideTools() {
+        console.log("hideTools() ");
+        tools.style.display = "none";
+        tools.style.visibility = "hidden"
+        tools.hidden = true;
+        aCount = 0;
+    }
+
+    function getRound() {
+        console.log("gp.getRound() ");
+        const rndSerNbr = document.getElementById("rndSerNbr");
+        const aSerNbr = rndSerNbr.value;
+
+        console.log("aSerNbr =" + aSerNbr);
+        if (onNet == true) {
+            const url = '/cgi-bin/GetRoundsTSD.pl?' + aSerNbr;
+            console.log("Sp.url =" + url + "**");
+            fetch(url, {
+            })
+                .then(response => response.text())
+                .then(data => {
+                    cp.itf.cleanPlayArea();
+                    const round = new Round(data);
+                    theQuestion = round.getTheQuestion();
+                    console.log("-@@-sp.getRoundFmRnd QQQQ=  " + round.getTheQuestion())
+                    cp.startGame(round);
+                })
+                .catch(error => console.log('Error fetching data:', error));
+            return;
+        }
+
+    }//
+
+    function startRnd() {
+        console.log("gp.startRnd() ");
+        const rndSerNbr = document.getElementById("rndMenu").value;
+        console.log("rndSerNbr =" + rndSerNbr);
+        cp.startSetRoundBySerNbr(rndSerNbr);
+    }
+
+
+
+    function getHelpXX() {
+        console.log("gp.getHelp() ");
+        document.getElementById('customAlert').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function biddingXX() {
+        console.log("  ++++ ");
+        const xx = help.getHelp("bidding", "xx");
+        alert(xx);
+        return;
+    }
+
+    function thisRoundXX() {
+        const rnd = cp.theRoundInPlay;
+        if (rnd == null) {
+            alert("There is no Round in play at this time.");
+            closeAlert();
+            return;
+        }
+        console.log("rnd  " + rnd.serNbr);
+        const rndLtr = rnd.serNbr.charAt(3);
+        const xx = help.getHelp(txt, rndLtr);
+        console.log("xx  " + xx);
+        alert(xx);
+    }
+
+    function nextRoundXX() {
+        if (cp.setBeingPlayed == null) {
+            alert("There is no Set in play at this time.");
+            return;
+        } else {
+            const rndLtr = cp.setBeingPlayed.getTypeOfNextRnd();
+            console.log("rndLtr  " + rndLtr);
+            const xx = help.getHelp("round", rndLtr);
+            alert(xx);
+            return;
+        }
+
+    }
+
+    function close() {
+        closeAlert();
+    }
+
+    function closeAlert() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('customAlert').style.display = 'none';
+    }
+
+    function showHelpMenu() {
+        console.log("showHelpMenu  ");
+        getHelp();
+    }
+
+
+    function setPlayClockTo2Sec() {
+
+
+    }
+
+    function nextRound() {
+        console.log("nextRound()  ");
+
+        cp.playNextRound();
+    }
+
+
+
+
+
+    function allStop() {
+        console.log("GP allStop()  ")
+        throw new Error("Script stopped due to an error.");
+    }
+
+    function showAnswers() {
+        console.log(" GP showAnswers()");
+        cp.theGameInPlay.showAnswers();
+    }
+
+
+
+
+    function hideWkButs() {
+        console.log(" hideWkButs()  ")
+        document.getElementById("butWkArea").style.display = 'none';
+    }
+
+    function showWkButs() {
+        console.log(" showWkButs()  ")
+        document.getElementById("butWkArea").style.display = 'block';
+    }
+
+    function getHelpXX() {
+        console.log(" getHelp");
+        //window.location.href =
+        const theURL = "Help/OverView.html";
+        window.open(theURL, '_blank').focus();
+    }
+
+
+    function togTheAnsBut() {
+
+        if (ansBut.style.display == "block") {
+            ansBut.style.display = "none"
+        } else {
+            ansBut.style.display = "block"
+        }
+    }
+
+    function setBidClockTo2Sec() {
+        console.log(" setBidClockTo2Sec()  " + bidClockTime  + "  "  +  singlePlayerMode)
+        if (singlePlayerMode) {
+            bidButs.startStopBidClock();
+        } else {
+            bidSeconds = 2;
+        }
+
+    }
+
+
+    function stopBidding() {
+        console.log("GP stopBidding ");
+        bidButs.setBidSeconds(2)
+    }
+
+    function goToSummary() {
+        console.log("gp.egoToSummary()");
+        window.location.href = "GameOver.html";
+    }
+
+
+    function enableAnsButXX() {
+        console.log("gp.enableAnsBut() ");
+        ansBut.style.visibility = "visible";
+        visibilityTestOfButton();
+        ansBut.disabled = false;
+        ansBut.style.display = "block";
+        ansBut.style.backgroundColor = "lightgrey";
+        visibilityTestOfButton();
+    }
+
+    function pauseTheGame() {
+        console.log("GP pauseGame()  " + pauseGame);
+        const but = document.getElementById("pauseBut");
+        if (pauseGame) {
+            pauseGame = false;
+            but.value = "PAUSE OFF"
+            but.style.backgroundColor = "lightgrey";
+        } else {
+            pauseGame = true;
+            but.value = "PAUSE ON"
+            but.style.backgroundcolor = "red";
+        }
+
+    }
+
+
+    /**
+
+                        <div class="tooltip flex-item ">
+                            <input type="button" class="flex-item btn" onClick="hide2nPlyr()" value="Hide2nPlyr" id="hide2nPlyr">
+                            <span class="tooltiptext">Hide SecondPlayer</span>
+                        </div>
+
+ */
+
+</script>
+
+
+<script src="js/Interface.js"></script>
+<script src="js/PlayerLineUp.js"></script>
+<script src="js/Game.js"></script>
+<script src="js/ControlPanel.js"></script>
+<script src="js/SelectionPanel.js"></script>
+<script src="js/RndMenu.js"></script>
+<script src="js/BoxGame.js"></script>
+<script src="js/Rounds.js"></script>
+<script src="js/AnsButtons.js"></script>
+<script src="js/Sets.js"></script>
+<script src="js/SetMenu.js"></script>
+<script src="js/GameA.js"></script>
+<script src="js/GameB.js"></script>
+<script src="js/GameC.js"></script>
+<script src="js/GameD.js"></script>
+<script src="js/GameE.js"></script>
+<script src="js/GameI.js"></script>
+<script src="js/GameL.js"></script>
+<script src="js/GameM.js"></script>
+<script src="js/GameN.js"></script>
+<script src="js/GameO.js"></script>
+<script src="js/GameP.js"></script>
+<script src="js/GameQ.js"></script>
+<script src="js/GameU.js"></script>
+<script src="js/GameX.js"></script>
+<script src="js/Player.js"></script>
+<script src="js/Round.js"></script>
+<script src="js/RoundB.js"></script>
+<script src="js/RoundC.js"></script>
+<script src="js/RoundD.js"></script>
+<script src="js/RoundE.js"></script>
+<script src="js/RoundI.js"></script>
+<script src="js/RoundL.js"></script>
+<script src="js/RoundM.js"></script>
+<script src="js/RoundN.js"></script>
+<script src="js/RoundO.js"></script>
+<script src="js/RoundP.js"></script>
+<script src="js/RoundQ.js"></script>
+<script src="js/RoundU.js"></script>
+<script src="js/Set.js"></script>
+<script src="js/Rnd.js"></script>
+<script src="js/Help.js"></script>
+<script src="js/HelpBut.js"></script>
+<script src="js/Explain.js"></script>
+<script src="js/AudX.js"></script>
+<script src="js/SetPRA.js"></script>
+<script src="js/SubSet.js"></script>
+<script src="js/Utl.js"></script>
+<script src="js/AlphaBar.js"></script>
+<script src="js/NetTest.js"></script>
+<script src="js/Settings.js"></script>
+<script src="js/BidButs.js"></script>
+<script src="js/script.js"></script>
+
+<!-- new-UI presentation helper. Loads AFTER the game scripts and only
+     writes a CSS variable; it changes no game state. -->
+<script src="js-ui/tsd-slider-fill.js"></script>
+
+
+<script>
+    setUpGameArea();
+    hideAnsBox();
+    console.log("Bottom of GamePanel ");
+</script>

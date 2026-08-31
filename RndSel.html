@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Fri, 21 Feb 2025 21:59:36 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title></title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+<style>
+.ckbxRnd{
+ font-size:x-small;
+
+ }
+ 
+  
+</style>
+<script src="js/script.js"></script>
+<script>
+  let rndArr = new Array();
+  let dataFmReg= "";
+  let lineCount = 0; 
+
+
+function pickSetAtRandom(){console.log('pickSetAtRandom top ');
+    downloadRnds(true);
+ 
+    console.log('pickSetAtRandom bottom ');
+
+
+}
+
+
+  
+ function  test(){ console.log("test"  ) 
+     const collection =   document.getElementsByClassName("rndLine");
+     for(let i = 0;i< collection.length;i++){
+        console.log("id= " +  collection[i].id +     " textContent= "  + collection[i].textContent );          
+     } 
+}
+
+
+function collectDataAndGoToGame(){console.log("storeDataAndGoToGame  "  + dataFmReg)
+    const theSetData = createSet(false);
+    console.log("theSetData=  "  + theSetData);
+
+    const regPlusSetData = dataFmReg + ","  + theSetData ;
+    console.log("regPlusSetData=  "  + regPlusSetData)
+    
+    localStorage.setItem("FromRndSel",regPlusSetData);
+    
+    const xxx  = localStorage.getItem("regData");
+    console.log("xxx=  "  + xxx);
+    setRegData(regPlusSetData);
+    window.location.href = "GamePanel.html";    //       
+}
+
+//xxx=  0;Peter;94566;10;5|1;Helen;94066;11;5,,SetFromSelection,,,,,,,,,Rnd;AA.Uen00031;9 ;100;Authors;Complete the Names of Famous Authors;
+//,Rnd;AA.Uen00030;9 ;100;Authors;Complete the Names of Famous Authors;,Rnd;AA.Uen00033;11;100;Authors;Equate the Author with the Work.;,
+
+
+
+
+function showResults(){console.log("showResults " ) 
+     //let results = "<br>The results of your selection is as folllows<br>Click on the Rounds you want in the Set and press <b>Start Set</b>.<br>A recommended number of Rounds is 7.<br><br>";
+     let results =   "";  
+     const nbrOfRnds = rndArr.length;
+     for(let i = 0;i< nbrOfRnds;i++){
+          const s = rndArr[i];
+          if(s != undefined){
+             const ss = s.split("\n");
+             for(let j = 0;j< ss.length;j++){
+                 const x =  ss[j];   
+                 const temp =  x.split("-");//Get the number 
+                 results += "<li class='rndLine' id='ln"+temp[0]+"' name='"+ss[j]+ "'><input type='checkbox' id='" +  temp[0] + "' class='ckbxRnd' >" + ss[j] + "</li>"              
+             }
+          }
+     }  
+     const insrtPt =   document.getElementById("insertPtForRnds")
+     insrtPt.innerHTML = insrtPt.innerHTML + results;
+     //console.log("results=  " + results)             
+
+} 
+
+function showResultsHTML(rndArr){console.log("showResults " ) 
+     //let results = "<br>The results of your selection is as folllows<br>Click on the Rounds you want in the Set and press <b>Start Set</b>.<br>A recommended number of Rounds is 7.<br><br>";
+     let results =   "";  
+     const nbrOfRnds = rndArr.length;
+     for(let i = 0;i< nbrOfRnds;i++){
+          const s = rndArr[i];
+          if(s != undefined){
+             const ss = s.split("\n");
+             for(let j = 0;j< ss.length;j++){
+                 const x =  ss[j];   
+                 const temp =  x.split("-");//Get the number 
+                 results += "<li class='rndLine' id='ln"+temp[0]+"' name='"+ss[j]+ "'><input type='checkbox' id='" +  temp[0] + "' class='ckbxRnd' >" + ss[j] + "</li>"              
+             }
+          }
+     }  
+     const insrtPt =   document.getElementById("insertPtForRnds")
+     insrtPt.innerHTML = insrtPt.innerHTML + results;
+     //console.log("results=  " + results)             
+
+} 
+
+function getSavedRnds(textOnly){console.log("getSavedRnds " + textOnly );
+    const collection =   document.getElementsByClassName("ckbxRnd");
+      console.log("collection.length = " + collection.length);
+      let results = ""
+      const arr = new Array();
+      for(let i = 0;i< collection.length;i++){
+          const ckBx = collection[i];
+          if(ckBx != undefined && ckBx.checked == true ){
+              const aLine = document.getElementById("ln" + ckBx.id);
+              const theRnd =  aLine.textContent;                    
+              const temp =  theRnd.split("-")
+              const ss =  temp[1].substring(0,(theRnd.length-1)); //remove last comma
+              if(textOnly){
+                  const sss =  ss.replaceAll(",",";");
+                  arr.push(sss)
+              } else{ //value='"+theRnd+"'
+                 results +=  "<li id='ln"+temp[0]+"'  ><input type='checkbox' checked id='" +  temp[0] + "' class='ckbxRnd' >" + theRnd + "</li>";                                 
+              }
+          }
+
+      }
+      if(textOnly){
+         return arr;
+      }
+      //console.log("results = " + results + "\n");      
+      return results;      
+ }
+
+function getAllRnds(textOnly){console.log("getSavedRnds " + textOnly );
+    const collection =   document.getElementsByClassName("ckbxRnd");
+      console.log("collection.length = " + collection.length);
+      let results = ""
+      const arr = new Array();
+      for(let i = 0;i< collection.length;i++){
+          const ckBx = collection[i];
+          if(true ){
+              const aLine = document.getElementById("ln" + ckBx.id);
+              const theRnd =  aLine.textContent;                    
+              const temp =  theRnd.split("-")
+              const ss =  temp[1].substring(0,(theRnd.length-1)); //remove last comma
+              if(textOnly){
+                  const sss =  ss.replaceAll(",",";");
+                  arr.push(sss)
+              } else{ //value='"+theRnd+"'
+                 results +=  "<li id='ln"+temp[0]+"'  ><input type='checkbox' checked id='" +  temp[0] + "' class='ckbxRnd' >" + theRnd + "</li>";                                 
+              }
+          }
+
+      }
+      if(textOnly){
+         return arr;
+      }
+      //console.log("results = " + results + "\n");      
+      return results;      
+ }
+
+
+
+ function getDataXML(){
+    const rnds = new XMLHttpRequest();
+    rnds.open("GET","https://www.edugames.com/cgi-bin/GetRndsTSD.pl?1.00,16.00,LDAP,TrivCode/Ar/Ar");
+    rnds.send()
+
+    rnds.addEventListener("load",function(){
+        console.log(this.responseText);
+        let outPut = "";
+        const rndArr = new Array();
+        const arrXX = this.responseText.split("\n")      
+        for(let j = 0;j< arrXX.length;j++){
+           const aLine = arrXX[j];
+           if(arrXX[j].substring(0,6)== "Result" || arrXX[j].length < 5){
+               continue; 
+           }
+           rndArr.push(lineCount++ + "-" + arrXX[j]);             
+         }
+         showResultsHTML(rndArr);
+
+    })
+
+ }
+
+  
+ async function downloadRnds(andCreateSet){console.log("downloadRnds() lineCount= " + lineCount ) 
+    outPut = "";
+    rndArr = new Array();
+    const allCkBoxes = document.getElementsByClassName("ckbx"); 
+    console.log("allCkBoxes.length " + allCkBoxes.length )
+    const arr = new Array; 
+    let tot = 0;
+    let nbrChecked = 0.0   
+    for(let i = 0;i< allCkBoxes.length;i++){
+        if(allCkBoxes[i].checked == 1){
+            nbrChecked++
+            const path =  allCkBoxes[i].value;
+            console.log(i + " " + path )       
+            const count = Number(allCkBoxes[i].name);
+            tot += count;
+            outPut += "path";           
+            arr.push(path);
+        }
+    }
+    for(let i = 0;i< arr.length;i++){
+         const rnds = new XMLHttpRequest();
+         rnds.open("GET","https://www.edugames.com/cgi-bin/GetRndsTSD.pl?1.00,16.00,LDAP,TrivCode/" + arr[i] + ",false," );
+         rnds.send();
+         rnds.addEventListener("load",function(){
+        console.log(this.responseText);
+        let outPut = "";
+        const rndArr = new Array();
+        const arrXX = this.responseText.split("\n")      
+        for(let j = 0;j< arrXX.length;j++){
+           const aLine = arrXX[j];
+           if(arrXX[j].substring(0,6)== "Result" || arrXX[j].length < 5){
+               continue; 
+           }
+           rndArr.push(lineCount++ + "-" + arrXX[j]);             
+         }
+         showResultsHTML(rndArr);
+         if(andCreateSet){
+             createSet(true);
+         }
+
+    })
+
+    }
+
+
+    /**
+    for(let i = 0;i< arr.length;i++){  
+          if(arr[i] == "XXX"){
+             console.log(i + " END "  )                      
+            showResults();
+             break;
+          }   
+       const url = 'https://www.edugames.com/cgi-bin/GetRndsTSD.pl?1.00,16.00,LDAP,TrivCode/' + arr[i] + ',false,' ;
+       console.log(i + " --- " + url )          
+			fetch( url )
+			.then(response => response.text())
+			.then(data => {
+      //console.log(i + " data= "  + data.substring(0,20))
+      //console.log(i + " data= "  + data)      			
+	  const arrXX = data.split("\n")
+      for(let j = 0;j< arrXX.length;j++){
+         const aLine = arrXX[j];
+         if(arrXX[j].substring(0,6)== "Result" || arrXX[j].length < 5){
+             continue; 
+         }
+         rndArr.push(lineCount++ + "-" + arrXX[j]);             
+      }
+			;
+			});
+	  }   
+    console.log("bottom lineCount = " + lineCount);
+    //showResults(rndArr);
+    **/
+}  
+  
+function getDataFmRegPage(){ console.log(" getDataFmRegPage() " );
+    dataFmReg =  localStorage.getItem("regData");
+    if(dataFmReg == null){
+       alert("You will need to register first. \n\n(We only ask for a first or nick name.");
+       window.location.href = "index.html";
+       return;
+    }
+    console.log(" dataFmReg  = " + dataFmReg);
+
+ }
+ 
+
+
+function getClickedBoxes(){ console.log("getClickedBoxes()"  ) 
+      const collection = document.getElementsByClassName("ckbxRnd");
+      console.log("collection.length ="  + collection.length ) 
+      let xx = "";
+      let rndCount = 0;
+      let gradeCount = 0;
+      let pointCount = 0;
+      for(let i = 0;i< collection.length;i++){
+          const x = collection[i];
+          console.log(" x =  " + x )
+          if( x.checked == true){
+              rndCount++;
+              const rndNbr = Number( x.id );
+              console.log(" Selected = " + rndArr[rndNbr] );
+              const s = rndArr[rndNbr].split("-");
+              const theRound = s[1];
+              const parts = theRound.split(",");  //AA.Uen01100,9.00,100,0,People/Nicknames,Match the book with the author.,
+              gradeCount+= parts[1];
+              pointCount+= parts[2];
+              const ss = theRound.replace(",",";")
+              xx+= ss + ","; 
+          }
+      }//PRA1_1835,2025.02.06,PRA1_1835;Set;13;8.615385;1300;;TSD_A,,AvgGrade=8.615385 Points=1300 TotalRounds=13 SubSets=0 SubSetRnds=0 WebPages=0 Instructions=0 Commands=0 Comments=0 ,ThGaTe;;;Te;,gPRA1_115 ,,Fu2
+      const gradeAvg = gradeCount/rndCount;
+      const pointAvg = pointCount/rndCount;     
+      
+      let theSet = "UserCreated,2025.00.00,PRA1_1835,Set;13;8.615385;1300;;TSD_A,,AvgGrade=" + gradeAvg +  " Points=" + pointAvg +  " TotalRounds=" + rndCount +  " SubSets=0 SubSetRnds=0 WebPages=0 Instructions=0 Commands=0 Comments=0,,,,Fu2," + xx
+      console.log(" theSet = " + theSet );
+}
+
+function getClickedLines(){console.log("getClickedLines()"  ) 
+    const collection = document.getElementsByClassName("ckbxRnd");
+    for(let i = 0;i< collection.length;i++){
+          const x = collection[i];
+          if( x.checked == true){
+              const rndNbr = Number(x.id);
+              const theLineID = "ln" + rndNbr;
+              console.log("theLineID=  " + theLineID);             
+              const aLine = document.getElementById(theLineID);
+              console.log(" Selected = " + aLine );  
+          }
+      }
+}
+ 
+function createSet(random5){console.log("RndSel. createSet() " +  random5)
+     //getClickedLines();
+     let outPutArray = new Array();
+     if(random5){
+       outPutArray =  getAllRnds(true);
+     }else{
+         outPutArray = getSavedRnds(true);
+     }
+
+     console.log("outPutArray.length= " +  outPutArray.length)
+
+     for(let i = 0;i< outPutArray.length;i++){
+         console.log(i + " " + outPutArray[i].textContent )
+         
+     }
+     
+     
+     console.log("outPutArray= " + outPutArray) ;     
+     outPut = "";
+     
+     const noDupsArr = [...new Set(outPutArray)];
+      
+     
+     const nbrOfRnd = noDupsArr.length;
+     
+     const arrB  = new Array();
+     const arrC  = new Array();
+     const arrD  = new Array();
+     const arrE  = new Array();
+     const arrI  = new Array();
+     const arrL  = new Array();
+     const arrM  = new Array();
+     const arrN  = new Array();
+     const arrO  = new Array();
+     const arrP  = new Array();
+     const arrQ  = new Array();
+     const arrU  = new Array();
+     const arrX  = new Array(); ///FOR FUTURE USE
+     const arrY  = new Array();
+     const arrZ  = new Array();
+          
+     const shuffledArray = shuffleArray(noDupsArr);
+     arrLtrs = ["B","C","D","E","I","M","N","O","P","Q","U","X","Y","Z"] ;
+     const ltrMap = new Map();
+     for(let i = 0;i< shuffledArray.length;i++){ 
+          const aRnd = shuffledArray[i];
+          const ltr = aRnd.charAt(3);
+          if(ltr == "B")arrB.push(aRnd);
+          ltrMap.set("B",arrB); 
+          if(ltr == "C")arrC.push(aRnd);
+          ltrMap.set("C",arrC);  
+          if(ltr == "D")arrD.push(aRnd);
+          ltrMap.set("D",arrD);   
+          if(ltr == "E")arrE.push(aRnd);
+          ltrMap.set("E",arrE);   
+          if(ltr == "I")arrI.push(aRnd);
+          ltrMap.set("I",arrI);   
+          if(ltr == "L")arrL.push(aRnd);
+          ltrMap.set("L",arrL);   
+          if(ltr == "M")arrM.push(aRnd);
+          ltrMap.set("M",arrM);   
+          if(ltr == "N")arrN.push(aRnd);
+          ltrMap.set("N",arrN);   
+          if(ltr == "O")arrO.push(aRnd);
+          ltrMap.set("O",arrO);            
+          if(ltr == "P")arrP.push(aRnd);
+          ltrMap.set("P",arrP);  
+          if(ltr == "Q")arrQ.push(aRnd);
+          ltrMap.set("Q",arrQ);  
+          if(ltr == "U")arrU.push(aRnd);
+          ltrMap.set("U",arrU);  
+           console.log(i + " ++ "   + shuffledArray[i] +   "   "  + ltr);
+     }
+     const totNbrOfRnds =  arrB.length + arrC.length + arrD.length + arrE.length + arrI.length + arrL.length + arrM.length + arrN.length + arrO.length + arrP.length + arrQ.length + arrU.length ;     
+     console.log(" totNbrOfRnds= "   + totNbrOfRnds);//This may not = the number of rnds originally because of some rnds that are not supported by TSD           
+     const shuffledLtrs = shuffleArray(noDupsArr);     
+      console.log(" shuffledLtrs= "  + shuffledLtrs)  
+     let countDown = nbrOfRnd;
+     const theSetArr = new Array();
+     let newSet  = "SetFromSelection,,,,,,,,,";
+     console.log(" shuffledLtrs.length "   + shuffledLtrs.length );
+     let nbrPlaced = shuffledLtrs.length;
+      let runningGrdLev = 0;
+      let runningPtLev = 0;                
+     for(let i = 0;i< (shuffledLtrs.length * 10);i++){  // * 10 is Just a high number  
+        if(shuffledLtrs[i] == undefined)break
+        const theLtr = shuffledLtrs[i].charAt(3);
+        console.log(i + " theLtr= "   + theLtr + "  "  + shuffledLtrs[i].substring(0,9));       
+        const theArr = ltrMap.get(theLtr);
+        console.log(i + " theArr= "   + theArr )      
+        if(theArr != undefined && theArr.length > 0){
+            const ss = theArr.shift()
+            const statArr = ss.split(";");
+            runningGrdLev+= Number(statArr[1])
+            runningPtLev+= Number(statArr[2])
+            console.log(i + " ss= "   + ss );           
+            if(ss != undefined){
+                  theSetArr.push(ss);
+                  newSet+= "Rnd;" + ss + ",";
+                  if(--countDown <= 0)break;
+             }
+            //newSet+= theArr.shift()+",";
+        }
+        if(countDown-- <= 0)break;
+     }
+     
+     console.log("theSetArr= \n" + theSetArr.length );         
+     for(let i = 0;i< theSetArr.length;i++){
+        console.log(i + " +  + "   + theSetArr[i] );
+     } 
+     const theData = dataFmReg +  newSet ;
+     console.log("theData= \n" + theData );
+     
+     localStorage.setItem("regData",theData);    
+     setRegData(theData);
+    window.location.href = "GamePanel.html";
+    //window.location.href = "RndSel.html";
+          
+     
+     
+     //PRA1_0048,2004.02.17,Set;PRA1_0048;4;7.75;400;0;Demo;GameMMMM,,4;4;0;0,;;;;,aPRA1_100,-,-,Rnd;AA.Men00001;9.00;100;2;US/Capitals;Match the Western State Capital with the State.,Rnd;AA.Men00021;7;100;2;Words/Compound;Pair the Homonyms,Rnd;AA.Men00024;4;100;2;Words/Compound;Pair the compound words,Rnd;AA.Men00027;11;100;2;Leaders/Presidents;Pair the President with his burial site.  (Check Button),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+       //PRA1_0050,2004.04.27,Set;PRA1_0050;12;9.28;1200;0;Demo;DemoForAsilomar,,12;12;0;0,;;;;,aPRA1_300,-,-,"Rnd;AA.Len00002;9.00;100;0;Army Leaders;Where did this man ""Make the biggest mistake of his life"".?",Rnd;AA.Len00076;11;100;0;Wars/WW II;Approximately where was the second Atom Bomb exploded?,Rnd;AA.Oen00002;12.00;100;0;Emotions/Grief;Put the five stages of grief in order.,Rnd;AA.Oen00005;9.00;100;0;Boats/Sailboats/Terms;Put the masts of a seven masted sailing ship in order.,Rnd;AA.Oen00024;9;100;0;Poems/American Classic;Place the lines to the poem by Emma Lazarus that is on the base of the Statue of Liberty  in order.,Rnd;AA.Den00001;9.00;100;0;Actors/Movie;When did this person die?,Rnd;AA.Cen00001;9.00;100;0;Europe/Cities;Match the European city with the country.,Rnd;AA.Cen00006;6;100;0;Geography/US/National Parks;Place the National Parks by State.,Rnd;AA.Men00025;7;100;0;Words/Compound;Pair the Homonyms,Rnd;AA.Qen00003;11;100;0;Science/Chemistry;Answer these questions about the Elements.(Image Grid),Rnd;AA.Qen00004;11;100;0;US/States;Answer these questions about the United States,Rnd;AA.Aen00002;8.43;100;0;Boats/Basics;Which is the clew outhaul?,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+       //PRA1_0044,2003.08.06,Set;PRA1_0044;2;10.0;200;0;Test;Test86,,2;2;0;0,;;;;,aPRA1_50,-,-,Rnd;AA.Nen00191;10;50;0;Mathematics/Numbers;A US movie with the number --MCLIIM- in its credits was made in what year?,Rnd;AA.Nen00192;10;25;3;Numbers/Numbers;The binary number 1101 is what in base ten?
+       //SetFromSelection,,,,,,,,,Rnd;AA.Oen00739;9.00;100;0;Games/Card;Put the poker hands in order with the highest on top.;,Rnd;AA.Qen00423;9.00;100;0;Misc questions;Questions about fictious characters;,Rnd;AA.Uen01114;9.00;100;0;Misc questions;What are they famous for for;,Rnd;AA.Oen00740;9.00;100;0;Games/Card;Put the poker hands in order with the highest on top.;,Rnd;AA.Uen01115;9.00;100;0;Misc questions;What are they famous for for;,
+ } 
+ 
+/** 
+ 
+ SetFromSelection,,,,,,,,, 
+ AA.Men00123;11;100;Titles;Match the work with the author.;, 
+ AA.Uen01102;9.00;100;0;People/Nicknames;Match the book with the author.;,
+ 
+ **/
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}  
+  
+
+
+function clearSelection(){console.log("clearSelection" );
+     const savedRnds =   getSavedRnds();
+     rndArr = new Array();
+     const insrtPt = document.getElementById("insertPtForRnds"); 
+     insrtPt.innerHTML = savedRnds;
+ }
+ 
+ //086- AA.Qen00006;11;100;US/Cities;Answer these questions about US Cities;-Revise,87- AA.Qen00007;11;100;US/States;Answer these questions about the United States;-Revise,
+  
+async function dwnLdRndsXX(arr) {console.log('dwnLdRnds  '+ arr.length);
+    for(let i = 0;i< arr.length;i++){
+      const url = 'https://www.edugames.com/cgi-bin/GetRndsTSD.pl?1.00,16.00,LDAP,TrivCode/' + arr[i] + ',false,' ;
+      console.log(i + " " + url ) 
+      try {
+        // Await the fetch call
+        const response = await fetch(url);
+        console.log('response= ' + response.statusText);
+        // Check if the response is ok (status code 200-299)
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+        // Await the JSON parsing
+        const data = await response.json();
+        // Handle the JSON data
+        console.log('Data fetched:', data);
+      } catch (error) {
+        // Handle any errors that occurred during the fetch
+        console.error('There was a problem with the fetch operation:', error);        
+      } 
+    }
+} 
+ 
+getDataFmRegPage();  // 
+/**
+<input type="button" onClick="test()" value="Test">
+<input type="button" onClick="showResults()" value="Show Results">
+<input type="button" onClick="getSavedRnds()" value="Get Saved Rouds">
+<input type="button" onClick="getDataXML()" value="TestGetData">
+<input type="checkbox" name="MixUpRounds" id="mixUpRnds"value="Mix Up Rounds">
+**/
+
+
+
+
+</script>   
+<body>
+<input type="button" onClick="pickSetAtRandom()" value="Start Set from Checked Categories"> 
+<input type="button" onClick="downloadRnds(false)" value="DownLoad Rounds">
+<input type="button" onClick="clearSelection()" value="Remove Unchecked Rounds">
+<input type="button" onClick="collectDataAndGoToGame()" value="Start Set">
+
+
+<br>
+You have chosen to assemble the content material [<b>Rounds</b>] for a  <b><font size="6">Set</font></b>. There are two ways to accomplish this.
+<ol type="1">
+</ol>1)Check the desired categories and press <b>Start Set from Checked Categories</b>.
+<div align="center"><h3>OR</h3></div>
+2)Select the actual Rounds for the Set by checking the desired caegories and pressing <b>DownLoad Rounds</b>. 
+  <BR>&nbsp;&nbsp;&nbsp;&nbsp;[A list of all the Rounds from the chosen categories will appear.] 
+<br>Check the Rounds you want in the Set and press <b>Start Set</b>
+
+<BR>
+<BR>
+
+
+<br>*************************************<br><br>
+<div id="insertPtForRnds">****</div>
+  
+<br><br><table border="1"  width="100%" style="font-size: 12px; vertical-align: baseline; border: 0px;margin: 0px;padding: 0px;">
+  <tr><!-- Row 1 -->
+     <td><li><input type='checkbox'class= 'ckbx' name='25'value='Ar'><b>Arts & Entertainment [25]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='118'value='Ar/Ar'> _ _ Artist [118]</li>
+<li><input type='checkbox'class= 'ckbx' name='26'value='Ar/Bo'> _ _ Books [26]</li>
+<li><input type='checkbox'class= 'ckbx' name='4'value='Ar/Bo/Ch'> _ _ _ _Characters [4]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Ar/Ch'> _ _ Childhood Literature [3]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Ar/Co'> _ _ Comic Books [3]</li>
+<li><input type='checkbox'class= 'ckbx' name='6'value='Ar/En'> _ _ Entertainers [6]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ar/En/Si'> _ _ _ _Singers [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='12'value='Ar/Fi'> _ _ Fiction & Mythology [12]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Ar/Ga'> _ _ Games</li>
+<li><input type='checkbox'class= 'ckbx' name='81'value='Ar/Ga/Ca'> _ _ _ _Card [81]</li>
+<li><input type='checkbox'class= 'ckbx' name='12'value='Ar/Ga/Tr'> _ _ _ _Trivia [12]</li>
+<li><input type='checkbox'class= 'ckbx' name='5'value='Ar/Li'> _ _ Literature & Authors [5]</li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Ar/Li/Sh'> _ _ _ _Shakespeare [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='12'value='Ar/Mo'> _ _ Movies [12]</li>
+<li><input type='checkbox'class= 'ckbx' name='572'value='Ar/Mo/Ac'> _ _ _ _Academy Awards [572]</li>
+<li><input type='checkbox'class= 'ckbx' name='182'value='Ar/Mu'> _ _ Music & Song [182]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ar/Mu/Ba'> _ _ _ _Ballet [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='5613'value='Ar/Mu/Cl'> _ _ _ _Classical Music [5613]</li>
+<li><input type='checkbox'class= 'ckbx' name='1429'value='Ar/Mu/Mi'> _ _ _ _Military and patriotic [1429]</li>
+<li><input type='checkbox'class= 'ckbx' name='162'value='Ar/Mu/Po'> _ _ _ _Popular [162]</li>
+<li><input type='checkbox'class= 'ckbx' name='133'value='Ar/Po'> _ _ Poems [133]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ar/Qu'> _ _ Quotes [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ar/Sc'> _ _ Science Fiction [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Ar/TV'> _ _ TV</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Ar/TV/Si'> _ _ _ _SitComs [3]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Bu'><b>Business [1]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='51'value='Bu/Mo'> _ _ Money & Finance [51]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Bu/Pr'> _ _ Professions [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Bu/To'> _ _ Top Companies [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='5'value='Ci'><b>Civics [5]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='1976'value='Ci/US'> _ _ US [1976]</li>
+<li><input type='checkbox'class= 'ckbx' name='101'value='Ci/US/La'> _ _ _ _Laws [101]</li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Co'><b>Communications [2]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Co/Si'> _ _ Signs & Symbols [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Co/Sl'> _ _ Slang [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='14'value='Co/Wo'> _ _ Words & Phrases [14]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Cu'><b>Current Events [3]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='15'value='Cu/Di'> _ _ Diasters [15]</li>
+<li><input type='checkbox'class= 'ckbx' name='97'value='Cu/Ne'> _ _ Newspaper Headlines [97]</li>
+<li><input type='checkbox'class= 'ckbx' name='474'value='Cu/Pe'> _ _ People In The News [474]</li>
+<li><input type='checkbox'class= 'ckbx' name='82'value='Cu/Pl'> _ _ Places in the News [82]</li>
+<li><input type='checkbox'class= 'ckbx' name='4'value='Cu/Sc'> _ _ Scandals [4]</li>
+<li><input type='checkbox'class= 'ckbx' name='132'value='Di'><b>Disasters [132]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='6'value='Ev'><b>Every Day Living [6]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ev/Co'> _ _ Cooking [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='212'value='Ev/Cu'> _ _ Currency [212]</li>
+<li><input type='checkbox'class= 'ckbx' name='14'value='Ev/Dr'> _ _ Dress [14]</li>
+<li><input type='checkbox'class= 'ckbx' name='98'value='Ev/Fa'> _ _ Facts And Figures [98]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ev/Fi'> _ _ Finances [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='14'value='Ev/Fi/Sa'> _ _ _ _Salary [14]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Ev/Go'> _ _ Government</li>
+<li><input type='checkbox'class= 'ckbx' name='157'value='Ev/Go/Fe'> _ _ _ _Federal [157]</li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Ev/Go/Fe/Mi'> _ _ _ _ _ _;Military [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ev/He'> _ _ Health & Fitness [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ev/Ho'> _ _ How We Spend Out Time [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ev/Ho/Ho'> _ _ _ _Holidays [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='10'value='Ev/In'> _ _ Interesting Facts [10]</li>
+<li><input type='checkbox'class= 'ckbx' name='4'value='Ev/Le'> _ _ Leisure Time [4]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Ev/Me'> _ _ Measurements [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ev/Mo'> _ _ Modern Times [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Ev/Pe'> _ _ Pets [3]</li>
+<li><input type='checkbox'class= 'ckbx' name='151'value='Ev/Po'> _ _ Popular Culture [151]</li>
+<li><input type='checkbox'class= 'ckbx' name='30'value='Ev/Qu'> _ _ Quotes [30]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ev/Ra'> _ _ Race [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Ev/Wo'> _ _ Work [8]</li><li><input type='checkbox'class= 'ckbx' name='0'value='Ga'><b>Games</b></li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ga/Bo'> _ _ Board [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ga/Ca'> _ _ Card [1]</li></td><!-- Col 1 -->
+
+<td>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Ge'><b>Geography</b></li>
+<li><input type='checkbox'class= 'ckbx' name='36'value='Ge/Am'> _ _ American [36]</li>
+<li><input type='checkbox'class= 'ckbx' name='1410'value='Ge/Am/Ci'> _ _ _ _City [1410]</li>
+<li><input type='checkbox'class= 'ckbx' name='39'value='Ge/Am/Hi'> _ _ _ _Highways [39]</li>
+<li><input type='checkbox'class= 'ckbx' name='16'value='Ge/Ci'> _ _ Cities [16]</li>
+<li><input type='checkbox'class= 'ckbx' name='24'value='Ge/Co'> _ _ Countries [24]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Ge/Co/Ci'> _ _ _ _Cities</li>
+<li><input type='checkbox'class= 'ckbx' name='7'value='Ge/Co/Ci/Ca'> _ _ _ _ _ _;Capitals [7]</li>
+<li><input type='checkbox'class= 'ckbx' name='5'value='Ge/Di'> _ _ Distance [5]</li>
+<li><input type='checkbox'class= 'ckbx' name='191'value='Ge/Fa'> _ _ Famous Places & Things [191]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Ge/Ge'> _ _ Geographic Points of Interest [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='26'value='Ge/Na'> _ _ Natural Wonders [26]</li>
+<li><input type='checkbox'class= 'ckbx' name='172'value='Ge/Pa'> _ _ Parks & Monuments [172]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Ge/So'> _ _ South America [3]</li>
+<li><input type='checkbox'class= 'ckbx' name='871'value='Ge/St'> _ _ States [871]</li>
+<li><input type='checkbox'class= 'ckbx' name='84'value='Ge/St/AK'> _ _ _ _AK-Alaska [84]</li>
+<li><input type='checkbox'class= 'ckbx' name='53'value='Ge/St/AL'> _ _ _ _AL-Alabama [53]</li>
+<li><input type='checkbox'class= 'ckbx' name='51'value='Ge/St/AR'> _ _ _ _AR-Arkansas [51]</li>
+<li><input type='checkbox'class= 'ckbx' name='52'value='Ge/St/AZ'> _ _ _ _AZ-Arizona [52]</li>
+<li><input type='checkbox'class= 'ckbx' name='42'value='Ge/St/CA'> _ _ _ _CA-California [42]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/CO'> _ _ _ _CO-Colorado [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='49'value='Ge/St/CT'> _ _ _ _CT-Connecticut [49]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/DE'> _ _ _ _DE-Delaware [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='49'value='Ge/St/FL'> _ _ _ _FL-Florida [49]</li>
+<li><input type='checkbox'class= 'ckbx' name='410'value='Ge/St/Fl'> _ _ _ _Flags [410]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/GA'> _ _ _ _GA-Georgia [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='30'value='Ge/St/HI'> _ _ _ _HI-Hawaii [30]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/IA'> _ _ _ _IA-Iowa [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/ID'> _ _ _ _ID-Idaho [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/IL'> _ _ _ _IL-Illinois [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/IN'> _ _ _ _IN-Indiana [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/KS'> _ _ _ _KS-Kansas [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='47'value='Ge/St/KY'> _ _ _ _KY-Kentucky [47]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/LA'> _ _ _ _LA-Louisiana [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/MA'> _ _ _ _MA-Massachusetts [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/MD'> _ _ _ _MD-Maryland [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='47'value='Ge/St/ME'> _ _ _ _ME-Maine [47]</li>
+<li><input type='checkbox'class= 'ckbx' name='47'value='Ge/St/MI'> _ _ _ _MI-Michigan [47]</li>
+<li><input type='checkbox'class= 'ckbx' name='47'value='Ge/St/MN'> _ _ _ _MN-Minnesota [47]</li>
+<li><input type='checkbox'class= 'ckbx' name='47'value='Ge/St/MO'> _ _ _ _MO-Missouri [47]</li>
+<li><input type='checkbox'class= 'ckbx' name='52'value='Ge/St/MS'> _ _ _ _MS-Mississippi [52]</li>
+<li><input type='checkbox'class= 'ckbx' name='47'value='Ge/St/MT'> _ _ _ _MT-Montana [47]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/NC'> _ _ _ _NC-North Carolina [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/ND'> _ _ _ _ND-North Dakota [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/NE'> _ _ _ _NE-Nebraska [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/NH'> _ _ _ _NH-New Hampshire [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/NJ'> _ _ _ _NJ-New Jersey [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/NM'> _ _ _ _NM-New Mexico [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='46'value='Ge/St/NV'> _ _ _ _NV-Nevada [46]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/NY'> _ _ _ _NY-New York [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/OH'> _ _ _ _OH-Ohio [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/OK'> _ _ _ _OK-Oklahoma [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='43'value='Ge/St/OR'> _ _ _ _OR-Oregon [43]</li>
+<li><input type='checkbox'class= 'ckbx' name='23'value='Ge/St/PA'> _ _ _ _PA-Pennsylvania [23]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/RI'> _ _ _ _RI-Rhode Island [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/SC'> _ _ _ _SC-South Carolina [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='45'value='Ge/St/SD'> _ _ _ _SD-South Dakota [45]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/TN'> _ _ _ _TN-Tennessee [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='41'value='Ge/St/TX'> _ _ _ _TX-Texas [41]</li>
+<li><input type='checkbox'class= 'ckbx' name='42'value='Ge/St/UT'> _ _ _ _UT-Utah [42]</li>
+<li><input type='checkbox'class= 'ckbx' name='41'value='Ge/St/VA'> _ _ _ _VA-Virginia [41]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/VT'> _ _ _ _VT-Vermont [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='39'value='Ge/St/WA'> _ _ _ _WA-Washington [39]</li>
+<li><input type='checkbox'class= 'ckbx' name='44'value='Ge/St/WI'> _ _ _ _WI-Wisconsin [44]</li>
+<li><input type='checkbox'class= 'ckbx' name='35'value='Ge/St/WV'> _ _ _ _WV-West Virginia [35]</li>
+<li><input type='checkbox'class= 'ckbx' name='35'value='Ge/St/WY'> _ _ _ _WY-Wyoming [35]</li><li><input type='checkbox'class= 'ckbx' name='128'value='Ge/US'> _ _ US Capitals [128]</li>
+<li><input type='checkbox'class= 'ckbx' name='34'value='Ge/Wa'> _ _ Waterways [34]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Ge/Wo'> _ _ World Capitals [1]</li></td><!-- Col 2 -->
+<td>
+<li><input type='checkbox'class= 'ckbx' name='8'value='He'><b>Health And Fitness [8]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='10'value='Hi'><b>History [10]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='11'value='Hi/Aw'> _ _ Awards Achievements & Milestones [11]</li>
+<li><input type='checkbox'class= 'ckbx' name='23'value='Hi/Da'> _ _ Dark_History [23]</li>
+<li><input type='checkbox'class= 'ckbx' name='58'value='Hi/De'> _ _ Deaths [58]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Hi/De/Ex'> _ _ _ _Excecutions [3]</li>
+<li><input type='checkbox'class= 'ckbx' name='105'value='Hi/Ev'> _ _ Events That Changed History [105]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Hi/Ev/Fi'> _ _ _ _Financial [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Hi/Ex'> _ _ Explorers Discovers & Scientists [3]</li>
+<li><input type='checkbox'class= 'ckbx' name='266'value='Hi/Fa'> _ _ Facts And Figures [266]</li>
+<li><input type='checkbox'class= 'ckbx' name='265'value='Hi/Hi'> _ _ Historic Things & Places [265]</li>
+<li><input type='checkbox'class= 'ckbx' name='442'value='Hi/In'> _ _ Influential People [442]</li>
+<li><input type='checkbox'class= 'ckbx' name='15'value='Hi/Ma'> _ _ Major Events In History [15]</li>
+<li><input type='checkbox'class= 'ckbx' name='4'value='Hi/Ma/As'> _ _ _ _Assassinations [4]</li>
+<li><input type='checkbox'class= 'ckbx' name='322'value='Hi/Ma/Ba'> _ _ _ _Battles [322]</li>
+<li><input type='checkbox'class= 'ckbx' name='10'value='Hi/Ma/Di'> _ _ _ _Discovery [10]</li>
+<li><input type='checkbox'class= 'ckbx' name='13'value='Hi/Ma/Fi'> _ _ _ _Firsts [13]</li>
+<li><input type='checkbox'class= 'ckbx' name='6'value='Hi/Ma/Ri'> _ _ _ _Riots [6]</li>
+<li><input type='checkbox'class= 'ckbx' name='190'value='Hi/Ma/Wa'> _ _ _ _Wars [190]</li>
+<li><input type='checkbox'class= 'ckbx' name='4'value='Hi/Mi'> _ _ Military Leaders [4]</li>
+<li><input type='checkbox'class= 'ckbx' name='289'value='Hi/Po'> _ _ Political [289]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Hi/Re'> _ _ Recent</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Hi/Re/20'> _ _ _ _2000 [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Hi/Re/50'> _ _ _ _50's [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Hi/Re/60'> _ _ _ _60's [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Hi/Re/70'> _ _ _ _70's [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Hi/Re/80'> _ _ _ _80's [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='8'value='Hi/Re/90'> _ _ _ _90's [8]</li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Hi/Sc'> _ _ Scandals [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='5'value='Hi/Sp'> _ _ Speaches [5]</li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Hi/Sp/De'> _ _ _ _Debates [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='7'value='Hi/Tr'> _ _ Trials [7]</li>
+<li><input type='checkbox'class= 'ckbx' name='419'value='Hi/Wa'> _ _ Wars & Interventions [419]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='La'><b>Language</b></li>
+<li><input type='checkbox'class= 'ckbx' name='95'value='La/Wo'> _ _ Words [95]</li>
+<li><input type='checkbox'class= 'ckbx' name='351'value='Li'><b>Life And Death [351]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='1569'value='Mi'><b>Military [1569]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='94'value='Mi/Ai'> _ _ Air Planes [94]</li>
+<li><input type='checkbox'class= 'ckbx' name='118'value='Mi/Ba'> _ _ Battles [118]</li>
+<li><input type='checkbox'class= 'ckbx' name='1403'value='Mi/Ev'> _ _ Events [1403]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Mi/Le'> _ _ Leaders</li>
+<li><input type='checkbox'class= 'ckbx' name='167'value='Mi/Le/Na'> _ _ _ _Navy [167]</li>
+<li><input type='checkbox'class= 'ckbx' name='19'value='Mi/Ra'> _ _ Ranks [19]</li>
+<li><input type='checkbox'class= 'ckbx' name='117'value='Mi/Sh'> _ _ Ships [117]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Na'><b>Nature [3]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='34'value='Na/An'> _ _ Animals [34]</li><li><input type='checkbox'class= 'ckbx' name='2'value='Or'><b>Organizations [2]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='175'value='Or/Po'> _ _ Political [175]</li>
+<li><input type='checkbox'class= 'ckbx' name='39'value='Pe'><b>People [39]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='7'value='Pe/Di'> _ _ Discoverers [7]</li>
+<li><input type='checkbox'class= 'ckbx' name='191'value='Pe/Fa'> _ _ Famous [191]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Pe/Fa/Fa'> _ _ _ _Famous Quotes [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Pe/Fa/Wo'> _ _ _ _Women [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='6'value='Pe/In'> _ _ Inventors [6]</li>
+<li><input type='checkbox'class= 'ckbx' name='2257'value='Pe/Le'> _ _ Leaders [2257]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Pe/Le/Mi'> _ _ _ _Military [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='10'value='Pe/Le/Po'> _ _ _ _Political [10]</li>
+<li><input type='checkbox'class= 'ckbx' name='463'value='Pe/Le/Pr'> _ _ _ _Presidents [463]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Pe/Si'> _ _ Singers and Composers [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='18'value='Pe/Wr'> _ _ Writers [18]</li></td><!-- Col 3 -->
+
+
+<td>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Po'><b>Politics [1]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='1494'value='Po/Am'> _ _ American Presidents [1494]</li>
+<li><input type='checkbox'class= 'ckbx' name='45'value='Po/Co'> _ _ Constitution-The [45]</li>
+<li><input type='checkbox'class= 'ckbx' name='7'value='Po/El'> _ _ Elections [7]</li>
+<li><input type='checkbox'class= 'ckbx' name='101'value='Po/La'> _ _ Law & Order [101]</li>
+<li><input type='checkbox'class= 'ckbx' name='129'value='Po/Le'> _ _ Leaders [129]</li>
+<li><input type='checkbox'class= 'ckbx' name='228'value='Po/Po'> _ _ Political Parties [228]</li>
+<li><input type='checkbox'class= 'ckbx' name='95'value='Po/US'> _ _ US Government [95]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Po/Wo'> _ _ World Politics</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Po/Wo/Co'> _ _ _ _Conferences [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Po/Wo/Tr'> _ _ _ _Treatys [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='15'value='Re'><b>Religion & Philosophy [15]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='429'value='Re/Bi'> _ _ Bible-The [429]</li>
+<li><input type='checkbox'class= 'ckbx' name='74'value='Re/Bi/NT'> _ _ _ _NT-New Testament [74]</li>
+<li><input type='checkbox'class= 'ckbx' name='130'value='Re/Bi/OT'> _ _ _ _OT-Old Testament [130]</li>
+<li><input type='checkbox'class= 'ckbx' name='212'value='Re/Cu'> _ _ Customs [212]</li>
+<li><input type='checkbox'class= 'ckbx' name='721'value='Re/Fa'> _ _ Facts & Figures [721]</li>
+<li><input type='checkbox'class= 'ckbx' name='161'value='Re/Ho'> _ _ Holydays [161]</li>
+<li><input type='checkbox'class= 'ckbx' name='1907'value='Re/No'> _ _ Non Christian Religions [1907]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Re/Re'> _ _ Religious Leaders [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='624'value='Re/Wh'> _ _ What We Believe [624]</li>
+<li><input type='checkbox'class= 'ckbx' name='35'value='Sc'><b>Science [35]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='59'value='Sc/As'> _ _ Astronomy [59]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Sc/Bi'> _ _ Biology [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='4'value='Sc/Ea'> _ _ Earth [4]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Sc/En'> _ _ Engineering [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='536'value='Sc/Fa'> _ _ Facts & Figures [536]</li>
+<li><input type='checkbox'class= 'ckbx' name='82'value='Sc/Me'> _ _ Medicine & Health [82]</li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Sc/Mi'> _ _ Milestones [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='5'value='Sc/Te'> _ _ Technology & Inventions [5]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Sc/Tr'> _ _ Trigonometry [1]</li>
+<li><input type='checkbox'class= 'ckbx' name='14'value='Sc/We'> _ _ Weights & Measures [14]</li>
+<li><input type='checkbox'class= 'ckbx' name='1'value='Se'><b>Sexuality [1]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Sp'><b>Sports</b></li>
+<li><input type='checkbox'class= 'ckbx' name='2'value='Sp/Co'> _ _ College [2]</li>
+<li><input type='checkbox'class= 'ckbx' name='5'value='Sp/Fa'> _ _ Facts And Figures [5]</li>
+<li><input type='checkbox'class= 'ckbx' name='15'value='Sp/Ho'> _ _ Horse [15]</li>
+<li><input type='checkbox'class= 'ckbx' name='1645'value='Sp/Ol'> _ _ Olympic [1645]</li>
+<li><input type='checkbox'class= 'ckbx' name='27'value='Sp/Pr'> _ _ Professional [27]</li>
+<li><input type='checkbox'class= 'ckbx' name='30'value='Sp/Pr/BK'> _ _ _ _BK-Basketball [30]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Sp/Pr/Ba'> _ _ _ _Baseball [0]</li>
+<li><input type='checkbox'class= 'ckbx' name='34'value='Sp/Pr/Fo'> _ _ _ _Football [34]</li>
+<li><input type='checkbox'class= 'ckbx' name='30'value='Sp/Pr/Ho'> _ _ _ _Hockey [30]</li>
+<li><input type='checkbox'class= 'ckbx' name='14'value='Sp/Pr/So'> _ _ _ _Soccer [14]</li>
+<li><input type='checkbox'class= 'ckbx' name='32'value='Sp/Sa'> _ _ Sailing [32]</li>
+<li><input type='checkbox'class= 'ckbx' name='9'value='Sp/Sk'> _ _ Skiing [9]</li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Sp/Te'> _ _ Team Sports</li>
+<li><input type='checkbox'class= 'ckbx' name='18'value='Sp/Te/BK'> _ _ _ _BK-Basketball [18]</li>
+<li><input type='checkbox'class= 'ckbx' name='9'value='Sp/Te/Ba'> _ _ _ _Baseball [9]</li>
+<li><input type='checkbox'class= 'ckbx' name='483'value='Sp/Te/Co'> _ _ _ _College [483]</li>
+<li><input type='checkbox'class= 'ckbx' name='13'value='Te'><b>Testing Material [13]</b></li>
+<li><input type='checkbox'class= 'ckbx' name='0'value='Tr'><b>Travel</b></li>
+<li><input type='checkbox'class= 'ckbx' name='6'value='Tr/Av'> _ _ Aviation [6]</li>
+<li><input type='checkbox'class= 'ckbx' name='5'value='Tr/Po'> _ _ Points of Interest [5]</li>
+<li><input type='checkbox'class= 'ckbx' name='5'value='Tr/US'> _ _ US-United States [5]</li>
+<li><input type='checkbox'class= 'ckbx' name='3'value='Tr/US/Ce'> _ _ _ _Central [3]</li>
+<li><input type='checkbox'class= 'ckbx' name='4'value='Tr/US/We'> _ _ _ _West [4]</li></td><!-- Col 4 -->
+  </tr>
+</table>
+
+
+  </body>
+  
+  
+</html>

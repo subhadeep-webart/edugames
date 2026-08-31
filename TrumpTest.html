@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regret Voting for Trump</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #d9534f;
+        }
+        img {
+            max-width: 100px;
+            height: auto;
+            margin: 10px;
+        }
+        .button {
+            background-color: #5bc0de;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #31b0d5;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Regret Voting for Trump</h1>
+    <p>If you regret voting for Donald Trump, please share your reasons here. Your feedback will help create a better understanding of voter sentiment.</p>
+
+    <!-- Voting Section -->
+    <div class="section" id="voting-section">
+        <h2>When Did You Vote for Trump?</h2>
+        <div>
+            <label><input type="checkbox" name="voted_in" value="2016"> 2016 Election</label><br>
+            <img src="unflattering_image_2016.jpg" alt="Trump 2016">
+        </div>
+        <div>
+            <label><input type="checkbox" name="voted_in" value="2020"> 2020 Election</label><br>
+            <img src="unflattering_image_2020.jpg" alt="Trump 2020">
+        </div>
+        <div>
+            <label><input type="checkbox" name="voted_in" value="2024"> 2024 Election</label><br>
+            <img src="unflattering_image_2024.jpg" alt="Trump 2024">
+        </div>
+    </div>
+
+    <!-- Why Voted for Trump Section -->
+    <div class="section" id="why-voted-section">
+        <h2>Why Did You Vote for Trump?</h2>
+        <label><input type="checkbox" name="why_voted" value="Policies"> Policies</label><br>
+        <label><input type="checkbox" name="why_voted" value="Party Loyalty"> Party Loyalty</label><br>
+        <label><input type="checkbox" name="why_voted" value="Dislike of Opponent"> Dislike of Opponent</label><br>
+        <label><input type="checkbox" name="why_voted" value="Media Influence"> Media Influence</label><br>
+        <label><input type="checkbox" name="why_voted" value="Other"> Other</label><br>
+        <textarea name="why_voted_comments" rows="4" cols="50" placeholder="Please share additional thoughts..."></textarea>
+    </div>
+
+    <!-- Why Regret Voting Section -->
+    <div class="section" id="why-regret-section">
+        <h2>Why Do You Regret Voting for Trump?</h2>
+        <label><input type="checkbox" name="why_regret" value="Broken Promises"> Broken Promises</label><br>
+        <label><input type="checkbox" name="why_regret" value="Policy Decisions"> Policy Decisions</label><br>
+        <label><input type="checkbox" name="why_regret" value="Ethical Concerns"> Ethical Concerns</label><br>
+        <label><input type="checkbox" name="why_regret" value="Impact on Country"> Impact on Country</label><br>
+        <label><input type="checkbox" name="why_regret" value="Other"> Other</label><br>
+        <textarea name="why_regret_comments" rows="4" cols="50" placeholder="Please share additional thoughts..."></textarea>
+    </div>
+
+    <!-- Submit Button -->
+    <div>
+        <button class="button" onclick="submitForm()">Submit</button>
+    </div>
+
+    <!-- Show Results Button -->
+    <div>
+        <button class="button" onclick="showResults()">View Results</button>
+    </div>
+
+    <script>
+        function submitForm() {
+            fetch('/cgi-bin/submit_form.pl', {
+                method: 'POST',
+                body: new URLSearchParams(new FormData(document.forms[0]))
+            })
+            .then(response => response.text())
+            .then(data => alert("Your response has been submitted!"))
+            .catch(error => console.error('Error:', error));
+        }
+
+        function showResults() {
+            window.location.href = '/cgi-bin/show_results.pl';
+        }
+    </script>
+
+</body>
+</html>

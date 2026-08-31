@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Thu, 20 Jun 2024 20:13:39 GMT">
+    <meta name="description" content="twp person knowledge game">
+    <meta name="keywords" content="knowledge game,trivia">
+    <title>Welcome to Trivia-SmackDown!</title>
+
+  </head>
+  <body>
+ <p class=MsoNormal align=center style='text-align:center'><b><span
+style='font-size:16.0pt;line-height:115%'>Welcome to Trivia-SmackDown!<o:p></o:p></span></b></p>
+
+ <div align=center><img  style='text-align:center' src="images/TSD_Logo.jpg" width="478" 
+ height="478" alt="Trivia-SmackDown Logo" title="Trivia-SmackDown Logo" /> </div>
+
+ <h2 style='text-align:center'><b>The Ultimate Knowledge Competition</b></h2>
+ 
+ <p>If you have never played it, it is a good idea to check out the 
+ <a href="Help/SimpleRules.html","_blank"><b>Ground Rules</b></a>.  They are short and simple.</p>
+ 
+ <p>A one page <a href="Help/OverView.html" onMouseOver="window.status='This takes you to a web page overview of the three type of game.'; return true" onMouseOut="window.status=' '"><B>GAME OVERVIEW</B></a></p>
+   
+ 
+
+ 
+  
+  
+  
+<div id='formA'>
+ <!-- <p>Please complete the below form and press the "Register" button. </p> --> 
+ <!-- <p>After registration select a Set and press the "Start Set" button. </p> -->   
+        
+    <font size=2 color='#000000' face='Arial'>
+    <div><table width='100%' border='1' cellpadding='2' bordercolor='#003366' cellspacing='2' bgcolor='#ccffff'>
+    <tr valign='top'>
+    <td color="#8000ff">Blue</td>
+    <td>First or Nick Name:<input type='text' id='p0' name='' value='Peter'>Zip Code:
+    <input type='text' id='z0' name='' cols='12' value='94566'>
+    Highest Grade Completed
+    <select id='g0' name='Grade' align='top'>
+      <option value='1'>1</option>
+      <option value='2'>2</option>
+      <option value='3'>3</option>
+      <option value='4'>4</option>
+      <option value='5'>5</option>
+      <option value='6'>6</option>
+      <option value='7'>7</option>
+      <option value='8'>8</option>
+      <option value='9'>9</option>
+      <option  selected value='10'>10</option>
+      <option value='11'>11</option>
+      <option value='12'>12</option>
+      <option value='13'>13</option>
+      <option value='14'>14</option>
+      <option value='14+'>14</option>
+    </select>
+    Play Speed    <select id='s0' name='Grade' align='top'>
+      <option value='1'>Fastest</option>
+      <option value='2'>2</option>
+      <option value='3'>3</option>
+      <option value='4'>4</option>
+      <option selected value='5'>Medium</option>
+      <option value='6'>6</option>
+      <option value='7'>7</option>
+      <option value='8'>8</option>
+      <option value='9'>9</option>
+      <option value='10'>Slowests</option>
+    </select> 
+    <tr valign='top'>
+    <td>Red</td>
+    <td>First or Nick Name:<input type='text'  id='p1' name='' value='Helen'>Zip Code:
+    <input type='text' id='z1' name='' value='94066'>
+    Highest Grade Completed
+    <select id='g1' name='Grade' align='top'>
+        <option value='1'>1</option>
+      <option value='2'>2</option>
+      <option value='3'>3</option>
+      <option value='4'>4</option>
+      <option value='5'>5</option>
+      <option value='6'>6</option>
+      <option value='7'>7</option>
+      <option value='8'>8</option>
+      <option value='9'>9</option>
+      <option value='10'>10</option>
+      <option selected  value='11'>11</option>
+      <option value='12'>12</option>
+      <option value='13'>13</option>
+      <option value='14'>14</option>
+      <option value='14+'>14</option>
+    </select>
+        Play Speed    <select id='s1' name='Grade' align='top'>
+      <option value='1'>Fastest</option>
+      <option value='2'>2</option>
+      <option value='3'>3</option>
+      <option value='4'>4</option>
+      <option selected value='5'>Medium</option>
+      <option value='6'>6</option>
+      <option value='7'>7</option>
+      <option value='8'>8</option>
+      <option value='9'>9</option>
+      <option value='10'>Slowests</option>
+    </select></td>
+    <tr>
+    
+    </td>
+    </table>
+    </div>
+    </div>
+    
+ You are not required to fill in the Zip and Grade level if you don't want to.  
+    
+<p>A Set is composed of multiple Rounds as selected by a Game Master and is the Basis of Play.  
+<p>Select one and press the <b>Start Set</b> button.</p></p>
+    
+    <table border="1"  width="100px">
+  <tr><td><input type="submit" name="submit"  value="Start Set" onClick="storeDataAndGoToGame()"></td>
+  <td><input type="submit" name="submit"  value="Get Info On Set" onClick="getSetInfo()"></td>  
+  <td><select name="List of Sets" id="setSerNbr" align="left">
+  <option value=PRA1_1782>Sports Sports Sports Sports</option>
+  <option value=PRA1_1783>History</option>
+  <option value=PRA1_1780>Geography</option>
+  <option value=PRA1_1781>Current Events</option>
+  <option selected value=PRA1_1794>Misc</option>
+</select></td>
+     
+  </tr>
+</table></br>
+<!--If you are interested in becoming a Game Master or Author, complete this <a href="Help/AuthorGM_form.html"><b>Form</b></a>:  -->
+
+
+<BR><BR><BR><BR><BR>
+    
+  </body>
+</html> 
+<script src="js/script.js"></script>
+<script> 
+function  getSetInfo(){console.log("getSetInfo  " )//PRA1_1795,Set,8,9.5,800,,TSD_TestA 
+      const setSerNbr = document.getElementById("setSerNbr").value ;
+      console.log("setSerNbr  " + setSerNbr)
+      if(onNet){
+        fetch('/edugames.com/cgi-bin/GetSetLinesFromDB.pl?' + setSerNbr)     
+        .then(response => response.text())
+        .then(data => {
+        console.log("fetch **" + data +"**");
+        
+        this.startRound(data);
+        });
+        return;
+      } else{
+ 
+      const arr = "PRA1_1795,Set,8,9.5,800,,TSD_TestA ".split(",");
+      let buf = ""
+      buf+="Set Serial Number = " + arr[0]  + "\n";
+      buf+="Number of Rounds = " + arr[2]  + "\n";
+      buf+="Average Grade Level = " + arr[3]  + "\n";      
+      buf+="Max Points = " + arr[4]  + "\n";      
+      buf+="Description = " + arr[6]  + "\n";
+      alert(buf);
+      }
+ 
+
+}
+
+
+
+function storeDataAndGoToGame(){console.log("storeDataAndGoToGame  " ) 
+    const arr = []
+    arr.push("setserNbr=" + document.getElementById("setSerNbr").value );       
+    arr.push(document.getElementById("p0").value);
+    arr.push(document.getElementById("p1").value);
+    arr.push(document.getElementById("z0").value);
+    arr.push(document.getElementById("z1").value);    
+    arr.push(document.getElementById("g0").value);
+    arr.push(document.getElementById("g1").value);
+    arr.push(document.getElementById("s0").value);
+    arr.push(document.getElementById("s1").value);        
+    console.log("arr==  " + arr)
+    localStorage.setItem("regData",arr);    
+    setRegData(arr);
+    window.location.href = "GamePanel.html";
+       
+}
+
+</script>
+<script src="js/NetTest.js"></script>

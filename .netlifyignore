@@ -1,0 +1,33 @@
+# Files present in the repo but not part of the live application.
+# See CLAUDE.md — this repo is an FTP dump containing many near-identical
+# copies. Only the root index.html / GamePanel.html / GameOver.html plus
+# js/, js-ui/, images/, Audio/ and Help/ are live.
+
+# Stale duplicate trees
+GameSep3/
+js20241011/
+jsJun27/
+jsContex/
+js20260624AI/
+WorkArea/
+Test/
+NodeFirstApp/
+treejs-master/
+Help - Copy/
+timless-classicsA/
+
+# Large media not referenced by the live pages
+Video/
+
+# Duplicate / superseded pages
+GamePanel - Copy*.html
+GamePanel.backup.html
+GamePanel.htmlyy
+GamePanelJune27.html
+indexD.html
+
+# Local dev only
+dev-server.js
+.dev-cache/
+docs/
+.claude/

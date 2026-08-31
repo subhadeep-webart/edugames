@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Thu, 13 Jun 2024 18:44:34 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title></title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+  
+ <style>
+<div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #ddd;}
+
+/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+.show {display:block;} 
+  
+  </style> 
+  
+  
+  <body>
+<span>Help</span><select name="Help" id="helpDropDown" onchange="displayHelp()">
+  <option  selected value="--">HELP</option>
+  <option value="helpSet">What is a Set?</option>
+  <option value="helpRound">What is a Round?</option>
+  <option value="helpThisRound">Explain this Round?</option>
+  <option value="helpNextRound">Explain Next Round</option>
+  <option value="helpPtFac">What is Point Factor?</option>
+  <option value="helpScore">How Scored?</option>
+  <option value="How can I create my own Game?">helpAuthor</option>
+</select>
+  <br>
+  <br>
+  
+</div>
+  <br>
+  </body>
+</html>  
+<script >
+
+function  myFunction(){console.log("myFunction" );
+   document.getElementById("myDropdown").classList.toggle("test");
+}
+
+function displayHelp(){console.log("script.displayHelp" );
+   const el = document.getElementById("helpDropDown");
+   const indx = el.selectedIndex;
+   console.log("indx=  "  + indx );   
+   const selection =  el.value;
+   console.log("selection=  "  + selection );
+}
+
+
+ 
+ 
+</script>

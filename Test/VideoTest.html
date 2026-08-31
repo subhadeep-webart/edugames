@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Thu, 13 Jun 2024 04:42:15 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title></title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+       <input type="button" onClick="showVideo()" id="showVid" value="Show Video">
+       <input type="button" onClick="hideVideo()" id="hideVid" value="Hide Video" >     
+       
+  <video src="Video/Test.mp4" width="320" height="320" id="theVid" controls style.display = "none">   
+   The video can't be displayed in this browser
+   </video>    
+  </body>
+</html>
+
+<script>
+
+function showVideo(){console.log("showVideo " );
+   const vid =  document.getElementById("theVid")
+   vid.style.display = "block"; 
+
+}
+
+ function hideVideo(){console.log("hideVideo " );
+   const vid =  document.getElementById("theVid")
+   vid.style.display = "none"; 
+
+}
+
+
+</script>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Trivia-SmackDown — Start</title>
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/start.css">
+
+  <link rel="preload" as="image" href="images/new-images/trivia_smackdown_splash_image.svg">
+</head>
+
+<body class="tsd-start">
+
+  <div class="tsd-start-stage">
+
+    <!-- ambient background layers -->
+    <div class="tsd-ambient" aria-hidden="true"></div>
+    <div class="tsd-stars" id="tsdStars" aria-hidden="true"></div>
+
+    <div class="tsd-container">
+
+      <!-- ---------- logo ---------- -->
+      <div class="tsd-start-logo">
+        <img src="images/new-images/trivia_smackdown_splash_image.svg"
+             width="553" height="554" alt="Trivia SmackDown">
+      </div>
+
+      <!-- ---------- menu ---------- -->
+      <nav class="tsd-menu" aria-label="Main menu">
+
+        <a class="tsd-btn tsd-btn--ghost" href="overview.html" id="btnHowToPlay">
+          <img class="tsd-btn-icon"
+               src="images/new-images/icons/instruction_icon.svg"
+               width="24" height="24" alt="">
+          <span>How to Play</span>
+        </a>
+
+        <a class="tsd-btn tsd-btn--primary" href="index.html" id="btnStartGame">
+          <img class="tsd-btn-icon"
+               src="images/new-images/icons/play_button.svg"
+               width="19" height="25" alt="">
+          <span>Start Game</span>
+        </a>
+
+        <button class="tsd-btn tsd-btn--ghost" type="button" id="btnExit">
+          <img class="tsd-btn-icon"
+               src="images/new-images/icons/exit_icon.svg"
+               width="21" height="19" alt="">
+          <span>Exit</span>
+        </button>
+
+      </nav>
+
+    </div>
+  </div>
+
+<!-- sparkle template — cloned by the script below -->
+<template id="tsdStarTpl">
+  <svg viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd"
+          d="M11.1642 6.32331C8.0762 6.32331 5.58208 3.48679 5.58208 0C5.58208 3.48679 3.07806 6.32331 0 6.32331C3.07806 6.32331 5.58208 9.14862 5.58208 12.6354C5.58208 9.14862 8.0762 6.32331 11.1642 6.32331Z"/>
+  </svg>
+</template>
+
+<script src="js-ui/tsd-modal.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------------------------------------------------------
+     Sparkle clusters.
+     Left cluster mixes yellow + pink; right cluster is blue.
+     --------------------------------------------------------------- */
+  (function buildStars() {
+    var host = document.getElementById("tsdStars");
+    var tpl  = document.getElementById("tsdStarTpl");
+    if (!host || !tpl) { return; }
+    if (window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) { return; }
+
+    var styles = getComputedStyle(document.documentElement);
+    var YELLOW = styles.getPropertyValue("--tsd-star-yellow").trim() || "#FFD93B";
+    var PINK   = styles.getPropertyValue("--tsd-star-pink").trim()   || "#FD0C75";
+    var BLUE   = styles.getPropertyValue("--tsd-star-blue").trim()   || "#0683FC";
+
+    /* x / y are percentages of the stage; size is px at 1080p and scales down */
+    var STARS = [
+      /* --- left cluster --- */
+      { x: 13.0, y: 41.5, size: 20, color: YELLOW },
+      { x: 13.8, y: 48.5, size: 26, color: YELLOW },
+      { x: 15.3, y: 49.8, size: 13, color: PINK   },
+      { x: 11.6, y: 53.0, size: 11, color: PINK   },
+      { x: 17.4, y: 44.0, size:  9, color: YELLOW },
+      { x:  8.9, y: 45.8, size:  8, color: PINK   },
+
+      /* --- right cluster --- */
+      { x: 83.0, y: 43.0, size: 11, color: BLUE   },
+      { x: 84.4, y: 49.0, size: 22, color: BLUE   },
+      { x: 86.1, y: 50.4, size: 13, color: PINK   },
+      { x: 82.0, y: 52.4, size:  9, color: PINK   },
+      { x: 87.6, y: 45.2, size:  9, color: BLUE   },
+      { x: 80.2, y: 47.0, size:  8, color: BLUE   }
+    ];
+
+    var frag = document.createDocumentFragment();
+
+    STARS.forEach(function (s, i) {
+      var wrap = document.createElement("span");
+      wrap.className = "tsd-star";
+
+      var svg = tpl.content.firstElementChild.cloneNode(true);
+      svg.querySelector("path").setAttribute("fill", s.color);
+      wrap.appendChild(svg);
+
+      /* size scales with the viewport but never collapses */
+      var px = "clamp(" + (s.size * 0.55).toFixed(1) + "px, " +
+               (s.size / 19.2).toFixed(2) + "vw, " + s.size + "px)";
+      wrap.style.width  = px;
+      wrap.style.height = px;
+      wrap.style.left   = s.x + "%";
+      wrap.style.top    = s.y + "%";
+
+      wrap.style.animationDuration = (2.6 + (i % 5) * 0.7).toFixed(1) + "s";
+      wrap.style.animationDelay    = (-(i * 0.43)).toFixed(2) + "s";
+
+      frag.appendChild(wrap);
+    });
+
+    host.appendChild(frag);
+  }());
+
+  /* ---------------------------------------------------------------
+     Exit — confirm first, via the global modal.
+     A page cannot reliably close a tab it did not open, so fall back
+     to sending the player back to the splash screen.
+     --------------------------------------------------------------- */
+  var exitBtn = document.getElementById("btnExit");
+  if (exitBtn) {
+    exitBtn.addEventListener("click", function () {
+      TSDModal.confirmExit(function () {
+        window.close();
+        /* if the tab is still here a moment later, close() was blocked */
+        setTimeout(function () {
+          if (!window.closed) { window.location.href = "splash.html"; }
+        }, 180);
+      });
+    });
+  }
+}());
+</script>
+
+</body>
+</html>
