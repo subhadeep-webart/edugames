@@ -76,6 +76,17 @@
                            rgba(232, 47, 47, .25)  0%,
                            rgba(116, 21, 21, .25)  79.51%);
 
+  /* Scorebar player cards (GamePanel). The card is a flat translucent
+     white rather than the team gradient; the team colour shows in the
+     1.2px hairline border and in the two offset corner brackets. */
+  --tsd-pl-card-bg:      #FFFFFF17;
+  --tsd-pl-bracket-w:    1.2px;
+
+  /* Player-2 red. Distinct from --tsd-modal-red (#FC4343), which stays on
+     the dialogs and bid buttons. This is the same red the GameOver screen
+     already uses for player 2, and the base of --tsd-p2-gradient. */
+  --tsd-p2-red:          #E82F2F;
+
   --tsd-player-label:    #FBB445;   /* "PLAYER 1" / "PLAYER 2" */
 
   --tsd-field-bg:        #110E3E;

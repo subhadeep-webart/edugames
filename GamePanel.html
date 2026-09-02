@@ -26,13 +26,21 @@
   <!-- ====================== header ====================== -->
   <header class="tsd-panel-header">
 
-    <span class="tsd-panel-logo">
-      <img src="images/new-images/logo.png" width="44" height="44" alt="">
-    </span>
+    <!-- Back button. Figma replaces the logo here with the arrow badge;
+         it returns to the round-selection page the same way Exit does. -->
+    <button class="tsd-back-but" type="button" onclick="goBack()"
+            aria-label="Back">
+      <img src="images/new-images/back_button.svg" width="44" height="51" alt="">
+    </button>
 
-    <!-- The game scripts write the round/mode wording into #centerDisplay,
-         not here. This pill is the static frame around the title. -->
-    <p class="tsd-panel-status" id="panelStatus">Trivia SmackDown</p>
+    <!-- Round information + game mode. Static markup: no script currently
+         writes to either span, so they do not advance on their own. The
+         ids are here so the game code can fill them when wired up. -->
+    <p class="tsd-panel-status" id="panelStatus">
+      <span id="panelRound">Round 1 of 3</span>
+      <span class="tsd-panel-sep" aria-hidden="true"></span>
+      <span id="panelMode">Game Mode: Picture</span>
+    </p>
 
     <div class="tsd-panel-tools">
 
@@ -567,6 +575,11 @@
     function goToSummary() {
         console.log("gp.egoToSummary()");
         window.location.href = "GameOver.html";
+    }
+
+    function goBack() {
+        console.log("gp.goBack()");
+        history.back();
     }
 
 

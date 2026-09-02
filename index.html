@@ -46,7 +46,11 @@
         </span>
       </button>
 
+      <!-- Advanced panel hidden for now (client request). The button is kept
+           in the DOM but never shown, so the toggle handler below still finds
+           it. Restore by deleting the style/hidden/tabindex attributes. -->
       <button class="tsd-gear" type="button" id="btnAdvanced"
+              style="display:none" hidden tabindex="-1" aria-hidden="true"
               aria-label="Advanced settings" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
@@ -552,11 +556,16 @@
   var gear  = document.getElementById("btnAdvanced");
   var panel = document.getElementById("advancedPanel");
 
+  /* Advanced panel disabled for now (client request). The markup stays in
+     the DOM because getData() reads z0/g0/z1/g1 and the startup code sets
+     .size on z0/z1 -- removing the fields would throw. Re-enable by
+     restoring the listener below and un-hiding #btnAdvanced above. */
   if (gear && panel) {
-    gear.addEventListener("click", function () {
-      var open = panel.classList.toggle("is-open");
-      gear.setAttribute("aria-expanded", String(open));
-    });
+    panel.classList.remove("is-open");
+    // gear.addEventListener("click", function () {
+    //   var open = panel.classList.toggle("is-open");
+    //   gear.setAttribute("aria-expanded", String(open));
+    // });
   }
 
   /* ---------- profile images ----------

@@ -44,40 +44,70 @@ body.tsd-panel {
   margin-bottom: clamp(14px, 1.8vw, 28px);
 }
 
-.tsd-panel-logo {
+/* Back button (was the logo). The SVG carries its own colour. */
+.tsd-back-but {
+  appearance: none;
+  -webkit-appearance: none;
   flex: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: transform .18s var(--tsd-ease);
 }
 
-.tsd-panel-logo img {
-  width: clamp(34px, 3.2vw, 48px);
+.tsd-back-but img {
+  width: clamp(34px, 3.2vw, 44px);
   height: auto;
   display: block;
 }
 
-/* the glowing status pill: "ROUND 1 OF 3   GAME MODE: ..." */
+.tsd-back-but:hover  { transform: translateX(-2px); }
+.tsd-back-but:active { transform: scale(.94); }
+
+.tsd-back-but:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* Round information + game mode, centred between the back button and the
+   controls. No glow -- plain text reads cleaner here. */
 .tsd-panel-status {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: clamp(10px, 1.4vw, 26px);
 
   margin: 0;
-  padding: clamp(8px, .9vw, 15px) clamp(16px, 2vw, 34px);
-  border-radius: 999px;
-  border: var(--tsd-border-hairline);
-  background: var(--tsd-card-bg);
+  padding: 0 clamp(10px, 1.4vw, 24px);
+  border: 0;
+  background: none;
 
+  text-align: center;
   font-size: clamp(15px, 1.75vw, 30px);
   font-weight: 800;
   letter-spacing: .04em;
   text-transform: uppercase;
-  text-shadow: var(--tsd-title-glow);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tsd-panel-status > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* hairline divider between the round and the game mode */
+.tsd-panel-sep {
+  flex: none;
+  width: 1px;
+  align-self: stretch;
+  background: var(--tsd-hairline);
 }
 
 .tsd-panel-tools {
@@ -107,12 +137,13 @@ body.tsd-panel {
   transition: background .18s var(--tsd-ease), transform .18s var(--tsd-ease);
 }
 
+/* The source SVGs are already #FD0C75 -- no filter, or the glyph turns
+   white and stops matching the ring. */
 .tsd-icon-but img,
 .tsd-icon-but svg {
   width: 48%;
   height: auto;
   display: block;
-  filter: var(--tsd-icon-white);
 }
 
 .tsd-icon-but:hover  { background: rgba(253, 12, 117, .18); }
@@ -124,27 +155,29 @@ body.tsd-panel {
   outline-offset: 2px;
 }
 
-/* pill-shaped "Exit Game" */
+/* Exit -- pill with the label and the pink door glyph beside it. */
 .tsd-exit-but {
   appearance: none;
   -webkit-appearance: none;
   margin: 0;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
 
   padding: clamp(8px, .85vw, 13px) clamp(14px, 1.5vw, 24px);
   border-radius: 999px;
-  border: 1.5px solid var(--tsd-hairline);
+  border: 1px solid var(--tsd-hairline-soft, var(--tsd-hairline));
   background: transparent;
   color: var(--tsd-text);
   font-size: clamp(12px, 1.05vw, 17px);
   font-family: inherit;
+  white-space: nowrap;
   cursor: pointer;
   transition: background .18s var(--tsd-ease);
 }
 
-.tsd-exit-but img { width: 1.15em; height: auto; filter: var(--tsd-icon-white); }
+.tsd-exit-but img { width: 1.15em; height: auto; }
 .tsd-exit-but:hover { background: rgba(255, 255, 255, .08); }
 
 /* ---- scoreboard row ----------------------------------------------------
@@ -180,38 +213,57 @@ body.tsd-panel {
 
   padding: clamp(10px, 1.1vw, 16px) clamp(10px, 1vw, 16px);
   border-radius: 14px;
-  border: var(--tsd-border-hairline);
+  /* 1.2px per the design; colour comes from the --p1/--p2 modifier */
+  border: var(--tsd-pl-bracket-w) solid var(--tsd-hairline);
 }
 
 .tsd-pl-card--p1 {
-  background: var(--tsd-p1-gradient);
+  background: var(--tsd-pl-card-bg);
   border-color: var(--tsd-blue);
 }
 
 .tsd-pl-card--p2 {
-  background: var(--tsd-p2-gradient);
-  border-color: var(--tsd-modal-red);
+  background: var(--tsd-pl-card-bg);
+  border-color: var(--tsd-p2-red);
 }
 
-/* the offset corner brackets in the design */
-.tsd-pl-card::before {
+/* ---- offset corner brackets -------------------------------------------
+   The design shows TWO SEPARATE brackets sitting outside the card: one
+   hugging the top-left corner, one hugging the bottom-right. They are
+   detached from each other, so each pseudo-element covers only ~55% of
+   the card and carries just two borders. (The previous rule stretched a
+   single full-size box with inset:-6px, which joined the two sides into
+   one continuous L along the whole edge -- the "two sided bar".)         */
+.tsd-pl-card::before,
+.tsd-pl-card::after {
   content: "";
   position: absolute;
-  inset: -6px;
-  border-radius: 18px;
+  width:  55%;
+  height: 55%;
   pointer-events: none;
   z-index: -1;
 }
 
-.tsd-pl-card--p1::before {
-  border-left:   2px solid var(--tsd-blue);
-  border-bottom: 2px solid var(--tsd-blue);
+/* top-left bracket */
+.tsd-pl-card::before {
+  top:  -6px;
+  left: -6px;
+  border-top:  var(--tsd-pl-bracket-w) solid var(--tsd-pl-bracket);
+  border-left: var(--tsd-pl-bracket-w) solid var(--tsd-pl-bracket);
+  border-radius: 18px 0 0 0;
 }
 
-.tsd-pl-card--p2::before {
-  border-right:  2px solid var(--tsd-modal-red);
-  border-bottom: 2px solid var(--tsd-modal-red);
+/* bottom-right bracket */
+.tsd-pl-card::after {
+  right:  -6px;
+  bottom: -6px;
+  border-bottom: var(--tsd-pl-bracket-w) solid var(--tsd-pl-bracket);
+  border-right:  var(--tsd-pl-bracket-w) solid var(--tsd-pl-bracket);
+  border-radius: 0 0 18px 0;
 }
+
+.tsd-pl-card--p1 { --tsd-pl-bracket: var(--tsd-blue); }
+.tsd-pl-card--p2 { --tsd-pl-bracket: var(--tsd-p2-red); }
 
 /* avatar — same placeholder pattern as the setup page (css/setup.css) */
 .tsd-pl-avatar {
@@ -492,8 +544,8 @@ body.tsd-panel {
 .tsd-bid-clock #centerDisplay::after {
   content: "";
   flex: none;
-  width: 14px;
-  height: 20px;
+  width:  22px;
+  height: 24px;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -932,8 +984,9 @@ body.tsd-panel {
 }
 
 @media (max-width: 720px) {
-  .tsd-panel-header  { flex-wrap: wrap; }
-  .tsd-panel-status  { order: 3; flex-basis: 100%; white-space: normal; }
+  .tsd-panel-header  { flex-wrap: nowrap; }
+  /* #panelStatus is an empty spacer now -- it must not wrap to its own row. */
+  .tsd-panel-status  { flex: 1 1 auto; }
   .tsd-question-bar  { flex-direction: column; align-items: center; }
 }
 
