@@ -341,8 +341,17 @@ body.tsd-panel {
   align-items: center;
   gap: clamp(8px, 1vw, 18px);
   margin-bottom: clamp(18px, 2.4vw, 40px);
-}
 
+  /* The player cards carry decorative brackets at top/left -6px and
+     bottom/right -6px, which reach 6px outside the card box. The page
+     gutter is only 15px, so the outer brackets -- Player 1's on the left,
+     Player 2's on the right -- came within a few pixels of the viewport
+     and the cards read as pinned to the edge.
+
+     Pad the row by the overhang so both brackets sit inside the gutter.
+     Only the scorebar needs this; nothing else bleeds outside its box. */
+  padding-inline: 8px;
+}
 
 /* ---- player cards ------------------------------------------------------ */
 
@@ -894,16 +903,41 @@ body.tsd-panel {
 
   /* re-state the closed control: base-select drops the UA skin, and with
      it the background-image chevron, which now belongs to ::picker-icon */
+  /* AlphaBar.js:203 sets style.display = "block" inline when it shows this
+     menu, and inline beats a stylesheet -- so `display: flex` here was
+     silently ignored and the chevron wrapped below the long label. Measured
+     in Chrome: computed display stayed "block", box height 50px (3 lines).
+
+     !important is the only way to take the display back without editing
+     AlphaBar.js. The JS only ever sets "block" or "none"; "none" must keep
+     working, so it is re-stated below. */
   .tsd-bid-panel .DDM {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
     padding: 7px 12px;
     background-image: none;
+
+    /* the label is long ("All answers that start with: V") */
+    white-space: nowrap;
+  }
+
+  /* Keep the JS's hide working. Chrome serialises the inline value without
+     the space, so match both forms -- verified in the browser. */
+  .tsd-bid-panel .DDM[style*="display:none"],
+  .tsd-bid-panel .DDM[style*="display: none"] { display: none !important; }
+
+  .tsd-bid-panel .DDM::selectedcontent {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .tsd-bid-panel .DDM::picker-icon {
+    flex: 0 0 auto;
     color: var(--tsd-text-muted);
     transition: transform .15s var(--tsd-ease);
   }
@@ -1912,6 +1946,11 @@ body.tsd-panel {
    The design shows this as the hint line under the question.            */
 .tsd-play-area #gamePlayArea table > caption {
   caption-side: top;
+  /* both captions sit over their slider, so give them the same track width
+     rather than letting each inherit its own table's width */
+  width: 100%;
+  max-width: var(--tsd-sl-track-w);
+  margin-inline: auto;
   margin-bottom: 14px;
   font-family: var(--tsd-dnd-font);
   font-size: 20px;
@@ -1922,21 +1961,62 @@ body.tsd-panel {
   text-align: center;
 }
 
-/* #displayBoxYear is the live readout. GameD.js sets background-color on it
-   inline to flag whose turn it is, so the background is left to the JS and
-   only the rest of the box is styled here.                               */
+/* #displayBoxYear is the live readout -- the picked year while playing, then
+   "The answer is: 20 July 1969" once the round is checked.
+
+   GameD.js writes background-color on it inline (white for the answer,
+   SkyBlue / Salmon for whose turn it is) and inline beats a stylesheet, so
+   those three values are matched below and mapped onto the panel's palette
+   instead. Without that the box renders as a white pill on a dark page.
+
+   It also sets fontSize:"large" inline before showing the answer, hence the
+   !important on font-size.                                               */
 .tsd-play-area #displayBoxYear {
   display: block;
+  box-sizing: border-box;
   margin: 0 auto 18px;
-  width: 140px;
-  padding: 8px 10px;
-  border: var(--tsd-border-hairline);
+  /* wide enough for "The answer is: 20 July 1969" -- 140px clipped it */
+  width: min(100%, 340px);
+  padding: 10px 18px;
+
+  border: 1px solid var(--tsd-hairline);
   border-radius: 10px;
+  background: rgba(255, 255, 255, .08);
+
   font-family: var(--tsd-dnd-font);
-  font-size: 20px;
+  font-size: clamp(16px, 1.5vw, 20px) !important;
   font-weight: 600;
   text-align: center;
-  color: var(--tsd-modal-ink);
+  color: var(--tsd-text);
+}
+
+/* The answer state. GameD.js:301 sets background-color:white inline, and an
+   inline declaration beats a stylesheet one -- so the box rendered white
+   with near-white text on it. !important is the only way CSS can take the
+   background back without editing GameD.js.
+
+   Transparent so it reads as part of the dark panel, with white text. */
+.tsd-play-area #displayBoxYear[style*="white"] {
+  background: transparent !important;
+  border-color: var(--tsd-hairline);
+  color: var(--tsd-text);
+}
+
+/* whose turn it is: blue = player 0, red = player 1 (SkyBlue / Salmon) */
+.tsd-play-area #displayBoxYear[style*="SkyBlue"],
+.tsd-play-area #displayBoxYear[style*="skyblue"],
+.tsd-play-area #displayBoxYear[style*="rgb(135, 206, 235)"] {
+  background: rgba(6, 131, 252, .20) !important;
+  border-color: rgba(6, 131, 252, .60);
+  color: var(--tsd-text);
+}
+
+.tsd-play-area #displayBoxYear[style*="Salmon"],
+.tsd-play-area #displayBoxYear[style*="salmon"],
+.tsd-play-area #displayBoxYear[style*="rgb(250, 128, 114)"] {
+  background: rgba(232, 47, 47, .20) !important;
+  border-color: rgba(232, 47, 47, .60);
+  color: var(--tsd-text);
 }
 
 /* ---- the range sliders -------------------------------------------------
@@ -1953,7 +2033,7 @@ body.tsd-panel {
   appearance: none;
   display: block;
   width: 100%;
-  max-width: 940px;
+  max-width: var(--tsd-sl-track-w);
   margin: 0 auto;
   height: var(--tsd-sl-thumb-size);
   background: transparent;   /* the track pseudo-elements paint instead */
@@ -2044,7 +2124,7 @@ body.tsd-panel {
 .tsd-play-area #gamePlayArea #dateLineInsrtPt {
   position: relative;
   width: 100%;
-  max-width: 940px;
+  max-width: var(--tsd-sl-track-w);
   margin: 0 auto;
 }
 
@@ -2076,7 +2156,7 @@ body.tsd-panel {
 
 .tsd-play-area #gamePlayArea table table {
   width: 100%;
-  max-width: 940px;
+  max-width: var(--tsd-sl-track-w);
   margin: 0 auto 4px;
   table-layout: fixed;
 }
@@ -2099,10 +2179,92 @@ body.tsd-panel {
    filler is no longer needed — collapse it so the two sliders share one
    left edge, as the design shows.                                       */
 
-.tsd-play-area #theDayTable td[width="67px"],
-.tsd-play-area #theDayTable td[width="60px"] { width: 0; padding: 0; }
+/* insertDayTable() lays the day row out as three cells -- a left spacer, the
+   slider, a right spacer -- to line the slider up under the bitmap date
+   line. That bitmap is hidden, so the spacers only squeeze the slider.
 
-.tsd-play-area #theDayTable { margin-top: 26px; }
+   Row 1's spacers carry width="67px"/"60px", but row 2's LEFT spacer has no
+   width attribute at all, so an attribute selector misses it and the cell
+   keeps its auto width -- which is what pushed the day slider narrow and
+   off to the left.
+
+   :empty cannot target them either: the cells contain whitespace, which
+   counts as a text node. So collapse every cell by default and give the
+   width back to the two that actually hold something. The table then
+   matches the year table's width and both sliders line up. */
+/* Scoped to the ids alone, not to .tsd-play-area: insertLayout() emits
+   malformed table markup (a <table> nested inside a <tr>, unclosed <tr>s),
+   so the parser moves #dayTableInsertionPoint and there is no reliable
+   ancestor to hang these rules off. The ids are unique, so this is safe. */
+#theDayTable { margin-top: 26px; }
+
+/* #dateLine carries width="500" as an HTML attribute, which still sizes its
+   cell even though the image is hidden. Zero it so the cell collapses. */
+#theDayTable #dateLine { display: none; width: 0 !important; }
+
+/* Both sliders pinned to the same box.
+
+   Verified by parsing the generated markup with jsdom: insertLayout() emits
+   a <table> nested inside a <tr>, so the parser hoists everything out and
+   #sliderYear ends up in a plain <div id="sliderDiv"> while #sliderDay stays
+   in a <td> of #theDayTable. Two different containers, which is why they
+   sized differently.
+
+   Both also carry width attributes from the JS (500px and 384px), so the
+   widths here have to win outright. */
+#sliderDay,
+#sliderYear {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: var(--tsd-sl-track-w) !important;
+  margin-inline: auto;
+}
+
+/* Flatten #theDayTable completely rather than fighting its cell widths.
+
+   Measured in Chrome: leaving it as a table gave TABLE=1000px but TD=129px,
+   because the spacer cells still claimed their share of the row. Setting
+   display:block on just the slider cell made it worse -- the row could no
+   longer lay out at all.
+
+   As blocks the spacers collapse to nothing and the slider row simply fills
+   the width, which is what makes it match #sliderDiv above. */
+#theDayTable,
+#theDayTable > tbody,
+#theDayTable > tbody > tr,
+#theDayTable > tbody > tr > td {
+  display: block;
+  width: 100%;
+  max-width: var(--tsd-sl-track-w);
+  margin-inline: auto;
+  padding: 0;
+}
+
+/* the spacer cells hold only whitespace; with the table flattened they would
+   still each take a line, so remove them from the flow */
+#theDayTable > tbody > tr > td:not(:has(#sliderDay)):not(:has(#dateLine)) {
+  display: none;
+}
+
+/* Flattening the table left its <caption> as display:table-caption inside a
+   block parent, so it shrank to its text and "SELECT THE DAY" wrapped onto
+   three lines. Measured: 75px against the year caption's 1000px. Make it a
+   block so it spans the same width as the year caption above. */
+#theDayTable > caption {
+  display: block;
+  width: 100%;
+  max-width: var(--tsd-sl-track-w);
+  margin-inline: auto;
+}
+
+#sliderDiv {
+  display: block;
+  width: 100%;
+  max-width: var(--tsd-sl-track-w);
+  margin-inline: auto;
+  padding: 0;
+}
 
 /* the day ruler — twelve months, so a tick every 1/12 with no minor ticks */
 .tsd-play-area #gamePlayArea #dateLineInsrtPt::before,
@@ -2131,7 +2293,7 @@ body.tsd-panel {
 .tsd-play-area #arrowInsrtPt1 {
   position: relative;
   height: 20px;
-  max-width: 940px;
+  max-width: var(--tsd-sl-track-w);
   margin: 0 auto;
 }
 
@@ -2464,15 +2626,24 @@ body.tsd-panel {
    with a large one, capped so a 10-row grid still fits the viewport.     */
 
 .tsd-play-area #gamePlayArea:has(> table > tbody > tr > td .gridInsrtPt) {
-  display: inline-block;
-  padding: clamp(18px, 2vw, 30px);
+  /* Sized to the grid inside it and centred in the play area. fit-content
+     with auto margins is explicit about both, where inline-block relied on
+     the inherited text-align to do the centring. */
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+
+  /* The table adds border-spacing outside the first and last columns too,
+     so this is the panel's own inset on top of that -- keep it modest or
+     the two stack up into a wide empty margin. */
+  padding: clamp(10px, 1.2vw, 16px);
   border: var(--tsd-bx-panel-border);
   border-radius: var(--tsd-bx-panel-radius);
   background: var(--tsd-bx-panel-bg);
 }
 
-/* centring is handled once on .tsd-play-area (see the play-area block
-   above), which also restores normal text alignment inside .gridInsrtPt */
+/* .tsd-play-area still restores normal text alignment inside .gridInsrtPt
+   (see the play-area block above); the panel does its own centring now. */
 
 /* ---- the generated table ------------------------------------------------
    border='5' is an attribute, so it is cleared on every level.          */
@@ -2486,10 +2657,22 @@ body.tsd-panel {
 .tsd-play-area #gamePlayArea table:has(.gridInsrtPt) {
   border-collapse: separate;
   border-spacing: var(--tsd-bx-btn-gap);
-  margin: 0 auto;
+  /* border-spacing also applies OUTSIDE the first and last row/column, which
+     doubled up with the panel padding. Pull that edge back so the spacing
+     shows only between the tiles. */
+  margin: calc(-1 * var(--tsd-bx-btn-gap));
+
+  /* auto layout, but every cell is pinned to the same width below -- so the
+     columns line up AND the table is only as wide as its columns need,
+     which lets the panel around it shrink-wrap to the grid. */
+  width: auto;
 }
 
 .tsd-play-area #gamePlayArea table:has(.gridInsrtPt) td {
+  /* one button wide; fixed so all columns match regardless of label */
+  width: var(--tsd-bx-btn-w);
+  min-width: var(--tsd-bx-btn-w);
+  max-width: var(--tsd-bx-btn-w);
   padding: 0;
   text-align: center;
   vertical-align: middle;
@@ -2509,20 +2692,24 @@ body.tsd-panel {
 
    loadButtonsIntoGrid() writes style='background-color:aquamarine;' inline,
    which beats a normal rule — hence !important on the background alone.
-   Width is a minimum, not a fixed size, so a long label ("South Carolina")
-   grows its button instead of overflowing it.                            */
+   Every button fills its cell, so they are all the same width and the rows
+   read as a clean grid. A long label ("San Francisco") wraps inside the
+   button rather than widening it past its neighbours.                    */
 
 .tsd-play-area #gamePlayArea .but {
   appearance: none;
   -webkit-appearance: none;
 
-  min-width: var(--tsd-bx-btn-min-w);
+  width: 100%;
   min-height: var(--tsd-bx-btn-min-h);
   padding: var(--tsd-bx-btn-pad-y) var(--tsd-bx-btn-pad-x);
-  border: 0;
   border-radius: var(--tsd-bx-btn-radius);
+  /* Figma gives the tile a .4 opacity, but applying that to the element
+     dims the LABEL too, which is what made the text look washed out. Bake
+     the same value into the fill instead, so the tile is translucent and
+     the text stays crisp. */
   background: var(--tsd-bx-btn-bg) !important;
-  opacity: var(--tsd-bx-btn-opacity);
+  border: 1px solid rgba(255, 255, 255, .10);
 
   font-family: var(--tsd-dnd-font);
   font-size: clamp(13px, 1vw, 15px);
@@ -2531,14 +2718,20 @@ body.tsd-panel {
   color: var(--tsd-bx-btn-ink);
   text-align: center;
   white-space: normal;
-  overflow-wrap: anywhere;
+  /* break between words, not inside them -- `anywhere` split labels like
+     "Yuma;Arizona" into "Arizon / a". A genuinely unbreakable word still
+     breaks rather than overflowing the tile. */
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
 
   cursor: pointer;
-  transition: opacity .14s var(--tsd-ease), transform .14s var(--tsd-ease);
+  transition: background .14s var(--tsd-ease), transform .14s var(--tsd-ease);
 }
 
 .tsd-play-area #gamePlayArea .but:hover {
-  opacity: .7;
+  background: rgba(255, 255, 255, .24) !important;
+  border-color: rgba(255, 255, 255, .22);
 }
 
 .tsd-play-area #gamePlayArea .but:active {
@@ -2589,12 +2782,12 @@ body.tsd-panel {
 /* ---- box-grid responsive ------------------------------------------------ */
 
 @media (max-width: 1100px) {
-  :root { --tsd-bx-btn-min-w: 96px; --tsd-bx-btn-pad-x: 14px; }
+  :root { --tsd-bx-btn-w: 156px; --tsd-bx-btn-pad-x: 12px; }
 }
 
 @media (max-width: 720px) {
   :root {
-    --tsd-bx-btn-min-w: 74px;
+    --tsd-bx-btn-w: 116px;
     --tsd-bx-btn-min-h: 32px;
     --tsd-bx-btn-pad-x: 8px;
     --tsd-bx-btn-gap:   6px;
@@ -2660,8 +2853,8 @@ body.tsd-panel {
   position: relative;
   display: inline-block;
   line-height: 0;                 /* no descender gap under the image */
-  border: var(--tsd-gi-stage-border);
-  border-radius: var(--tsd-gi-stage-radius);
+  /* border: var(--tsd-gi-stage-border); */
+  /* border-radius: var(--tsd-gi-stage-radius); */
   background: var(--tsd-gi-stage-bg);
   overflow: hidden;
 
@@ -2697,7 +2890,7 @@ body.tsd-panel {
   -webkit-appearance: none;
   padding: 0;
   border: var(--tsd-gi-panel-border);
-  border-radius: var(--tsd-gi-panel-radius);
+  /* border-radius: var(--tsd-gi-panel-radius); */
   background: linear-gradient(180deg,
                 var(--tsd-gi-panel-bg)  0%,
                 var(--tsd-gi-panel-bg2) 100%);
@@ -2719,3 +2912,157 @@ body.tsd-panel {
 @media (prefers-reduced-motion: reduce) {
   .tsd-play-area #imageInsertPt .butX { transition: none; }
 }
+
+/* ======================================================================
+   ROUND RESULT CARD
+   ======================================================================
+   Replaces the two "Place Your Bid" cards whenever they are empty --
+   the six non-bidding game types for the whole round, and every other
+   type once bidding ends. js-ui/tsd-result-card.js sets .is-result on
+   the scorebar; nothing here changes game behaviour.
+
+   Only the correct answer and the winner's name are shown. The two
+   per-player answer boxes in the Figma reference are not backed by any
+   data: the code stores no per-player answer, and only the bid winner
+   ever plays a round.                                                   */
+
+.tsd-result-card { display: none; }
+
+.tsd-scorebar.is-result .tsd-bid-panel { display: none; }
+
+/* The clock physically sits between the two bid slots, so the card cannot
+   span columns 2..4 without swallowing it. Instead the row is re-columned
+   for this state: players keep the outer 1fr tracks, the card takes one
+   wide middle track and the clock the next, giving
+   player 1 | result card | clock | player 2 -- the reference layout. */
+.tsd-scorebar.is-result {
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 646px)
+    minmax(0, 275px)
+    minmax(0, 1fr);
+}
+
+.tsd-scorebar.is-result .tsd-pl-card--p1 { grid-column: 1; }
+.tsd-scorebar.is-result .tsd-bid-clock   { grid-column: 3; }
+.tsd-scorebar.is-result .tsd-pl-card--p2 { grid-column: 4; }
+
+.tsd-scorebar.is-result .tsd-result-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, .8vh, 12px);
+
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+  min-height: clamp(120px, 15vh, 160px);
+  margin-inline: auto;
+  padding: clamp(12px, 1.6vh, 18px) 20px;
+  box-sizing: border-box;
+
+  border-radius: 20px;
+  border: 1.5px solid var(--tsd-hairline-soft);
+  background: var(--tsd-panel-bg);
+  text-align: center;
+}
+
+.tsd-result-title {
+  margin: 0;
+  font-size: clamp(13px, 1.1vw, 17px);
+  font-weight: 500;
+  color: var(--tsd-bid-label);
+}
+
+.tsd-result-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(4px, .6vh, 10px);
+  min-width: 0;
+  width: 100%;
+}
+
+.tsd-result-answer {
+  margin: 0;
+  font-size: clamp(16px, 1.6vw, 22px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--tsd-text);
+  overflow-wrap: anywhere;
+}
+
+.tsd-result-winner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  font-size: clamp(14px, 1.25vw, 18px);
+  font-weight: 600;
+  color: var(--tsd-bid-gold);
+}
+
+.tsd-result-winner[hidden] { display: none; }
+.tsd-result-winner img { width: 1.4em; height: auto; flex: none; }
+
+/* Stacked layout: the card takes the full width above the clock. */
+@media (max-width: 1100px) {
+  .tsd-scorebar.is-result {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tsd-scorebar.is-result .tsd-pl-card--p1   { grid-column: 1; grid-row: 1; }
+  .tsd-scorebar.is-result .tsd-pl-card--p2   { grid-column: 2; grid-row: 1; }
+  .tsd-scorebar.is-result .tsd-result-card   { grid-column: 1 / -1; grid-row: 2; }
+  .tsd-scorebar.is-result .tsd-bid-clock     { grid-column: 1 / -1; grid-row: 3; }
+}
+
+/* ---- dropped item inside a drop slot ------------------------------------
+   A source item (.draggable) carries padding:6px and paints its fill on the
+   CONTENT box, so the padding shows as the gap between the dashed outer
+   slot and the filled inner box. That works while the item sits in the left
+   panel, where its parent is the panel itself.
+
+   Once the item is dropped, GameC/GameO move that same element INTO a
+   .containerC slot. The slot has its own 6px padding, but the item is
+   width:100% of the slot's content box and its fill reaches the item's own
+   border edge -- so the filled box ends up flush against the dashed border
+   with no visible gap.
+
+   Inside a slot the item is only the FILLED inner box -- the slot itself
+   already draws the dashed outer border, so the item must not draw a second
+   one nested inside it. Its own border is dropped and the fill is kept
+   clipped to the content box, which is what holds it off the slot's edge.
+
+   background-clip must stay content-box here: switching it to padding-box
+   makes the fill cover the padding and run flush against the dashed border,
+   which is exactly the gap this rule exists to preserve.                */
+.tsd-play-area .containerC > .draggable,
+.tsd-play-area .containerC > .draggableC {
+  margin: 0;
+  border: 0;                       /* the slot draws the dashed edge */
+  padding: 4px 6px;                /* the gap to the slot's border */
+  border-radius: 8px;
+  background: var(--tsd-dnd-item-bg) content-box;
+  background-clip: content-box;    /* keep the fill off the slot edge */
+}
+
+/* GameC builds every category cell as TWO <p> elements (GameC.js:378):
+     <td class='containerC'><p id='insrtPtA'></p><p id='CatName'>CatName</p></td>
+   The first is an empty spacer, the second is the category LABEL. Neither is
+   a dropped item, so neither may take the filled-bar treatment above -- that
+   is only for .draggable / .draggableC, which is what GameC actually moves
+   into the slot. The label is the heading for the bucket. */
+.tsd-play-area .containerC > p {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 600;
+  color: var(--tsd-text);
+}
+
+/* the empty spacer <p> would otherwise add a blank line above the label */
+.tsd-play-area .containerC > p:empty { display: none; }

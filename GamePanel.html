@@ -20,6 +20,7 @@
     <!-- UI layer. tsd-mute.js wraps the Audio constructor, so it must load
          before any game script creates a sound. -->
     <script src="js-ui/tsd-mute.js"></script>
+    <script src="js-ui/tsd-result-card.js" defer></script>
     <script src="js-ui/tsd-modal.js"></script>
 
     <title>Trivia SmackDown</title>
@@ -95,6 +96,24 @@
         <p class="tsd-pl-caption">Total Point</p>
         <p id="rndTotL" class="pt">0</p>
         <div id="setTotL" class="tsd-pl-total">Set Total =</div>
+      </div>
+    </div>
+
+    <!-- ---------- round result card ----------
+         Occupies the two bid-panel columns. Hidden by default; the
+         scorebar gets .is-result (js-ui/tsd-result-card.js) whenever the
+         bid panels are empty -- on the non-bidding game types (A D I L N X)
+         and, on bidding rounds, once bidding has finished. Presentation
+         only: the text is copied from #qBox and the player names, no game
+         state is computed here. -->
+    <div class="tsd-result-card" id="resultCard" aria-live="polite">
+      <p class="tsd-result-title" id="resultTitle">Correct Answer:</p>
+      <div class="tsd-result-body">
+        <p class="tsd-result-answer" id="resultAnswer"></p>
+        <p class="tsd-result-winner" id="resultWinner">
+          <img src="images/new-images/icons/trophy.svg" alt="" onerror="this.style.display='none'">
+          <span id="resultWinnerName"></span>
+        </p>
       </div>
     </div>
 

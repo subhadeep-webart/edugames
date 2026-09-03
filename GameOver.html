@@ -38,8 +38,13 @@
 
       <!-- ---------- player 0 (blue / left) ---------- -->
       <div class="tsd-over-player tsd-over-player--p1">
-        <span class="tsd-over-avatar">
-          <img class="tsd-over-avatar-empty" src="images/new-images/male.svg" alt="">
+        <span class="tsd-over-avatar" id="goAvatar0">
+          <span class="tsd-avatar-empty">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
         </span>
         <p class="tsd-over-name" id="goName0">--</p>
         <div class="tsd-over-total">
@@ -68,8 +73,13 @@
 
       <!-- ---------- player 1 (red / right) ---------- -->
       <div class="tsd-over-player tsd-over-player--p2">
-        <span class="tsd-over-avatar">
-          <img class="tsd-over-avatar-empty" src="images/new-images/female.svg" alt="">
+        <span class="tsd-over-avatar" id="goAvatar1">
+          <span class="tsd-avatar-empty">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
         </span>
         <p class="tsd-over-name" id="goName1">--</p>
         <div class="tsd-over-total">
@@ -81,9 +91,16 @@
     </section>
 
     <!-- ====================== evaluation ======================
-         #sliderLike, #sliderContent and textarea[name="Comment"] are read
-         verbatim by submitEval() — ids and the name attribute must not
-         change. -->
+         HIDDEN. submitEval() (below) builds the ratings and comment into a
+         string and only console.log()s it - there is no fetch, no form
+         action and no cgi-bin endpoint to receive it, so nothing a player
+         submits here is stored anywhere.
+
+         Commented out rather than deleted: the markup is complete and can
+         be restored as-is once somewhere exists to send it. #sliderLike,
+         #sliderContent and textarea[name="Comment"] are read verbatim by
+         submitEval(), so those ids and the name attribute must not change.
+         See docs/10-known-issues.md.
     <section class="tsd-over-panel">
       <h2 class="tsd-over-panel-title">Rate This Set</h2>
 
@@ -124,6 +141,7 @@
                 onClick="submitEval()">Submit Evaluation</button>
       </div>
     </section>
+    -->
 
     <!-- ====================== round by round ======================
          Filled by insrtRndByRnd(). -->
@@ -323,6 +341,34 @@
         const [, name1, zip1, grd1, spd1] = p1.split(";");
     }
 
+    /* ---------- player photos ----------
+       setup.html stores whatever the player picked under playerPhoto0 /
+       playerPhoto1 (a data URL, browser-local only). Show it here if it is
+       there; otherwise the generic placeholder in the markup stands.
+
+       Presentation only - nothing is read from or written to game state. */
+    function showPlayerPhotos() {
+        for (var slot = 0; slot < 2; slot++) {
+            var ring = document.getElementById("goAvatar" + slot);
+            if (!ring) { continue; }
+
+            var src = null;
+            try {
+                src = localStorage.getItem("playerPhoto" + slot);
+            } catch (err) {
+                console.log("could not read player photo: " + err);
+            }
+            if (!src) { continue; }
+
+            ring.innerHTML = "";
+            var img = document.createElement("img");
+            img.src = src;
+            img.alt = "";
+            ring.appendChild(img);
+        }
+    }
+
+    showPlayerPhotos();
     getAndProcessGameData();
     /*
     PRA1_1842;Peter;822;580;The winner of Set SerNbr [PRA1_1842] is Peter with a score of 822 and the looser is Helen with a score of 580,30|0;Peter;94566;12;10|1;Helen;94066;12;10,Which seven presidents are Democrats?;100;Helen;14;0;250;0,Pair the Homonyms;100;Peter;181;34;17;0,What is this American Monument?;100;Peter;134;34;0;0,Rank the following standard volume measurements with the largest on top.;100;Peter;121;34;0;0,Select the  Seven Dwarfs From this list.;100;Helen;40;34;213;33,Approximately where was the first Independence Day declared?;100;Peter;0;34;0;33,Place the National Parks by State.;100;Peter;0;34;0;33,Pick the one item is each horizontal row that is different from the others in the row.;100;Peter;155;34;0;33,How many moons does Mars have?;100;Peter;0;34;0;33,Equate the Author with the Work.;100;Peter;160;34;0;33,Answer these questions about the United States;100;Peter;17;34;0;33,Set totals;100;Peter;1100;822;340;480;231

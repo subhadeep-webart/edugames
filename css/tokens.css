@@ -184,6 +184,7 @@
   --tsd-gb-correct:      #2DE28F;
 
   /* ---- Game D / N: number & date line sliders ------------------------- */
+  --tsd-sl-track-w:      940px; /* both sliders share this width */
   --tsd-sl-track-h:      10px;
   --tsd-sl-track-bg:     rgba(255, 255, 255, .12);   /* #FFFFFF1F */
   --tsd-sl-fill:         #FD0C75;
@@ -232,15 +233,19 @@
   --tsd-bx-panel-border: 1px solid rgba(255, 255, 255, .25);  /* #FFFFFF40 */
   --tsd-bx-panel-radius: 20px;
 
-  --tsd-bx-btn-bg:       rgba(255, 255, 255, .30);   /* #FFFFFF4D */
-  --tsd-bx-btn-opacity:  .4;
+  --tsd-bx-btn-bg:       rgba(255, 255, 255, .14);   /* #FFFFFF4D at .4 */
   --tsd-bx-btn-radius:   8px;
   --tsd-bx-btn-pad-y:    9px;
-  --tsd-bx-btn-pad-x:    23px;
-  --tsd-bx-btn-min-w:    109px;
+  --tsd-bx-btn-pad-x:    12px;  /* the tile is a fixed width now, so
+                                   this only insets the label */
+  --tsd-bx-btn-w:        180px;  /* every cell is this wide, so the columns
+                                    line up. Figma's 109 is the minimum;
+                                    widened because the data holds compound
+                                    labels ("Las Cruces;New Mexico") that
+                                    would otherwise wrap badly. */
   --tsd-bx-btn-min-h:    36px;
   --tsd-bx-btn-gap:      10px;
-  --tsd-bx-btn-ink:      var(--tsd-text);
+  --tsd-bx-btn-ink:      #DCE1F5;
 
   --tsd-bx-selected:     #0D77F2;
 

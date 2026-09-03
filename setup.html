@@ -570,8 +570,10 @@
   }
 
   /* ---------- profile images ----------
-     Purely cosmetic: the picked image is shown in the ring. It is not sent
-     anywhere, because the registration payload has no field for it. */
+     The picked image is shown in the ring and kept in localStorage under
+     playerPhoto0 / playerPhoto1, so GameOver can show the same face. It is
+     still not sent to the server - the registration payload has no field
+     for it - so this is local to the browser. */
   document.querySelectorAll("[data-photo-for]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var slot  = btn.getAttribute("data-photo-for");
@@ -592,6 +594,14 @@
           img.src = e.target.result;
           img.alt = "";
           ring.appendChild(img);
+
+          /* Keep it for GameOver. A data URL can be large, and the quota is
+             per-origin, so a failure here must not break the upload. */
+          try {
+            localStorage.setItem("playerPhoto" + slot, e.target.result);
+          } catch (err) {
+            console.log("could not store player photo: " + err);
+          }
         };
         reader.readAsDataURL(file);
       });
