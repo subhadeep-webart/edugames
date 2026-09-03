@@ -466,6 +466,16 @@ function startGameD() {
 
 
 
+/* Show a help message in the styled dialog rather than a native alert().
+   Falls back to alert() if the UI layer (js-ui/tsd-modal.js) is absent. */
+function showHelpMessage(title, body) {
+	if (window.TSDModal && typeof TSDModal.alert === "function") {
+		TSDModal.alert({ title: title, message: body, icon: "help" });
+	} else {
+		alert(body);
+	}
+}
+
 function getHelpFromMenu(txt) {console.log("script.getHelpFromMenu " + txt);
 	const thisRound = cp.theRoundInPlay;
 	if (txt == "general") {
@@ -473,30 +483,30 @@ function getHelpFromMenu(txt) {console.log("script.getHelpFromMenu " + txt);
 		//alert(xx);
 	} else if (txt == "bidding") {
 		const xx = help.getHelp("bidding");
-		alert(xx);
+		showHelpMessage("Bidding", xx);
 	} else if (txt == "roundThis") {
 		const thisRound = cp.theRoundInPlay;
 		if (thisRound == null) {
-			alert("You have not yet started a Set yet, so no Round is in play.");
+			showHelpMessage("This Round", "You have not yet started a Set yet, so no Round is in play.");
 			document.getElementById("helpDropDownMenu").reset();
             return;
 		}
 		console.log("serNbrOfRndInPlay= " + serNbrOfRndInPlay);
 		const rndLtr = serNbrOfRndInPlay.charAt(3);
 		const xx = help.getHelp("round", rndLtr);
-        alert(xx);
+        showHelpMessage("This Round", xx);
 	} else if (txt == "roundNext") {
 
 		const theSet = setBeingPlayed;
 
 		if (theSet == null) {	
-			alert("You have not yet started a Set yet, so no Round is in play.");
+			showHelpMessage("Next Round", "You have not yet started a Set yet, so no Round is in play.");
 			document.getElementById("helpDropDownMenu").reset();
 			return;
 		}
 		const nextRndLtr = setBeingPlayed.getTypeOfNextRnd();
 		const xx = help.getHelp("round", nextRndLtr);
-		alert(xx);
+		showHelpMessage("Next Round", xx);
 	}
 	document.getElementById("helpDropDownMenu").reset();
 	console.log("script.getHelpFromMenu  bottom" );
@@ -618,7 +628,7 @@ function setUpPlayers() {
 	const data = localStorage.getItem("regData");
 	if (data == null) {
 		alert("You will need to register first. \n\n(We only ask for a first or nick name.");
-		window.location.href = "index.html";
+		window.location.href = "setup.html";
 		return;
 	}
 

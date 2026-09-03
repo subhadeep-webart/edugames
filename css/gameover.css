@@ -28,7 +28,7 @@ body.tsd-over {
   min-height: 100vh;
   background: transparent;
   color: var(--tsd-text);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--tsd-font-body);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }

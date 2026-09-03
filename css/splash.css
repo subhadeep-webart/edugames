@@ -24,7 +24,7 @@ body {
 body.tsd-splash {
   background: var(--tsd-bg-gradient);
   color: var(--tsd-text);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--tsd-font-body);
   -webkit-font-smoothing: antialiased;
 }
 

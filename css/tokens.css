@@ -120,10 +120,14 @@
   --tsd-dnd-item-bg:      rgba(255, 255, 255, .15); /* #FFFFFF26 */
   --tsd-dnd-item-text:    #9297B1;
 
-  /* Lufga is not bundled with this project (no @font-face, no font files).
-     It is listed first so the design's face is used as soon as it is added;
-     until then the stack falls back to the UI font. */
-  --tsd-dnd-font: Lufga, "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  /* ---- Typefaces -------------------------------------------------------
+     Declared in css/fonts.css, files in /fonts. Each stack keeps a system
+     fallback so the pages still read correctly before the files land. */
+  --tsd-font-body:    "Lufga", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --tsd-font-display: "Bebas Neue", "Lufga", "Segoe UI", system-ui, Arial, sans-serif;
+
+  /* older name for the body stack, kept so existing rules keep working */
+  --tsd-dnd-font: var(--tsd-font-body);
 
   /* ---- Game-type accents ---------------------------------------------- */
   --tsd-type-b:          #2E9BFF;   /* Game Type B — blue    */
@@ -243,12 +247,22 @@
   /* ---- Game I: progressive reveal (Focus / Grid / BlockOut) ------------ */
   --tsd-gi-panel-bg:      #1B3A80;          /* the cover panels */
   --tsd-gi-panel-bg2:     #163270;          /* gradient foot    */
+  /* #FFFFFF40 (40 = 64/255 = .251) */
   --tsd-gi-panel-border:  1px solid rgba(255, 255, 255, .25);
   --tsd-gi-panel-radius:  4px;
   --tsd-gi-panel-ink:     var(--tsd-text);
   --tsd-gi-stage-bg:      rgba(255, 255, 255, .05);
   --tsd-gi-stage-border:  1px solid rgba(255, 255, 255, .25);
   --tsd-gi-stage-radius:  16px;
+
+  /* Magnification for the GameI picture stage. Several question images are
+     only 128-256px across, which leaves the cover grid too small to read or
+     click. Overridden per-stage in gamepanel.css; this is the fallback. */
+  /* 3.3 renders AA.Ien00028's 128x160 gif at 422x528 -- shorter than the
+     530-wide/662-tall the design's width alone would give. The image is a
+     4:5 portrait and the scale must stay uniform (see gamepanel.css), so
+     width and height can only come down together. */
+  --tsd-gi-stage-zoom:    3.3;
 
   /* ---- Utility: force any single-colour SVG to pure white ------------- */
   --tsd-icon-white:      brightness(0) invert(1);

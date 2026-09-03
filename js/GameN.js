@@ -59,8 +59,7 @@ class GameN extends Game{//console.log("GameN  = " + );
 		console.log("GameN.showPregameNotice() top ");
 		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><button type="button" class="tsd-pregame-back" aria-label="Go back" onclick="history.back()"><img src="images/new-images/back_button.svg" width="44" height="51" alt=""></button><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
      <p>The next Game requires you to select a number.</p>
-     <font size="4"><p>The point award is a function of how close you get to the correct number.</p></font>
-	 <p>You will have ${theTime} seconds to complete the play.</p></div></div><div class="tsd-pregame-foot"><button type="button" class="tsd-pregame-start" onclick="startGameN()"><i class="tsd-pregame-play" aria-hidden="true"></i><span>Start Round</span></button></div></div>`
+     <font size="4"><p>The point award is a function of how close you get to the correct number.</p></font></div></div><div class="tsd-pregame-foot"><button type="button" class="tsd-pregame-start" onclick="startGameN()"><i class="tsd-pregame-play" aria-hidden="true"></i><span>Start Round</span></button></div></div>`
 
 		gamePlayArea.innerHTML = buf;
 		console.log("GameN.showPregameNotice() bottom ");
@@ -75,8 +74,7 @@ class GameN extends Game{//console.log("GameN  = " + );
      <p><b>The player closest to the correct number wins.</b></p></p>
      <font size="4"><p>The point award is a function of how much closer the winner is than the looser.</p></font>
      <b>IMPORTANT:</b> Players need to decide if the second player is allowed to view the first player's selection or not.
-     If not, the second player must turn away while the first player makes the selection.
-     <p>The Game has selected ${this.nameFirstUp} at random to go first and has ${theTime} seconds to complete the play.</p></font></div></div><div class="tsd-pregame-foot"><button type="button" class="tsd-pregame-start" onclick="gameN.startPlay()"><i class="tsd-pregame-play" aria-hidden="true"></i><span>Start Round</span></button></div></div>`
+     If not, the second player must turn away while the first player makes the selection.</font></div></div><div class="tsd-pregame-foot"><button type="button" class="tsd-pregame-start" onclick="gameN.startPlay()"><i class="tsd-pregame-play" aria-hidden="true"></i><span>Start Round</span></button></div></div>`
 
 		gamePlayArea.innerHTML = buf;
 		console.log("GameN.showPregameNotice() bottom ");

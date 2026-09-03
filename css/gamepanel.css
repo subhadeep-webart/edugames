@@ -25,7 +25,7 @@ body.tsd-panel {
   background: var(--tsd-bg-gradient);
   background-attachment: fixed;
   color: var(--tsd-text);
-  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  font-family: var(--tsd-font-body);
 }
 
 .tsd-panel-page {
@@ -147,6 +147,9 @@ body.tsd-panel {
 }
 
 .tsd-icon-but:hover  { background: rgba(253, 12, 117, .18); }
+
+/* sound muted — dim the button so the off state reads at a glance */
+.tsd-icon-but.is-muted { opacity: .55; }
 .tsd-icon-but:active { transform: scale(.94); }
 
 .tsd-icon-but:focus-visible,
@@ -180,20 +183,158 @@ body.tsd-panel {
 .tsd-exit-but img { width: 1.15em; height: auto; }
 .tsd-exit-but:hover { background: rgba(255, 255, 255, .08); }
 
+/* ---- header help menu --------------------------------------------------
+   #helpDropDownMenu stays a <form> because script.js calls .reset() on it,
+   which only exists on a form element. It carries no visual weight itself. */
+.tsd-help-menu {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Styled to sit beside "Exit Game" as a matching pill rather than a native
+   control. Same padding, radius, border and type as .tsd-exit-but. */
+.tsd-help-select {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+
+  /* A <select> is inline-block by default, so it sits on the text baseline
+     and reserves descender space beneath it — which reads as a gap under
+     the label that no amount of symmetric padding will balance. Making it
+     a flex box removes the baseline entirely and centres the label in the
+     pill. */
+  display: inline-flex;
+  align-items: center;
+
+  padding: clamp(7px, .75vw, 11px) clamp(30px, 2.6vw, 40px)
+           clamp(7px, .75vw, 11px) clamp(14px, 1.5vw, 24px);
+  border-radius: 999px;
+  border: 1px solid var(--tsd-hairline-soft, var(--tsd-hairline));
+  background-color: transparent;
+
+  /* chevron, inline so no extra asset is needed */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23FFFFFF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right clamp(13px, 1.2vw, 18px) center;
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(12px, 1.05vw, 17px);
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .18s var(--tsd-ease),
+              border-color .18s var(--tsd-ease);
+}
+
+.tsd-help-select:hover { background-color: rgba(255, 255, 255, .08); }
+
+.tsd-help-select:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 2px;
+}
+
+/* the closed control is dark-on-dark; the native popup is not, so at least
+   stop the list rendering as white-on-white in browsers that still draw it
+   themselves */
+.tsd-help-select option {
+  background-color: #14113F;
+  color: var(--tsd-text);
+}
+
+/* Chrome/Edge 135+ hand over the popup once the select and its ::picker()
+   both opt in to base-select. Ignored elsewhere, so the rules above remain
+   the fallback. */
+@supports (appearance: base-select) {
+  .tsd-help-select,
+  .tsd-help-select::picker(select) { appearance: base-select; }
+
+  .tsd-help-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: clamp(7px, .75vw, 11px) clamp(14px, 1.5vw, 24px);
+    background-image: none;
+  }
+
+  .tsd-help-select::picker-icon {
+    color: var(--tsd-text);
+    transition: transform .18s var(--tsd-ease);
+  }
+  .tsd-help-select:open::picker-icon { transform: rotate(180deg); }
+
+  /* Leave `display` alone. The popup sizes itself to its content as a
+     block; switching it to flex made it collapse to a short fixed box with
+     a scrollbar instead of growing to fit the options. */
+  .tsd-help-select::picker(select) {
+    box-sizing: border-box;
+    min-width: anchor-size(width);
+    margin-top: 6px;
+    padding: 4px;
+
+    border-radius: 12px;
+    border: 1px solid var(--tsd-hairline);
+    background: rgba(16, 13, 60, .98);
+    box-shadow: 0 18px 40px rgba(6, 5, 20, .55);
+  }
+
+  /* the 2px margin is what keeps two adjacent hover highlights from
+     touching and reading as one welded block */
+  /* flex + align-items centres the label vertically in the row. This is
+     safe on the option itself — it was `display: flex` on ::picker(select)
+     that collapsed the popup's sizing, not on the rows inside it. */
+  .tsd-help-select option {
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 4px 12px;
+    margin-bottom: 2px;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--tsd-text);
+    font-size: clamp(12px, .95vw, 14px);
+    line-height: 1.3;
+    cursor: pointer;
+  }
+
+  .tsd-help-select option:last-of-type { margin-bottom: 0; }
+
+  /* "Help Menu" is the placeholder, not a destination */
+  .tsd-help-select option:first-of-type {
+    color: var(--tsd-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+
+  .tsd-help-select option:hover,
+  .tsd-help-select option:focus {
+    background: rgba(253, 12, 117, .28);
+  }
+
+  .tsd-help-select option::checkmark { display: none; }
+}
+
 /* ---- scoreboard row ----------------------------------------------------
    Five across, exactly as the design:
    player 1 · bid grid 1 · bidding timer · bid grid 2 · player 2          */
 
 /* The two bid columns are sized to the Figma box (303px) and the rest of
-   the width is shared by the player cards and the clock. minmax(0, 303px)
-   lets them shrink below 303 rather than overflow on a narrow viewport. */
+   the width is shared by the player cards and the clock. minmax(0, …) lets
+   them shrink rather than overflow on a narrow viewport.
+
+   The ceiling is 324px, not the Figma 303px, because the same box also
+   holds the A-Z alpha bar: a 9-key row at the spec'd 28px needs 292px plus
+   the panel's 2*16px padding. The bid-number grid never reaches this and
+   still sits at its own 303px max-width — see .tsd-bid-panel below. */
 .tsd-scorebar {
   display: grid;
   grid-template-columns:
     minmax(0, 1fr)
-    minmax(0, 303px)
+    minmax(0, 324px)
     minmax(0, 275px)
-    minmax(0, 303px)
+    minmax(0, 324px)
     minmax(0, 1fr);
   /* center, not stretch: the bid boxes have a fixed design height (160px)
      and must not be stretched to match the tallest cell in the row. */
@@ -201,6 +342,7 @@ body.tsd-panel {
   gap: clamp(8px, 1vw, 18px);
   margin-bottom: clamp(18px, 2.4vw, 40px);
 }
+
 
 /* ---- player cards ------------------------------------------------------ */
 
@@ -302,11 +444,18 @@ body.tsd-panel {
   flex: 1 1 auto;
 }
 
-.tsd-pl-card--p2 .tsd-pl-body { text-align: right; }
+/* Player 2's card is laid out to match Player 1 exactly rather than being
+   mirrored: avatar on the left, text left-aligned.
+
+   The markup puts P2's avatar AFTER the body (it was authored as a mirror
+   image of P1), so `order` pulls it back to the front visually. The DOM is
+   left alone — every id in it is a live global the game scripts write to. */
+.tsd-pl-card--p2 .tsd-pl-body { text-align: left; }
+.tsd-pl-card--p2 .tsd-pl-avatar { order: -1; }
 
 .tsd-pl-slot {
-  margin: 0 0 2px;
-  font-size: clamp(10px, .82vw, 14px);
+  margin: 0 0 4px;
+  font-size: clamp(9px, .72vw, 12px);
   font-weight: 800;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -318,24 +467,24 @@ body.tsd-panel {
    player never sees their own name cut off. */
 .tsd-pl-card .playerName {
   margin: 0;
-  font-size: clamp(12px, 1.15vw, 19px);
+  font-size: clamp(11px, 1vw, 16px);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
   text-transform: uppercase;
   color: var(--tsd-text);
   overflow-wrap: anywhere;
 }
 
 .tsd-pl-caption {
-  margin: clamp(2px, .3vw, 6px) 0 0;
-  font-size: clamp(9px, .78vw, 13px);
+  margin: clamp(6px, .6vw, 10px) 0 0;
+  font-size: clamp(8px, .68vw, 11px);
   color: var(--tsd-text-muted);
 }
 
 /* #rndTotL / #rndTotR — the running score */
 .tsd-pl-card .pt {
-  margin: 0;
-  font-size: clamp(18px, 1.9vw, 32px);
+  margin: 2px 0 0;
+  font-size: clamp(16px, 1.65vw, 27px);
   font-weight: 800;
   line-height: 1.1;
   color: var(--tsd-text);
@@ -343,7 +492,8 @@ body.tsd-panel {
 
 /* #setTotL / #setTotR */
 .tsd-pl-total {
-  font-size: clamp(9px, .75vw, 12px);
+  margin-top: clamp(4px, .45vw, 8px);
+  font-size: clamp(8px, .65vw, 11px);
   color: var(--tsd-text-muted);
 }
 
@@ -357,8 +507,19 @@ body.tsd-panel {
 .tsd-bid-panel {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items is deliberately left at its `stretch` default. Setting it
+     to `center` shrink-wraps every child to its own content width, which
+     starves the alpha bar: its rows could then never reach the full 292px
+     they need and the 9-key line collapsed.
+
+     Children therefore fill the panel width, and inline content is centred
+     with text-align instead — which also catches the loose "ANSWER GOES
+     HERE" text node (AlphaBar.js emits that <option> after the <select>
+     has already closed, so it renders as bare text rather than an option
+     — a markup bug in the JS, not something CSS can undo). */
+  align-items: stretch;
   justify-content: center;
+  text-align: center;
   gap: 12px;
 
   min-width: 0;
@@ -486,6 +647,340 @@ body.tsd-panel {
   color: var(--tsd-accent-pink);
 }
 
+/* ---- alpha bar (A-Z answer picker) -------------------------------------
+   AlphaBar.js writes a <table> of .alphaBut0 / .alphaBut1 inputs plus a
+   select.DDM into the same .butHolder insert points as the bid numbers, so
+   everything below is scoped to .tsd-bid-panel.
+   Rows are fixed by the JS: it breaks after I and after R (9 / 9 / 8).   */
+
+.tsd-bid-panel .butHolder > table {
+  border-spacing: 0;
+  border-collapse: separate;
+  margin: 0;
+  width: auto;
+}
+
+/* flatten the table so each <td> can be its own centred grid row */
+.tsd-bid-panel .butHolder > table,
+.tsd-bid-panel .butHolder > table tbody,
+.tsd-bid-panel .butHolder > table tr,
+.tsd-bid-panel .butHolder > table td {
+  display: block;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+/* One row of letters. AlphaBar.js breaks after I and after R, so the rows
+   are 9 / 9 / 8 keys and every row must hold 9 without wrapping.
+
+   The keys are a fixed 9-column grid rather than a wrapping flex row: the
+   count per line is declared, so it can never reflow to 8 + 1 the way a
+   wrapping row does when the width is a pixel short.
+
+   The row stays inside the panel's padding — no negative margin. A 9-key
+   row at the full 28px would need 300px against the 271px available, so
+   the column is whatever 271px divides into instead, and the keys shrink
+   the ~2px needed to fit.                                                */
+.tsd-bid-panel .butHolder > table td {
+  /* One column = the spec's 28px, or narrower if the panel genuinely
+     cannot afford 9 across. Declared on the row rather than the key so the
+     short last row (8 keys) reuses the same width and its columns line up
+     with the rows above. */
+  --tsd-key-gap: 5px;
+  --tsd-key: min(28px, calc((100% - 8 * var(--tsd-key-gap)) / 9));
+
+  display: grid;
+  grid-template-columns: repeat(9, var(--tsd-key));
+  justify-content: center;
+  gap: var(--tsd-key-gap);
+}
+
+/* the last row is 8 keys (S-Z) — same column width, one fewer column, and
+   justify-content: center above keeps it centred under the rows above */
+.tsd-bid-panel .butHolder > table tr:last-child td {
+  grid-template-columns: repeat(8, var(--tsd-key));
+}
+
+.tsd-bid-panel .butHolder > table tr + tr td { margin-top: 5px; }
+
+/* the alpha bar is wider than the bid-number grid; let it use the full
+   panel width rather than being boxed in by the .butHolder centring. */
+.tsd-bid-panel .butHolder:has(> table) { width: 100%; }
+
+/* A 9-key row at the spec'd 28px needs 9*28 + 8*5 = 292px, plus the
+   panel's 2*16px padding = 324px — more than the 303px design ceiling set
+   on .tsd-bid-panel. Raise the ceiling only for a panel that is actually
+   holding the alpha bar, so the keys keep their 28px instead of shrinking
+   to fit. The bid-number grid is untouched: at 6*30 + 5*8 = 220px it was
+   never near the limit. */
+.tsd-bid-panel:has(.butHolder > table) { max-width: 324px; }
+
+/* ---- the letter keys ---------------------------------------------------
+   Square keys, per spec: 28 x 28, radius 4.2px, 1.05px solid #FFFFFF40
+   (= --tsd-hairline).
+
+   --tsd-key-team is the player colour, set once per panel, so every state
+   rule below stays player-agnostic.                                      */
+
+.tsd-bid-panel--p1 .butHolder { --tsd-key-team: var(--tsd-blue); }
+.tsd-bid-panel--p2 .butHolder { --tsd-key-team: var(--tsd-accent-pink); }
+
+.tsd-bid-panel .alphaBut0,
+.tsd-bid-panel .alphaBut1,
+.tsd-bid-panel .alphaBut {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+
+  /* Spec size is 28x28. The column (--tsd-key) is that, or narrower if the
+     panel cannot afford 9 across; aspect-ratio keeps the key square as it
+     shrinks. */
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+
+  border-radius: 4.2px;
+  border: 1.05px solid var(--tsd-hairline);
+  opacity: 1;
+
+  /* a top-lit face, so an unlit key still has some dimension */
+  background:
+    linear-gradient(180deg,
+      rgba(255, 255, 255, .10) 0%,
+      rgba(255, 255, 255, .02) 55%,
+      rgba(255, 255, 255, 0)   100%),
+    rgba(10, 8, 45, .55);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: transform .12s var(--tsd-ease),
+              color .15s var(--tsd-ease),
+              border-color .15s var(--tsd-ease),
+              background .15s var(--tsd-ease),
+              box-shadow .15s var(--tsd-ease);
+}
+
+/* "-I Give Up" is injected ahead of the A key in single-player mode. It is
+   not a letter, so take it out of the 9-column flow entirely and give it
+   its own full-width line above the grid. */
+.tsd-bid-panel .alphaBut {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  width: 100%;
+  height: 26px;
+  aspect-ratio: auto;
+  padding: 0 12px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: var(--tsd-text-muted);
+}
+
+/* hover — the key lights up in the player's colour and lifts a pixel */
+.tsd-bid-panel .alphaBut0:hover,
+.tsd-bid-panel .alphaBut1:hover,
+.tsd-bid-panel .alphaBut:hover {
+  color: #FFFFFF;
+  border-color: var(--tsd-key-team);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--tsd-key-team) 55%, transparent) 0%,
+      color-mix(in srgb, var(--tsd-key-team) 22%, transparent) 100%),
+    rgba(10, 8, 45, .55);
+  transform: translateY(-1px);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--tsd-key-team) 55%, transparent);
+}
+
+/* press — the key goes solid and sinks back down */
+.tsd-bid-panel .alphaBut0:active,
+.tsd-bid-panel .alphaBut1:active,
+.tsd-bid-panel .alphaBut:active {
+  transform: translateY(0) scale(.94);
+  border-color: var(--tsd-key-team);
+  background: var(--tsd-key-team);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--tsd-key-team) 85%, transparent);
+}
+
+.tsd-bid-panel .alphaBut0:focus-visible,
+.tsd-bid-panel .alphaBut1:focus-visible,
+.tsd-bid-panel .alphaBut:focus-visible {
+  outline: 2px solid var(--tsd-accent-yellow);
+  outline-offset: 2px;
+  color: #FFFFFF;
+}
+
+/* the lift, the press scale and the glow are decoration */
+@media (prefers-reduced-motion: reduce) {
+  .tsd-bid-panel .alphaBut0,
+  .tsd-bid-panel .alphaBut1,
+  .tsd-bid-panel .alphaBut { transition: none; }
+
+  .tsd-bid-panel .alphaBut0:hover,
+  .tsd-bid-panel .alphaBut1:hover,
+  .tsd-bid-panel .alphaBut:hover,
+  .tsd-bid-panel .alphaBut0:active,
+  .tsd-bid-panel .alphaBut1:active,
+  .tsd-bid-panel .alphaBut:active { transform: none; }
+}
+
+/* ---- the answer dropdown (select.DDM) ---------------------------------
+   AlphaBar.js sets `style.display` on this element inline (block / none),
+   so never set `display` here — only skin it.                            */
+.tsd-bid-panel .DDM {
+  appearance: none;
+  -webkit-appearance: none;
+
+  box-sizing: border-box;
+  width: 100%;
+  /* the panel is align-items: stretch, so centre this explicitly rather
+     than relying on the flex alignment to do it */
+  max-width: 292px;
+  margin-top: 10px;
+  margin-inline: auto;
+  padding: 7px 30px 7px 12px;
+
+  border-radius: 6px;
+  border: 1.05px solid var(--tsd-hairline);
+  background-color: rgba(10, 8, 45, .92);
+
+  /* the chevron, drawn inline so no extra asset is needed */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23B9C0DC' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: border-color .15s var(--tsd-ease);
+}
+
+.tsd-bid-panel--p1 .DDM:hover,
+.tsd-bid-panel--p1 .DDM:focus { border-color: var(--tsd-blue); }
+.tsd-bid-panel--p2 .DDM:hover,
+.tsd-bid-panel--p2 .DDM:focus { border-color: var(--tsd-accent-pink); }
+.tsd-bid-panel .DDM:focus { outline: none; }
+
+/* The options themselves. In browsers that still render the popup list
+   natively this is all that can be reached — it at least stops the list
+   coming up as white-on-white. */
+.tsd-bid-panel .DDM option {
+  background-color: #14113F;
+  color: var(--tsd-text);
+  padding: 6px 10px;
+}
+
+/* Chrome/Edge 135+ hand over the popup list once BOTH the select and its
+   ::picker() opt in to `base-select`. Everything in this block is ignored
+   by browsers that do not support it, which keeps the rules above as the
+   fallback. */
+@supports (appearance: base-select) {
+  .tsd-bid-panel .DDM,
+  .tsd-bid-panel .DDM::picker(select) { appearance: base-select; }
+
+  /* re-state the closed control: base-select drops the UA skin, and with
+     it the background-image chevron, which now belongs to ::picker-icon */
+  .tsd-bid-panel .DDM {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 12px;
+    background-image: none;
+  }
+
+  .tsd-bid-panel .DDM::picker-icon {
+    color: var(--tsd-text-muted);
+    transition: transform .15s var(--tsd-ease);
+  }
+  .tsd-bid-panel .DDM:open::picker-icon { transform: rotate(180deg); }
+
+  /* the popup list */
+  .tsd-bid-panel .DDM::picker(select) {
+    box-sizing: border-box;
+    max-height: 260px;
+    margin-top: 6px;
+    padding: 4px;
+    overflow-y: auto;
+
+    border-radius: 12px;
+    border: 1px solid var(--tsd-hairline);
+    background: rgba(16, 13, 60, .98);
+    box-shadow: 0 18px 40px rgba(6, 5, 20, .55);
+
+    /* the list is taller than 260px for most letters, so it scrolls. The
+       default OS scrollbar is ~17px of light chrome against the dark
+       panel; thin it and tint it to match. */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .28) transparent;
+  }
+
+  /* WebKit/Blink still prefer the ::-webkit- pseudo-elements over
+     scrollbar-width when both are present, so give them the same look. */
+  .tsd-bid-panel .DDM::picker(select)::-webkit-scrollbar {
+    width: 6px;
+  }
+  .tsd-bid-panel .DDM::picker(select)::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .tsd-bid-panel .DDM::picker(select)::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: rgba(255, 255, 255, .28);
+  }
+  .tsd-bid-panel .DDM::picker(select)::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, .45);
+  }
+
+  /* flex + align-items centres the label vertically in the row — see the
+     note on .tsd-help-select option above. */
+  .tsd-bid-panel .DDM option {
+    display: flex;
+    align-items: center;
+    min-height: 27px;
+    padding: 3px 10px;
+    margin-bottom: 2px;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--tsd-text);
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  /* the first option is the "All answers that start with: D" heading and
+     the trailing "----" entries are spacers AlphaBar.js appends; neither
+     is a real answer, so mute them. */
+  .tsd-bid-panel .DDM option:first-of-type {
+    color: var(--tsd-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+
+  .tsd-bid-panel--p1 .DDM option:hover,
+  .tsd-bid-panel--p1 .DDM option:focus,
+  .tsd-bid-panel--p1 .DDM option:checked { background: rgba(6, 131, 252, .30); }
+
+  .tsd-bid-panel--p2 .DDM option:hover,
+  .tsd-bid-panel--p2 .DDM option:focus,
+  .tsd-bid-panel--p2 .DDM option:checked { background: rgba(253, 12, 117, .30); }
+
+  .tsd-bid-panel .DDM option::checkmark { display: none; }
+}
+
 /* ---- centre bidding / timer card --------------------------------------
    #centerDisplay is written by BidButs.js (innerHTML) and recoloured by the
    game scripts via centerDisplay.style.color / .backgroundColor.          */
@@ -522,14 +1017,29 @@ body.tsd-panel {
   justify-content: center;
   gap: 8px;
 
-  /* Figma: 26px / weight 400 / line-height 100% / letter-spacing 4% */
+  /* Figma calls for 26px, but this is a status label sitting above the
+     countdown — it should not compete with it. Sized down to read as a
+     caption, with the extra weight and tracking a smaller line needs.
+
+     Note: when the JS paints a player colour it also sets fontSize inline
+     (postNoticeCenterDisplay's first field, e.g. "24,blue,..."), which
+     wins over this rule. The "white" notices — which include BIDDING
+     STARTED — clear that inline size, so they take the value below. */
   text-align: center;
-  font-size: clamp(17px, 1.65vw, 26px);
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: .04em;
+  font-size: clamp(12px, 1.05vw, 16px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--tsd-bid-gold);
+}
+
+/* A player-coloured notice arrives with an inline font-size of 16-36px,
+   which would tower over the caption above. Bring those into the same
+   range; !important is required only because the size is inline. */
+.tsd-bid-clock #centerDisplay[style*="font-size"],
+.tsd-bid-clock #centerDisplay[style*="fontSize"] {
+  font-size: clamp(12px, 1.15vw, 17px) !important;
 }
 
 /* When the JS paints a player colour (blue / red) to signal who bid, that
@@ -544,8 +1054,10 @@ body.tsd-panel {
 .tsd-bid-clock #centerDisplay::after {
   content: "";
   flex: none;
-  width:  22px;
-  height: 24px;
+  /* sized in em so the zaps track the label rather than towering over it
+     now that the text is caption-sized */
+  width:  1.35em;
+  height: 1.5em;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -563,22 +1075,59 @@ body.tsd-panel {
    no status text so two bolts do not float in an empty card. */
 .tsd-bid-clock #centerDisplay:empty { display: none; }
 
-/* #timeBox — the countdown, styled as plain text not a button.
-   Figma: #0D77F2. */
+/* #timeBox — the countdown. The <input> is still the live element (seven
+   places in the game scripts write to its .value, and its onclick sets the
+   bid time), but an <input>'s value is one flat string, so the number and
+   the unit inside it cannot be sized separately.
+
+   js-ui/tsd-clock-bar.js therefore mirrors the value into #timeBoxView as
+   two spans. The input is taken out of the visual flow — but NOT hidden
+   with display:none, which would break scripts that measure it — and the
+   view is shown in its place. Clicks on the view are forwarded to it. */
 .tsd-bid-clock #timeBox {
-  appearance: none;
-  -webkit-appearance: none;
-  margin: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
   padding: 0;
   border: 0;
-  background: transparent;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the visible countdown. Figma: #0D77F2. */
+.tsd-bid-clock #timeBoxView {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .28em;
 
   font-family: inherit;
-  font-size: clamp(22px, 2.2vw, 34px);
-  font-weight: 800;
   line-height: 1;
   color: var(--tsd-bid-time);
   cursor: pointer;
+  user-select: none;
+}
+
+/* the number keeps the original size */
+.tsd-bid-clock .tsd-clock-num {
+  font-size: clamp(22px, 2.2vw, 34px);
+  font-weight: 800;
+}
+
+/* the unit ("Sec") is a label beside it, not part of the number */
+.tsd-bid-clock .tsd-clock-unit {
+  font-size: clamp(11px, 1vw, 15px);
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: capitalize;
+  opacity: .78;
+}
+
+/* "--", "Time's up!" and other non-countdown messages */
+.tsd-bid-clock .tsd-clock-msg {
+  font-size: clamp(13px, 1.2vw, 18px);
+  font-weight: 700;
 }
 
 .tsd-clock-row {
@@ -606,27 +1155,82 @@ body.tsd-panel {
   overflow: hidden;
 }
 
+/* The fill's width is driven by js-ui/tsd-clock-bar.js, which mirrors
+   #timeBox's countdown into an inline width. The transition is a shade
+   longer than the 1s tick so the bar glides continuously rather than
+   stepping once a second; `linear` keeps the motion even. */
 .tsd-clock-bar > i {
   display: block;
   height: 100%;
-  width: 45%;                       /* static: no JS drives this */
+  width: 45%;                       /* starting value; the JS takes over */
   border-radius: 999px;
   background: var(--tsd-bid-bar-gradient);
+  transition: width 1.05s linear, background .3s var(--tsd-ease);
+}
+
+/* the last five seconds — the bar turns to the alert gradient and pulses */
+.tsd-clock-bar[data-tsd-low] > i {
+  background: linear-gradient(90deg,
+                var(--tsd-accent-orange) 0%,
+                var(--tsd-accent-pink)  100%);
+  animation: tsd-clock-pulse .9s ease-in-out infinite;
+}
+
+@keyframes tsd-clock-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-clock-bar > i { transition: none; }
+  .tsd-clock-bar[data-tsd-low] > i { animation: none; }
 }
 
 /* ---- action buttons ---------------------------------------------------
    #nextRoundBut, #ansBut, #checkBut. The JS toggles their display and
    visibility — never set `display` on them here.                        */
 
-.tsd-panel-actions {
+/* Answers / Next Round / Check share one row inside the bidding clock.
+
+   The game scripts show and hide these three by setting
+   style.display = "block" / "none" directly on the buttons, so the row must
+   do its layout from the PARENT — a flex container treats a display:block
+   child as a flex item, and hiding one still collapses it out of the row. */
+.tsd-clock-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: clamp(6px, .7vw, 12px);
+  width: 100%;
 }
 
-.tsd-panel-actions .btn,
+/* Next Round is the primary action, so it keeps the middle and the other
+   two sit either side of it. */
+.tsd-clock-actions #ansBut       { order: 1; }
+.tsd-clock-actions #nextRoundBut { order: 2; }
+.tsd-clock-actions #checkBut     { order: 3; }
+
+/* The clock is 275px wide, so three buttons across leaves ~73px each once
+   the padding and gaps are taken out. Override the shared .btn sizing with
+   something that actually fits: smaller type, tighter padding, and each
+   button free to shrink to its share of the row.
+
+   "Next Round" is two words and needs the most room, so it gets a slightly
+   larger share than the two single-word buttons either side. */
+.tsd-clock-actions .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: clamp(7px, .7vw, 10px) clamp(4px, .5vw, 8px);
+  font-size: clamp(9px, .68vw, 11px);
+  letter-spacing: .02em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tsd-clock-actions #nextRoundBut { flex-grow: 1.35; }
+
+.tsd-clock-actions .btn,
 .tsd-bid-clock .btn {
   appearance: none;
   -webkit-appearance: none;
@@ -660,7 +1264,7 @@ body.tsd-panel {
     var(--tsd-primary-gradient) border-box;
 }
 
-.tsd-panel-actions .btn:hover,
+.tsd-clock-actions .btn:hover,
 .tsd-bid-clock .btn:hover { background: rgba(6, 131, 252, .2); }
 
 /* keep the gradient border on hover; brighten the fill instead */
@@ -670,23 +1274,14 @@ body.tsd-panel {
     var(--tsd-primary-gradient) border-box;
 }
 
-.tsd-panel-actions .btn:active,
+.tsd-clock-actions .btn:active,
 .tsd-bid-clock .btn:active { transform: scale(.97); }
 
-.tsd-panel-actions .btn:focus-visible,
+.tsd-clock-actions .btn:focus-visible,
 .tsd-bid-clock .btn:focus-visible {
   outline: 2px solid var(--tsd-text);
   outline-offset: 2px;
 }
-
-/* the help select sits in the same row as the action buttons */
-.tsd-panel-actions select.btn {
-  text-transform: none;
-  letter-spacing: normal;
-  background: var(--tsd-field-bg);
-}
-
-.tsd-panel-actions form { margin: 0; }
 
 /* ---- question ---------------------------------------------------------- */
 
@@ -707,14 +1302,26 @@ body.tsd-panel {
 /* #qBox — the JS writes the question text here and toggles its display */
 .tsd-question-main #qBox {
   margin: 0;
-  font-size: clamp(16px, 1.85vw, 32px);
+  /* 24px is the ceiling; it still scales down on a narrow viewport */
+  font-size: clamp(16px, 1.85vw, 24px);
   font-weight: 700;
   line-height: 1.3;
   color: var(--tsd-text);
 }
 
-/* the "Drag each item…" helper line */
-.tsd-question-hint {
+/* The "Drag each item…" helper line.
+
+   HIDDEN BY DEFAULT. This is static markup in GamePanel.html with no id,
+   and no script ever writes to it — so it showed the same drag-and-drop
+   instruction on every screen, including the pre-game notice and every
+   round type that has nothing to drag.
+
+   The markup is left in place (removing it is a content decision, not a
+   styling one) and the rule below is kept intact, so wiring it up later is
+   just a matter of a script filling it and setting .is-shown. */
+.tsd-question-hint { display: none; }
+
+.tsd-question-hint.is-shown {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -732,8 +1339,36 @@ body.tsd-panel {
    the container — never the generated contents.                          */
 
 .tsd-play-area {
+  /* min-height only -- the GameI stage is magnified (see #imageInsertPt) and
+     can render taller than this; the area must grow to it, never clip it. */
   min-height: clamp(220px, 30vw, 460px);
+
+  /* Every renderer's output is centred here, once, rather than each game
+     type getting its own :has() patch. The generated content is a mix of
+     shrink-to-fit tables, inline-blocks and images, so text-align covers
+     the inline/inline-block cases and the margin rule below covers the
+     block-level ones. */
+  text-align: center;
 }
+
+/* Block-level generated content has a width of its own, so text-align does
+   not move it — centre it with auto margins instead. Restricted to the
+   insert points' own children so nothing deeper is disturbed. */
+.tsd-play-area > #gameInsrtPt > table,
+.tsd-play-area > #gamePlayArea > table,
+.tsd-play-area > #imageInsertPt > img {
+  margin-inline: auto;
+}
+
+/* The renderers' own text should read normally inside those centred
+   containers; only the containers themselves are centred. Each game type
+   that genuinely wants centred text sets it further down. */
+.tsd-play-area #gamePlayArea .gridInsrtPt,
+.tsd-play-area #left,
+.tsd-play-area #right,
+.tsd-play-area .container,
+.tsd-play-area .containerC,
+.tsd-play-area .tsd-pregame-rules { text-align: initial; }
 
 .tsd-play-area #gamePlayArea { min-width: 0; }
 
@@ -993,9 +1628,94 @@ body.tsd-panel {
 @media (prefers-reduced-motion: reduce) {
   .tsd-icon-but,
   .tsd-exit-but,
-  .tsd-panel-actions .btn,
+  .tsd-clock-actions .btn,
   .tsd-bid-clock .btn,
   .tsd-bid-panel .but2Player { transition: none; }
+}
+
+/* ---- turn-change notice -------------------------------------------------
+   Game.showNextPlayerNotice() writes this into #insrtPtB between plays:
+   "OK / <name> / It's your Turn Now!" plus a CONTINUE button.
+
+   The markup used to carry inline font-size:48px on each line and an
+   unstyled default button. Those inline sizes could not be overridden from
+   here, so the sizing now lives in the markup's classes instead.         */
+
+.tsd-play-area .tsd-turn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, .4vw, 6px);
+  padding: clamp(20px, 3vw, 40px) 16px;
+  text-align: center;
+}
+
+.tsd-play-area .tsd-turn-lead {
+  margin: 0;
+  font-size: clamp(13px, 1.1vw, 16px);
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tsd-text-muted);
+}
+
+/* the name is the one thing that should carry weight here */
+.tsd-play-area .tsd-turn-name {
+  margin: 0;
+  font-size: clamp(22px, 2.4vw, 34px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: .01em;
+  color: var(--tsd-text);
+  overflow-wrap: anywhere;
+}
+
+.tsd-play-area .tsd-turn-cue {
+  margin: 0 0 clamp(16px, 2vw, 26px);
+  font-size: clamp(14px, 1.25vw, 19px);
+  font-weight: 500;
+  color: var(--tsd-body-text, var(--tsd-text-muted));
+}
+
+/* same treatment as the pre-game Start Round button, so the two read as
+   one family */
+.tsd-play-area .tsd-turn-but {
+  appearance: none;
+  -webkit-appearance: none;
+
+  min-height: clamp(42px, 4.6vw, 52px);
+  padding: 0 clamp(24px, 2.6vw, 40px);
+  border: 0;
+  border-radius: 12px;
+  background: var(--tsd-primary-gradient);
+
+  font-family: inherit;
+  font-size: clamp(13px, 1.1vw, 16px);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+  cursor: pointer;
+
+  box-shadow: 0 8px 24px rgba(6, 131, 252, .32);
+  transition: transform .16s var(--tsd-ease), box-shadow .16s var(--tsd-ease);
+}
+
+.tsd-play-area .tsd-turn-but:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(6, 131, 252, .45);
+}
+
+.tsd-play-area .tsd-turn-but:active { transform: translateY(0); }
+
+.tsd-play-area .tsd-turn-but:focus-visible {
+  outline: 2px solid var(--tsd-accent-yellow);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-play-area .tsd-turn-but { transition: none; }
+  .tsd-play-area .tsd-turn-but:hover { transform: none; }
 }
 
 /* ---- Game B — image box grid -------------------------------------------
@@ -1751,9 +2471,8 @@ body.tsd-panel {
   background: var(--tsd-bx-panel-bg);
 }
 
-/* centre that shrink-to-fit panel in the play area */
-.tsd-play-area:has(#gamePlayArea .gridInsrtPt) { text-align: center; }
-.tsd-play-area #gamePlayArea .gridInsrtPt      { text-align: initial; }
+/* centring is handled once on .tsd-play-area (see the play-area block
+   above), which also restores normal text alignment inside .gridInsrtPt */
 
 /* ---- the generated table ------------------------------------------------
    border='5' is an attribute, so it is cleared on every level.          */
@@ -1912,6 +2631,31 @@ body.tsd-panel {
    positioned against it. Sizing to the image keeps the panel coordinates,
    which are pixel values against the image's natural size, accurate.    */
 
+/* The stage is scaled up as a whole. The cover panels are positioned in
+   image pixels (GameI.positionButtons writes inline left/top/width/height
+   from the image's natural size), so anything that resized the image alone
+   would misalign every panel. Scaling the stage magnifies image and panels
+   together, so the grid stays registered to the artwork.
+
+   Some question images are tiny -- AA.Ien00028 ("What is this State?") is a
+   128x160 gif carrying an 8x8 grid, i.e. 16x20px per cell -- which is the
+   "small clumsy box".
+
+   `zoom` is used rather than `transform: scale()` because zoom reflows the
+   surrounding layout: the row below is pushed down by the real rendered
+   height, with no margin correction and no risk of the enlarged grid
+   overlapping the buttons beneath it.                                    */
+/* The stage is EMPTY until a picture round fills it, and an empty
+   inline-block still paints its border and background — which rendered as a
+   small dot on every screen that has no image. `:empty` keeps the stage
+   invisible until GameI.insertImage() puts something in it.
+
+   The rule is written against the class rather than the id so any other
+   empty stage is covered too. */
+.tsd-play-area .imageInsertPt:empty {
+  display: none;
+}
+
 .tsd-play-area #imageInsertPt {
   position: relative;
   display: inline-block;
@@ -1920,10 +2664,17 @@ body.tsd-panel {
   border-radius: var(--tsd-gi-stage-radius);
   background: var(--tsd-gi-stage-bg);
   overflow: hidden;
+
+  /* Uniform scale only. The cover panels are absolutely positioned in image
+     pixels, so both their offset and their size have to scale by the same
+     factor -- squashing one axis would need each panel's top AND height
+     recomputed, which only the JS that writes them could do. So the height
+     comes down by lowering the zoom, and the width follows.              */
+  zoom: var(--tsd-gi-stage-zoom);
 }
 
-/* centre the shrink-to-fit stage */
-.tsd-play-area:has(#imageInsertPt #gameIImage) { text-align: center; }
+
+/* the stage is centred by .tsd-play-area's own text-align (see above) */
 
 .tsd-play-area #gameIImage {
   position: relative;

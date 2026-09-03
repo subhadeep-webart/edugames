@@ -69,8 +69,7 @@ class GameL extends Game {//console.log(" =" + );
      <p><b>The player closest to the correct location wins.</b></p></p>
      <font size="4"><p>The point award is a function of how much closer the winner is than the looser.</p></font>
      <b>IMPORTANT:</b> Players need to decide if the second player is allowed to view the first player's placement or not.
-     If not, the second player must turn away while the first player makes the selection.
-     <p>The Game has selected ${this.nameFirstUp} at random to go first and has ${theTime} seconds to complete the play.</p></font></div></div><div class="tsd-pregame-foot"><button type="button" class="tsd-pregame-start" onclick="gameL.startGame()"><i class="tsd-pregame-play" aria-hidden="true"></i><span>Start Round</span></button></div></div>`
+     If not, the second player must turn away while the first player makes the selection.</font></div></div><div class="tsd-pregame-foot"><button type="button" class="tsd-pregame-start" onclick="gameL.startGame()"><i class="tsd-pregame-play" aria-hidden="true"></i><span>Start Round</span></button></div></div>`
 
 		gamePlayArea.innerHTML = buf;
 		console.log("GameL.showPregameNotice() bottom ");

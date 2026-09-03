@@ -22,6 +22,14 @@
        onCancel:  function () { ... }
      });
 
+   Usage — a message, in place of window.alert():
+
+     TSDModal.alert({
+       title:   "Bidding",
+       message: helpText,       // plain text; line breaks are preserved
+       icon:    "help"          // "help" | "exit" (default)
+     });
+
    Only one dialog exists in the DOM at a time; it is built on first use.
    ========================================================================== */
 
@@ -34,6 +42,8 @@ var TSDModal = (function () {
   var textEl       = null;
   var confirmBtn   = null;
   var cancelBtn    = null;
+  var iconHost     = null;
+  var currentIcon  = "exit";
 
   var onConfirmCb  = null;
   var onCancelCb   = null;
@@ -44,6 +54,16 @@ var TSDModal = (function () {
      filter cannot recolour that to an arbitrary hue, but inlining can. */
   var ICON_URL = "images/new-images/icons/exit_icon.svg";
 
+  /* the help glyph — drawn inline (not fetched) so it is available
+     immediately and inherits CSS `color` like the exit icon does */
+  var ICON_HELP =
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/>' +
+      '<path d="M9.3 9.2a2.8 2.8 0 1 1 3.5 2.7c-.5.2-.8.6-.8 1.1v.6" ' +
+            'stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
+      '<circle cx="12" cy="16.6" r="1.05" fill="currentColor"/>' +
+    '</svg>';
+
   /* shown until the real glyph loads (and if the fetch fails, e.g. file://) */
   var ICON_FALLBACK =
     '<svg viewBox="0 0 21 19" fill="none" aria-hidden="true">' +
@@ -53,6 +73,9 @@ var TSDModal = (function () {
             'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
     '</svg>';
 
+  /* the fetched exit glyph, kept so setIcon() can switch back to it */
+  var exitMarkup = ICON_FALLBACK;
+
   function loadIcon(host) {
     if (!window.fetch) { return; }
 
@@ -61,9 +84,26 @@ var TSDModal = (function () {
       .then(function (svg) {
         if (!svg) { return; }
         /* let CSS `color` drive the glyph instead of the baked-in pink */
-        host.innerHTML = svg.replace(/fill="#FD0C75"/g, 'fill="currentColor"');
+        exitMarkup = svg.replace(/fill="#FD0C75"/g, 'fill="currentColor"');
+
+        /* only paint it if an exit dialog is the one on screen — otherwise
+           a late fetch would stomp the help glyph */
+        if (iconHost && currentIcon === "exit") {
+          iconHost.innerHTML = exitMarkup;
+        }
       })
       .catch(function () { /* keep the fallback glyph */ });
+  }
+
+  /* swap the medallion glyph and its tint */
+  function setIcon(name) {
+    if (!iconHost) { return; }
+    currentIcon = (name === "help") ? "help" : "exit";
+
+    iconHost.innerHTML = (currentIcon === "help") ? ICON_HELP : exitMarkup;
+    iconHost.style.color = (currentIcon === "help")
+      ? "var(--tsd-accent-yellow)"
+      : "var(--tsd-blue)";
   }
 
   /* ---------------------------------------------------------------
@@ -98,7 +138,8 @@ var TSDModal = (function () {
     confirmBtn = overlay.querySelector("[data-tsd-confirm]");
     cancelBtn  = overlay.querySelector("[data-tsd-cancel]");
 
-    loadIcon(overlay.querySelector(".tsd-modal-icon"));
+    iconHost = overlay.querySelector(".tsd-modal-icon");
+    loadIcon(iconHost);
 
     confirmBtn.addEventListener("click", function () { resolve(true);  });
     cancelBtn.addEventListener("click",  function () { resolve(false); });
@@ -119,7 +160,10 @@ var TSDModal = (function () {
       }
 
       if (e.key === "Tab") {
-        var f = [confirmBtn, cancelBtn];
+        /* cancelBtn is hidden in alert mode — do not trap focus onto it */
+        var f = (cancelBtn.style.display === "none")
+          ? [confirmBtn]
+          : [confirmBtn, cancelBtn];
         var i = f.indexOf(document.activeElement);
         e.preventDefault();
         if (e.shiftKey) {
@@ -150,6 +194,16 @@ var TSDModal = (function () {
 
     textEl.style.display = opts.message ? "" : "none";
 
+    setIcon(opts.icon);
+
+    /* Alert mode: one button, and the body is rendered as pre-wrapped,
+       left-aligned text. The help copy in js/Help.js is plain text laid out
+       with real line breaks and indentation, which the centred single-line
+       treatment used for confirmations would destroy. */
+    var isAlert = opts.mode === "alert";
+    dialog.classList.toggle("tsd-modal-dialog--alert", isAlert);
+    cancelBtn.style.display = isAlert ? "none" : "";
+
     onConfirmCb = typeof opts.onConfirm === "function" ? opts.onConfirm : null;
     onCancelCb  = typeof opts.onCancel  === "function" ? opts.onCancel  : null;
 
@@ -157,8 +211,11 @@ var TSDModal = (function () {
 
     overlay.classList.add("is-open");
 
-    /* focus the safe option, not the destructive one */
-    setTimeout(function () { cancelBtn.focus(); }, 30);
+    /* focus the safe option, not the destructive one — in alert mode the
+       only button IS the safe one */
+    setTimeout(function () {
+      (isAlert ? confirmBtn : cancelBtn).focus();
+    }, 30);
   }
 
   function close() {
@@ -191,6 +248,21 @@ var TSDModal = (function () {
     confirm: open,
     close:   close,
     isOpen:  isOpen,
+
+    /* A message with a single dismiss button — the in-game replacement for
+       window.alert(). Line breaks in `message` are preserved. */
+    alert: function (opts) {
+      opts = opts || {};
+      open({
+        mode:        "alert",
+        icon:        opts.icon || "help",
+        title:       opts.title || "",
+        message:     opts.message || "",
+        confirmText: opts.confirmText || "Got it",
+        onConfirm:   opts.onConfirm,
+        onCancel:    opts.onConfirm   /* Esc / scrim dismiss runs it too */
+      });
+    },
 
     /* the standard exit prompt, so every screen words it identically */
     confirmExit: function (onConfirm) {

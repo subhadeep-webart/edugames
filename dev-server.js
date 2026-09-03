@@ -81,6 +81,9 @@ const MIME = {
   '.txt' : 'text/plain; charset=utf-8',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
+  '.otf' : 'font/otf',
+  '.ttf' : 'font/ttf',
+  '.eot' : 'application/vnd.ms-fontobject',
   '.pdf' : 'application/pdf'
 };
 

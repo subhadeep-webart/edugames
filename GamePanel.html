@@ -12,8 +12,15 @@
     <meta name="keywords" content="trivia,knowledge,challenge,game">
     <link rel="icon" type="image/android-icon-36x36.png" sizes="36x36" href="/favicon-36x36.png">
     <!-- /public_html/edugames.com/JStest/EdUGamesJS /> -->
+    <link rel="stylesheet" href="css/fonts.css">
     <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/modal.css">
     <link rel="stylesheet" href="css/gamepanel.css">
+
+    <!-- UI layer. tsd-mute.js wraps the Audio constructor, so it must load
+         before any game script creates a sound. -->
+    <script src="js-ui/tsd-mute.js"></script>
+    <script src="js-ui/tsd-modal.js"></script>
 
     <title>Trivia SmackDown</title>
 </head>
@@ -44,14 +51,20 @@
 
     <div class="tsd-panel-tools">
 
-      <button class="tsd-icon-but" type="button" onclick="showHelpMenu()"
-              aria-label="Help">
-        <img src="images/new-images/icons/help_icon.svg" alt="">
+      <button class="tsd-icon-but" type="button" id="btnSound"
+              onclick="toggleSound()" aria-label="Sound" aria-pressed="false">
+        <img id="btnSoundIcon" src="images/new-images/icons/voulme_icon.svg" alt="">
       </button>
 
-      <button class="tsd-icon-but" type="button" aria-label="Sound">
-        <img src="images/new-images/icons/voulme_icon.svg" alt="">
-      </button>
+      <form id="helpDropDownMenu" class="tsd-help-menu" method="post" action="">
+        <select class="tsd-help-select" onchange="getHelpFromMenu(value)"
+                aria-label="Help menu">
+          <option selected value="--">Help Menu</option>
+          <option value="general">General</option>
+          <option value="bidding">Bidding</option>
+          <option value="roundThis">This Round</option>
+        </select>
+      </form>
 
       <button class="tsd-exit-but" type="button" onclick="goToSummary()">
         Exit Game
@@ -99,15 +112,30 @@
 
       <div id="centerDisplay"></div>
 
+      <!-- #timeBox stays exactly as it was: seven places across the game
+           scripts write to its .value, and its onclick is live. It is
+           visually replaced by #timeBoxView, which js-ui/tsd-clock-bar.js
+           fills with the same text split into number + unit so the unit can
+           be styled smaller. The input keeps handling the click. -->
       <div class="tsd-clock-row">
         <img src="images/new-images/icons/timer_icon.svg" alt="">
         <input type="button" id="timeBox" onclick="setBidClockTo2Sec()" value="30 Sec">
+        <span id="timeBoxView" aria-hidden="true"></span>
       </div>
 
       <div class="tsd-clock-bar"><i></i></div>
 
-      <input type="button" class="btn" onclick="nextRound()"
-             value="Next Round" id="nextRoundBut">
+      <!-- Answers and Check flank Next Round. All three are shown/hidden by
+           the game scripts setting style.display = "block" / "none", so the
+           row is a flex container and the buttons keep their own display. -->
+      <div class="tsd-clock-actions">
+        <input type="button" class="btn" onclick="showAnswers()" value="Answers" id="ansBut">
+
+        <input type="button" class="btn" onclick="nextRound()"
+               value="Next Round" id="nextRoundBut">
+
+        <input type="button" class="btn" onclick="checkPlay()" id="checkBut" value="Check">
+      </div>
     </div>
 
     <!-- ---------- player 2 bid grid ----------
@@ -141,22 +169,8 @@
 
   </div>
 
-  <!-- ====================== actions ====================== -->
-  <div class="tsd-panel-actions">
-
-    <form id="helpDropDownMenu" method="post" action="">
-      <select class="btn" onchange="getHelpFromMenu(value)">
-        <option selected value="--">Help Menu</option>
-        <option value="general">General</option>
-        <option value="bidding">Bidding</option>
-        <option value="roundThis">This Round</option>
-        <option value="roundNext">Next Round</option>
-      </select>
-    </form>
-
-    <input type="button" class="btn" onclick="showAnswers()" value="Answers" id="ansBut">
-    <input type="button" class="btn" onclick="checkPlay()" id="checkBut" value="Check">
-  </div>
+  <!-- ====================== actions ======================
+       Answers and Check moved up beside Next Round in the bidding clock. -->
 
   <div id="noticeA">ALREADY SELECTED!</div>
   <!-- <p id="tempImageInsrtPt"> </p> -->
@@ -187,7 +201,6 @@
     <p id="ansBar"></p>
     <div id="gameInsrtPt"></div>
     <div id="imageInsertPt" class="imageInsertPt"></div>
-    <div id="gameLInsrtPtA" class="imageInsertPt"></div>
     <div id="gamePlayArea"></div>
     <div id="insrtPtA"></div>
     <div id="insrtPtB"></div>
@@ -311,7 +324,6 @@
     const checkBut = document.getElementById("checkBut");
     const gameInsrtPt = document.getElementById("gameInsrtPt");
     const gameISelBox = document.getElementById("gameISelBox");
-    const gameLInsrtPtA = document.getElementById("gameLInsrtPtA");
     const gameLInsrtPtB = document.getElementById("gameLInsrtPtB");
     const gamePlayArea = document.getElementById("gamePlayArea");
     const helpDropDown = document.getElementById("helpDropDown");
@@ -495,6 +507,9 @@
         document.getElementById('customAlert').style.display = 'none';
     }
 
+    /* The header's help icon button was replaced by the Help Menu dropdown
+       beside Exit Game, so nothing calls this any more. Kept so any other
+       caller does not hit a ReferenceError. */
     function showHelpMenu() {
         console.log("showHelpMenu  ");
         getHelp();
@@ -572,9 +587,40 @@
         bidButs.setBidSeconds(2)
     }
 
+    /* Exit — confirm first, then leave for the opening screen. */
     function goToSummary() {
         console.log("gp.egoToSummary()");
-        window.location.href = "GameOver.html";
+        if (typeof TSDModal === "undefined") {
+            window.location.href = "start.html";
+            return;
+        }
+        TSDModal.confirmExit(function () {
+            window.location.href = "start.html";
+        });
+    }
+
+    /* Sound on/off. TSDMute owns the state and silences every Audio the
+       game makes; this only keeps the button's icon and label in step. */
+    function toggleSound() {
+        if (typeof TSDMute === "undefined") { return; }
+        TSDMute.toggle();
+    }
+
+    if (typeof TSDMute !== "undefined") {
+        TSDMute.onChange(function (muted) {
+            var but  = document.getElementById("btnSound");
+            var icon = document.getElementById("btnSoundIcon");
+            if (icon) {
+                icon.src = muted
+                    ? "images/new-images/icons/volume_off_icon.svg"
+                    : "images/new-images/icons/voulme_icon.svg";
+            }
+            if (but) {
+                but.setAttribute("aria-pressed", String(muted));
+                but.setAttribute("aria-label", muted ? "Sound off" : "Sound on");
+                but.classList.toggle("is-muted", muted);
+            }
+        });
     }
 
     function goBack() {
@@ -678,6 +724,7 @@
 <!-- new-UI presentation helper. Loads AFTER the game scripts and only
      writes a CSS variable; it changes no game state. -->
 <script src="js-ui/tsd-slider-fill.js"></script>
+<script src="js-ui/tsd-clock-bar.js"></script>
 
 
 <script>

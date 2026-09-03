@@ -125,12 +125,17 @@ class Game{
 
 	showNextPlayerNotice(nextPlayerName) {
 		console.log("Game showNextPlayerNotice " + nextPlayerName );//    console.log(" =" + );
-		let buf = `  
-<div style="text-align:center; font-size:48px;">OK</div>
-<div style="text-align:center; font-size:48px;" id="nextPlayerName" >${nextPlayerName}</div>
-<div style="text-align:center; font-size:48px;">It's your Turn Now!</div>
-</br><div style="text-align:center; font-size:24px;"><input type="button" onClick="nextPlayer()"
-style="text-align:center; font-size:24px;"  value="CONTINUE"></div>
+		/* Sizing and colour come from css/gamepanel.css (.tsd-turn-*), not
+		   from inline styles — an inline font-size cannot be overridden by
+		   the stylesheet. #nextPlayerName and the nextPlayer() handler are
+		   kept exactly as they were. */
+		let buf = `
+<div class="tsd-turn">
+<p class="tsd-turn-lead">OK</p>
+<p class="tsd-turn-name" id="nextPlayerName">${nextPlayerName}</p>
+<p class="tsd-turn-cue">It's your Turn Now!</p>
+<button type="button" class="tsd-turn-but" onClick="nextPlayer()">CONTINUE</button>
+</div>
 `;
 		
 		gamePlayArea.style.display = "none";	
