@@ -4046,14 +4046,45 @@ body.tsd-panel {
 
 @media (max-width: 720px) {
   :root {
-    --tsd-bx-btn-w: 116px;
-    --tsd-bx-btn-min-h: 32px;
-    --tsd-bx-btn-pad-x: 8px;
+    --tsd-bx-btn-min-h: 36px;
+    --tsd-bx-btn-pad-x: 6px;
     --tsd-bx-btn-gap: 6px;
   }
 
+  /* --tsd-bx-btn-w is a FIXED tile width, and every cell is pinned to it
+     (width/min-width/max-width above). The column count comes from the
+     question data, so a fixed width cannot know how wide the grid will be:
+     a 3-column round measured 3*116 + spacing = 372px inside a 360px play
+     area. The table overflowed, tsd-fit-screen.js shrank the whole board to
+     0.93 to compensate, and the result was the cramped 12px grid sitting in
+     the left part of the screen with dead space beside it.
+
+     On a phone, let the table fill the width it has and let the columns
+     divide it instead. table-layout:fixed + width:100% gives every column
+     an equal share of whatever is actually available, so a 2-column round
+     gets wide tiles and a 4-column round narrow ones -- and neither
+     overflows, so the fit scaler stays at 1 and the type stays full size. */
+  .tsd-play-area #gamePlayArea table:has(.gridInsrtPt) {
+    width: 100%;
+    table-layout: fixed;
+    /* the negative margin above compensates for border-spacing bleeding
+       outside the edge cells; with width:100% that pull would drag the
+       table wider than its container, so trade it for horizontal-only */
+    margin: calc(-1 * var(--tsd-bx-gap)) 0;
+  }
+
+  /* release the fixed per-cell width so the shares above apply */
+  .tsd-play-area #gamePlayArea table:has(.gridInsrtPt) td {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+  }
+
+  /* 12px was compensating for tiles that had already been shrunk by the fit
+     scaler -- roughly 11px on screen. With the grid no longer overflowing,
+     the tiles are full size and can carry readable type again. */
   .tsd-play-area #gamePlayArea .but {
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 
@@ -5242,13 +5273,85 @@ body.tsd-panel {
     gap: 8px;
   }
 
-  /* The two bid pads sit side by side (grid row 2, set at 1100px above).
-     At 375px that is ~170px each, which with 44px touch targets fits two
-     columns per pad -- so a 7-bid round became four tall rows and the pad
-     grew past 300px. Centring the auto-fit track lets the buttons flow as
-     wide as the pad allows and keeps the block short. */
-  .tsd-bid-panel .bidButs td {
+  /* ---- bid pads: one per row, full width ------------------------------
+     The 1100px query above puts the two pads side by side, so each gets
+     half the screen -- ~175px on a 390px phone. With the 44px touch targets
+     from the coarse-pointer rule that fits only TWO columns, so the numbers
+     stack into a tall narrow ladder: 7 bids = 261px, 12 = 429px, and 20 =
+     653px, taller than the phone itself. The bid count is data-driven
+     (BidButs.createButs is called with the round's answer count), so the
+     big cases are real rounds, not hypotheticals.
+
+     Give each pad the full width and put them on their own rows instead.
+     Same 44px targets, but ~6 per line rather than 2, so 12 bids is two
+     rows instead of six and the pad stops growing with the bid count.
+
+     Blue-left / red-right still holds: player 1 is simply ABOVE player 2
+     rather than beside it, and the score cards on row 1 keep the left/right
+     mapping that the audio cues and score labels reinforce. */
+  .tsd-scorebar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .tsd-bid-panel--p1 {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .tsd-bid-panel--p2 {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .tsd-bid-clock {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
+  /* .tsd-bid-panel:has(.butHolder > table) caps the panel at 288px so the
+     alpha bar's 9-key row keeps its 28px keys. That selector also matches
+     the bid-number table, so it capped these full-width pads too and only
+     4 of the 44px squares fitted a line. Lift the cap here -- the alpha bar
+     is centred and stays 288px wide by its own max-width below. */
+  .tsd-bid-panel,
+  .tsd-bid-panel:has(.butHolder > table) {
+    max-width: none;
+  }
+
+  /* keep the alpha bar at its design width inside the now-wider panel */
+  .tsd-bid-panel .butHolder > table:not(.bidButs) {
+    max-width: 288px;
+    margin-inline: auto;
+  }
+
+  /* Now that the row is full-width, let the buttons use it.
+
+     BidButs.js emits a hard row break after rowLength (10) buttons -- a
+     second <tr><td> -- so a 12-bid round arrived as 11 + 1 and the stray
+     "12" sat centred and alone under a full line. That split is the JS's
+     and is not ours to change, so flatten it in CSS instead: make the
+     TABLE the grid and let every button flow into one shared track list,
+     ignoring which <td> it came from. The wrap is then purely a function
+     of the available width and the last row fills naturally. */
+  .tsd-bid-panel .bidButs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 44px);
     justify-content: center;
+    gap: 12px;
+  }
+
+  /* the table's internal boxes stop being layout: the buttons inside them
+     are promoted into the table's own grid by display:contents */
+  .tsd-bid-panel .bidButs tbody,
+  .tsd-bid-panel .bidButs tr,
+  .tsd-bid-panel .bidButs td {
+    display: contents;
+  }
+
+  /* the second row's top margin was spacing two <td> blocks that no longer
+     exist as boxes -- the grid gap handles it now */
+  .tsd-bid-panel .bidButs tr+tr td {
+    margin-top: 0;
   }
 
   /* Question text: the desktop clamp bottoms out at 16px, which is fine,
@@ -5256,6 +5359,82 @@ body.tsd-panel {
   .tsd-question-bar {
     gap: 8px;
     margin-bottom: 8px;
+  }
+
+  /* ---- drag-and-drop boards (GameC / GameO): stack the two panels -------
+     GameC.js:319 builds the board as a two-cell table -- <td>#left</td>
+     <td>#right</td> -- so the source list and the drop targets sit side by
+     side. On a 390px phone that is ~175px each, and the labels are real
+     content: "Great Smoky Mountains" needs 230px and was clipped mid-word,
+     while a drop cell of 70px could not hold "N. Carolina-Tennessee". One
+     round measured 14 clipped elements.
+
+     No font size fixes a 230px string in a 175px box, so stop splitting the
+     width: let the two table cells become full-width blocks, one above the
+     other. Each panel then has the whole 360px and the text fits. */
+  .tsd-play-area #gamePlayArea #tabl,
+  .tsd-play-area #gamePlayArea #tabl > tbody,
+  .tsd-play-area #gamePlayArea #tabl > tbody > tr {
+    display: block;
+    width: 100%;
+  }
+
+  .tsd-play-area #gamePlayArea #tabl > tbody > tr > td {
+    display: block;
+    width: 100% !important;   /* GameC writes width='30%' on the first cell */
+    box-sizing: border-box;
+  }
+
+  /* breathing room between the stacked source list and drop panel */
+  .tsd-play-area #gamePlayArea #tabl > tbody > tr > td + td {
+    margin-top: 10px;
+  }
+
+  /* The items and drop cells must WRAP rather than clip. The desktop rules
+     set a 38px line-height for the fixed-height design slots; a wrapped
+     two-line label needs normal leading and a height that follows content. */
+  .tsd-play-area .draggable,
+  .tsd-play-area .draggableC,
+  .tsd-play-area .containerC,
+  .tsd-play-area .containerC > p {
+    white-space: normal;
+    overflow-wrap: break-word;
+    line-height: 1.3;
+    height: auto;
+    min-height: 0;
+  }
+
+  /* 18px is the design size for a 632px-wide desktop panel. Even full-width
+     on a phone the longest labels want a little less. Kept well above the
+     minimum readable size, and it beats the inline font-Size GameC writes
+     on every item (GameC.js:378) the same way the desktop rule does. */
+  .tsd-play-area .draggableC,
+  .tsd-play-area .draggable,
+  .tsd-play-area .containerC,
+  .tsd-play-area .containerC > p {
+    font-size: 15px !important;
+  }
+
+  /* A CatCols=2 question puts two drop cells per row; at phone width even
+     full-width that is ~170px a cell, which is what clipped the longer
+     state names. One per row instead -- the panel is taller but nothing is
+     cut off, and the board scrolls now. */
+  .tsd-play-area #gamePlayArea #right table,
+  .tsd-play-area #gamePlayArea #right tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .tsd-play-area #gamePlayArea #right tr {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tsd-play-area #gamePlayArea #right td.containerC {
+    display: block;
+    flex: 1 1 100%;
+    width: auto;
   }
 }
 
