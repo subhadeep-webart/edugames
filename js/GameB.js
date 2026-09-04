@@ -136,10 +136,9 @@ class GameB extends Game{//console.log("GameB  = " + );
 
 	postAnswers() {//R1C1,R1C4,R2C3,R2C4,R3C2,R3C3,R3C4,1,1,1,4,2,3,2,4,3,2,3,3,3,4
 		console.log("**********postAnswers()  " + this.rightAnsArray);
-		//const dotHalfWidth = 12;
-		//const dotHalfHeight = 12;
-		const dotHalfWidth = 18;
-		const dotHalfHeight = 6;
+		// The bars sit inside the picture wrapper so they share the check
+		// marks' containing block and can be placed by percentage.
+		const gridWrap = document.getElementById("gridImageWrap");
 
 		for (let i = 0; i < bidButs.butMax   ; i++) {//this.ansDotLoc.length
 			//let yellowSquare = "<img src='https://www.edugames.com/DataBase/A65AA65A/ResLibry/Pi/Th/Sy/To/YellowSquare/YellowSquare.AA.jpg' ";
@@ -147,15 +146,19 @@ class GameB extends Game{//console.log("GameB  = " + );
 			const aLoc = this.rightAnsArray[i];
 			const yLoc = aLoc.charAt(1);
 			const xLoc = aLoc.charAt(3);
-			const dotXLoc = (xLoc * this.boxWidth) - (this.boxWidth / 2) - dotHalfWidth;
-			const dotYLoc = (yLoc * this.boxHeight) - (this.boxHeight / 2) - dotHalfHeight;
+			const dotXLoc = ((xLoc - 0.5) / this.cols) * 100;
+			const dotYLoc = ((yLoc - 0.5) / this.rows) * 100;
 			yellowSquare += "id='" + aLoc + "'";
 			//yellowSquare += " width='24' class='yellowSquare' height='24' />";
 			yellowSquare += " width='36' class='yellowSquare' height='12' />";
 			console.log(" yellowSquare=   " + yellowSquare)
-			gameInsrtPt.innerHTML = gameInsrtPt.innerHTML + yellowSquare;
+			// Appended as a node rather than via innerHTML +=, which would
+			// rebuild every sibling and drop the check marks already placed.
+			const barHolder = document.createElement("div");
+			barHolder.innerHTML = yellowSquare;
+			(gridWrap || gameInsrtPt).appendChild(barHolder.firstElementChild);
 			const theImageDot = document.getElementById(aLoc);
-			theImageDot.style = `left: ${dotXLoc}px; top:${dotYLoc}px; z-index:50; `//
+			theImageDot.style = `left: ${dotXLoc}%; top:${dotYLoc}%; transform: translate(-50%, -50%); z-index:50; `//
 			console.log(aLoc + "  " + xLoc + "  " + yLoc + "  " + dotXLoc + "  " + dotYLoc + "   " + theImageDot.style.left + "   " + theImageDot.style.top) ;
 
 		}
@@ -396,37 +399,33 @@ class GameB extends Game{//console.log("GameB  = " + );
 
 
 	checkMarkIt(theRC) {console.log(" checkMarkIt  " + theRC + "  " + bidButs.whoHasBid);
-		let imgSrc = "";
-		if (onNet) {
-			if (bidButs.whoHasBid == "Blue") {
-				imgSrc = "https://www.edugames.com/DataBase/A65AA65A/ResLibry/Pi/Th/Sy/To/BlueCheckMark/BlueCheckMark.BB.jpg";
-			} else {
-				imgSrc = "https://www.edugames.com/DataBase/A65AA65A/ResLibry/Pi/Th/Sy/To/RedCheckMark/RedCheckMark.BB.jpg";
-			}
-		} else {
-			imgSrc = onLapTop
-				? "ResLibry/Pi/Th/Sy/To/GreenDot/GreenDot.AA.jpg"
-				: "../../HTDocs/public_html/edugames.com/DataBase/A65AA65A/ResLibry/Pi/Th/Sy/To/GreenDot/GreenDot.AA.jpg";
-		}
+		// The check mark is drawn in CSS rather than loaded from a .jpg. The
+		// old BlueCheckMark/RedCheckMark files are JPEGs, so they cannot carry
+		// transparency -- each one painted an opaque coloured disc over the
+		// face beneath it. A drawn tick shows the mark alone.
 		const theID = "dot" + theRC;
-		const theCkMrk = document.createElement("img");
+		const theCkMrk = document.createElement("span");
 
-		theCkMrk.src = imgSrc;
 		theCkMrk.id = theID;
-		theCkMrk.width = 32;
-		theCkMrk.height = 32;
-		theCkMrk.className = "dot";
+		// Blue = player 0, Red = player 1; keep that mapping.
+		theCkMrk.className = "dot tsd-ck" + (bidButs.whoHasBid == "Blue" ? " tsd-ck-blue" : " tsd-ck-red");
 		theCkMrk.style.position = "absolute";
 
 		const yLoc = theRC.charAt(1);
 		const xLoc = theRC.charAt(3);
-		const dotXLoc = (xLoc * this.boxWidth) - (this.boxWidth / 2) - 16;
-		const dotYLoc = (yLoc * this.boxHeight) - (this.boxHeight / 2) - 16;
+		// Positioned as a percentage of the grid rather than in the picture's
+		// natural pixels, so the mark stays on its cell whatever size the
+		// picture is actually rendered at. translate(-50%,-50%) centres the
+		// mark on the cell regardless of the mark's own size.
+		const dotXLoc = ((xLoc - 0.5) / this.cols) * 100;
+		const dotYLoc = ((yLoc - 0.5) / this.rows) * 100;
 
-		theCkMrk.style.left = `${dotXLoc}px`;
-		theCkMrk.style.top = `${dotYLoc}px`;
+		theCkMrk.style.left = `${dotXLoc}%`;
+		theCkMrk.style.top = `${dotYLoc}%`;
+		theCkMrk.style.transform = "translate(-50%, -50%)";
 
-		gameInsrtPt.appendChild(theCkMrk);  // This now works because it's a real node
+		const gridWrap = document.getElementById("gridImageWrap");
+		(gridWrap || gameInsrtPt).appendChild(theCkMrk);  // This now works because it's a real node
 
 		this.dotId.push(theID); // Needed for cleanup
 		console.log(`Added dot: ${theID} at (${dotXLoc}, ${dotYLoc})`);
@@ -458,8 +457,19 @@ class GameB extends Game{//console.log("GameB  = " + );
 		//console.log("*******theImage  = " + this.theImage );
 		//const theImageMod = "<div id='baseImage'> " + theImage + "</div>"
 		console.log("#####this.theImage  = " + this.theImage);
-		gameInsrtPt.innerHTML = gameInsrtPt.innerHTML + this.theImage;
+		// The picture is wrapped so that it, and not #gameInsrtPt, is the
+		// containing block for the check marks and answer bars placed over it.
+		// #gameInsrtPt is a full-width block while the picture is centred, so
+		// dots positioned against #gameInsrtPt landed to the left of the grid.
+		gameInsrtPt.innerHTML = gameInsrtPt.innerHTML + "<div id='gridImageWrap'>" + this.theImage + "</div>";
 		this.theImageDoc = document.getElementById("theImage");
+
+		// Expose the grid shape so the CSS can size the marks to one cell.
+		const gridWrapEl = document.getElementById("gridImageWrap");
+		if (gridWrapEl) {
+			gridWrapEl.style.setProperty("--tsd-grid-cols", this.cols);
+			gridWrapEl.style.setProperty("--tsd-grid-rows", this.rows);
+		}
 
 		this.theImageDoc.addEventListener('click', function () {
 			console.log("^^^^^^^^^^EVLst = " )

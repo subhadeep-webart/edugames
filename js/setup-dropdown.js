@@ -81,10 +81,26 @@
       if (!silent) select.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
+    /* The setup page is sized to fit one viewport with no scrollbar, so a
+       list that opens past the bottom edge would simply be cut off — there is
+       nothing to scroll to reach it. Open upward instead whenever the space
+       below the trigger cannot hold the list but the space above can. */
+    function placeList() {
+      wrap.classList.remove("is-drop-up");
+
+      var t = trigger.getBoundingClientRect();
+      var below = window.innerHeight - t.bottom;
+      var above = t.top;
+      var needed = listbox.scrollHeight + 8; /* 8px = the listbox's offset */
+
+      if (below < needed && above > below) wrap.classList.add("is-drop-up");
+    }
+
     function openList() {
       if (wrap.classList.contains("is-open")) return;
       wrap.classList.add("is-open");
       trigger.setAttribute("aria-expanded", "true");
+      placeList();
       setActive(select.selectedIndex);
       updateScrollCues();
     }

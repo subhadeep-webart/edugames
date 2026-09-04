@@ -200,8 +200,22 @@
   --tsd-sl-rule-h:       42px;
   --tsd-sl-label:        var(--tsd-text);
 
+  /* The answer marker (#blackDownArrow) is a solid black PNG silhouette, so
+     it can only be recoloured with a filter, not a colour property. It marks
+     the CORRECT answer, so it must not read as either player: blue and red
+     are the players and pink is the slider fill. White is the neutral
+     "truth" colour and carries the most contrast on the dark ground. The
+     drop-shadow lifts it off the ruler it overlaps. */
+  --tsd-sl-answer-arrow: brightness(0) invert(1)
+                         drop-shadow(0 1px 3px rgba(0, 0, 0, .7));
+  --tsd-sl-answer-arrow-w: 18px;
+
   /* ---- Pre-game notice (Game D / L / N) -------------------------------- */
   --tsd-pg-outer-bg:     rgba(255, 255, 255, .25);   /* #FFFFFF40 */
+  /* Scrim behind the notice: hides the round's board while the modal
+     notice is up, tinted to the page background so it reads as one
+     screen rather than a dimmed second one. */
+  --tsd-pg-scrim:        rgba(10, 8, 45, .88);
   --tsd-pg-inner-bg:     #262040;
   --tsd-pg-radius:       20px;   /* outer rim, per Figma */
   --tsd-pg-inner-radius: 24px;   /* the dark card inside the rim */
@@ -235,16 +249,22 @@
 
   --tsd-bx-btn-bg:       rgba(255, 255, 255, .14);   /* #FFFFFF4D at .4 */
   --tsd-bx-btn-radius:   8px;
-  --tsd-bx-btn-pad-y:    9px;
+  /* Raised from 9px / 36px. The grid is a small object in a tall band, so
+     the tiles carried the round on their own and read as thin strips with
+     a lot of empty space around them. A taller tile gives each label room
+     to breathe and makes the panel a more substantial block on screen. */
+  --tsd-bx-btn-pad-y:    13px;
   --tsd-bx-btn-pad-x:    12px;  /* the tile is a fixed width now, so
                                    this only insets the label */
-  --tsd-bx-btn-w:        180px;  /* every cell is this wide, so the columns
+  --tsd-bx-btn-w:        210px;  /* every cell is this wide, so the columns
                                     line up. Figma's 109 is the minimum;
                                     widened because the data holds compound
-                                    labels ("Las Cruces;New Mexico") that
-                                    would otherwise wrap badly. */
-  --tsd-bx-btn-min-h:    36px;
-  --tsd-bx-btn-gap:      10px;
+                                    labels ("Las Cruces;New Mexico", "on the
+                                    Dead Man's Chest") that would otherwise
+                                    wrap to two lines and make the row taller
+                                    than its neighbours. */
+  --tsd-bx-btn-min-h:    46px;
+  --tsd-bx-btn-gap:      12px;
   --tsd-bx-btn-ink:      #DCE1F5;
 
   --tsd-bx-selected:     #0D77F2;

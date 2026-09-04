@@ -110,11 +110,11 @@
       <p class="tsd-result-title" id="resultTitle">Correct Answer:</p>
       <div class="tsd-result-body">
         <p class="tsd-result-answer" id="resultAnswer"></p>
-        <p class="tsd-result-winner" id="resultWinner">
-          <img src="images/new-images/icons/trophy.svg" alt="" onerror="this.style.display='none'">
-          <span id="resultWinnerName"></span>
-        </p>
       </div>
+      <p class="tsd-result-winner" id="resultWinner">
+        <img src="images/new-images/icons/trophy.svg" alt="" onerror="this.style.display='none'">
+        <span id="resultWinnerName"></span>
+      </p>
     </div>
 
     <!-- ---------- player 1 bid grid ----------
@@ -147,13 +147,14 @@
       <!-- Answers and Check flank Next Round. All three are shown/hidden by
            the game scripts setting style.display = "block" / "none", so the
            row is a flex container and the buttons keep their own display. -->
+      <!-- Only Next Round lives here now. It is the flow-control action, so
+           it belongs beside the timer it advances past. Answers and Check
+           moved to .tsd-action-bar below the play area: they are about the
+           question being answered, and this column is too narrow to hold
+           three buttons without truncating their labels. -->
       <div class="tsd-clock-actions">
-        <input type="button" class="btn" onclick="showAnswers()" value="Answers" id="ansBut">
-
         <input type="button" class="btn" onclick="nextRound()"
                value="Next Round" id="nextRoundBut">
-
-        <input type="button" class="btn" onclick="checkPlay()" id="checkBut" value="Check">
       </div>
     </div>
 
@@ -212,6 +213,23 @@
       </p>
     </div>
 
+    <!-- ====================== actions ======================
+         Answers and Check sit at the END of the question row, on the same
+         line as the challenge they act on.
+
+         They were previously in a full-width band UNDER the play area. That
+         put the primary action at the very bottom of the screen, far from
+         both the question and the answers, and when the game showed Check on
+         its own it read as one control stranded in an empty strip.
+
+         Both keep their ids and inline onclick: the game scripts toggle them
+         with style.display / style.visibility, so this row must not set
+         `display` on the buttons themselves. -->
+    <div class="tsd-action-bar">
+      <input type="button" class="btn" onclick="showAnswers()" value="Answers" id="ansBut">
+      <input type="button" class="btn" onclick="checkPlay()" id="checkBut" value="Check">
+    </div>
+
   </div>
 
   <!-- ====================== play area ======================
@@ -227,6 +245,7 @@
 
   <div id="ansBoxDiv">
     <textarea id="ansBox" name="ansBox" rows="10" cols="80"
+              aria-label="Your answer"
               style="font-size:18pt;line-height:115%"></textarea>
   </div>
 
@@ -319,7 +338,8 @@
     <input type="button" onclick="showAlphaButtons()" value="ShowABP">
     <input type="button" onclick="hideAlphaButtons()" value="HideABP">
     <input type="button" onclick="testphaButtons()" value="testABP">
-    <input type="text" id="rndSerNbr" value="RoundSerNbr">
+    <input type="text" id="rndSerNbr" value="RoundSerNbr"
+           aria-label="Round serial number">
     <input type="button" onclick="hideTools()" value="hideTools">
     <input type="button" onclick="abp.testA()" value="TestA">
     <input type="button" onclick="togTheAnsBut()" value="TestAnsBut">
@@ -744,6 +764,13 @@
      writes a CSS variable; it changes no game state. -->
 <script src="js-ui/tsd-slider-fill.js"></script>
 <script src="js-ui/tsd-clock-bar.js"></script>
+
+<!-- Keeps the whole panel inside the viewport: no page scrollbar and none
+     inside the play area. Measures the rendered content and shrinks it with
+     a uniform transform when a short screen cannot fit it. Presentation
+     only -- writes a CSS variable, reads geometry, changes no game state.
+     Loaded last so the play area exists when it initialises. -->
+<script src="js-ui/tsd-fit-screen.js"></script>
 
 
 <script>

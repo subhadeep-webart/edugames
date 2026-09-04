@@ -55,11 +55,16 @@
     return m ? m[1].trim() : "";
   }
 
-  /* Blue = player 0 = left, red = player 1 = right. */
-  function winnerFromCenterDisplay() {
-    var cd = document.getElementById("centerDisplay");
-    if (!cd) return "";
-    var txt = (cd.textContent || "").trim();
+  /* Blue = player 0 = left, red = player 1 = right.
+
+     Takes the notice text as an argument rather than re-reading
+     #centerDisplay, because the caller must only ever pass the end-of-round
+     verdict. Every other notice the game posts names a player too -- "HELEN
+     GOES FIRST!", "Now it's Helen's turn." -- and matching a name in those
+     is what used to light the trophy up at the top of the round, before
+     anybody had answered anything. */
+  function winnerFromNotice(txt) {
+    if (!txt) return "";
     var p0 = document.getElementById("player0");
     var p1 = document.getElementById("player1");
     var n0 = p0 ? p0.textContent.trim() : "";
@@ -69,21 +74,72 @@
     return "";
   }
 
+  /* The end-of-round verdict, as the game scripts write it.
+
+     postNoticeCenterDisplay() puts every notice into #centerDisplay -- the
+     narrow clock column. Short ones ("Now it's Helen's turn.") suit that
+     column fine, but the end-of-round verdict on types L / D / N is a
+     multi-sentence paragraph built with <br>. In a ~275px column that
+     paragraph wrapped to a dozen lines and stretched the clock card far
+     taller than the cards either side of it, which is what threw the whole
+     scorebar row out of proportion.
+
+     The verdict is recognised by shape, not by parsing its meaning: the
+     game scripts join the sentences with <br>, so a notice containing a
+     line break IS the long-form verdict, and one without is a short status
+     line. Nothing here is written back into the game -- the text is read
+     out of the notice the game already posted and shown in the wide card
+     that has room for it. */
+  function verdictFromCenterDisplay() {
+    var cd = document.getElementById("centerDisplay");
+    if (!cd) return "";
+    if (!/<br/i.test(cd.innerHTML || "")) return "";
+    return (cd.textContent || "").replace(/\s+/g, " ").trim();
+  }
+
   function refresh() {
     if (!scorebar) return;
 
     var show = isNoBidRound();
     scorebar.classList.toggle("is-result", show);
-    if (!show) return;
+
+    /* The clock notice is only suppressed while the wide card is standing in
+       for the bid panels. On a bidding round the card is hidden, so the
+       notice has to stay where it is. */
+    var cd = document.getElementById("centerDisplay");
+    if (!show) {
+      if (cd) cd.classList.remove("is-relocated");
+      return;
+    }
 
     var ans = answerFromQBox();
-    var who = winnerFromCenterDisplay();
+    var verdict = verdictFromCenterDisplay();
+    /* Only the verdict names a winner. While the round is still in play the
+       trophy row stays hidden. */
+    var who = winnerFromNotice(verdict);
 
-    if (answerEl) answerEl.textContent = ans;
-    if (titleEl)  titleEl.textContent = ans ? "Correct Answer:" : "Round in play";
+    /* The verdict supersedes the bare answer: it states the answer AND how
+       each player did, so showing both would repeat the same sentence. */
+    var body = verdict || ans;
+
+    if (answerEl) answerEl.textContent = body;
+    if (titleEl) {
+      titleEl.textContent = body
+        ? (verdict ? "Round Result:" : "Correct Answer:")
+        : "Round in play";
+    }
     if (winnerName) winnerName.textContent = who;
     if (winnerEl) winnerEl.hidden = !who;
-    if (card) card.classList.toggle("has-answer", !!ans);
+    if (card) {
+      card.classList.toggle("has-answer", !!body);
+      /* A relocated verdict is prose, not a headline -- let CSS set it at a
+         readable body size instead of the short-answer display size. */
+      card.classList.toggle("is-verdict", !!verdict);
+    }
+
+    /* Hide the now-duplicated copy in the clock column so the clock card
+       keeps its design height. */
+    if (cd) cd.classList.toggle("is-relocated", !!verdict);
   }
 
   function start() {

@@ -24,6 +24,7 @@ class GameL extends Game {//console.log(" =" + );
 		this.isfirstPlayer = true;
 		this.picJustHit = false;
 		this.gameOver = false;
+		this.lastMapScale = 0;
 		this.pickWhoGoesFirst();
 
 		if (singlePlayerMode) {
@@ -49,7 +50,7 @@ class GameL extends Game {//console.log(" =" + );
 	showSinglePlayerPregameNotice() {
 		console.log("GameL.showPregameNotice() top ");
 		const theTime = bidButs.getTimeForGameLND()
-		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><button type="button" class="tsd-pregame-back" aria-label="Go back" onclick="history.back()"><img src="images/new-images/back_button.svg" width="44" height="51" alt=""></button><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
+		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
      <p>The next Game requires you to click on a location on a map or image.</p>
      <font size="4"><p>The point award is a function of how close you get to the correct location.</p></font>
      <b>IMPORTANT:</b>
@@ -64,7 +65,7 @@ class GameL extends Game {//console.log(" =" + );
 	showPregameNotice() {
 		console.log("GameL.showPregameNotice() top ");
 		const theTime = bidButs.getTimeForGameLND()
-		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><button type="button" class="tsd-pregame-back" aria-label="Go back" onclick="history.back()"><img src="images/new-images/back_button.svg" width="44" height="51" alt=""></button><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
+		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
      <p>The next Game requires each player to click on a location on a map or image.  
      <p><b>The player closest to the correct location wins.</b></p></p>
      <font size="4"><p>The point award is a function of how much closer the winner is than the looser.</p></font>
@@ -106,8 +107,12 @@ class GameL extends Game {//console.log(" =" + );
 			return;
 		}
 		const time = stopGameLNDTimer("GameL picHit");
-		const xy = "left: " + (x - 8) + "px; top:" + (y - 8) + "px; z-index:50;";
-		console.log("xy = " + xy);
+		// event.offsetX/offsetY arrive in RENDERED pixels. Convert to the
+		// map's natural pixels immediately, so the stored play, the answer's
+		// Loc and every distance below are all in the same system.
+		const mapScale = this.getMapScale();
+		x = Math.round(x / mapScale);
+		y = Math.round(y / mapScale);
 		let firstDot = null;
 		
 		if (cp.itf.nowPlaying == 1) {
@@ -115,13 +120,13 @@ class GameL extends Game {//console.log(" =" + );
 			console.log("#picHit red");
 			this.redDot.style.display = "block";
 			firstDot = this.redDot;
-			this.redDot.style = xy;
+			this.placeToken(this.redDot, x, y, 16);
 		} else {
             this.time[0] = time;
 			console.log("#picHit blue");
 			this.blueDot.style.display = "block";
 			firstDot = this.blueDot;
-			this.blueDot.style = xy;
+			this.placeToken(this.blueDot, x, y, 16);
 		}
 		
 
@@ -352,6 +357,43 @@ class GameL extends Game {//console.log(" =" + );
 		super.helloWorld();
 	}
 
+	// ---- coordinate systems -------------------------------------------
+	// The question data's Loc, and this.picWidth/picHeight, are in the map's
+	// NATURAL pixels (from the size code: QJ = 544x320). The rendered map is
+	// usually smaller, because the stylesheet fits it to the available band.
+	// A click's event.offsetX/offsetY are in those RENDERED pixels.
+	//
+	// Mixing the two put the answer crosshair off the true location and,
+	// because checkResults() measures the distance between a rendered-pixel
+	// click and a natural-pixel answer, skewed the awarded points as well.
+	//
+	// Everything from the click onward is kept in NATURAL pixels: clicks are
+	// converted on capture (see picHit), so Loc, this.locArr and every
+	// distance share one system. Only drawing converts back the other way.
+	getMapScale() {
+		const mapEl = document.getElementById("map");
+		if (!mapEl || !this.picWidth) return this.lastMapScale || 1;
+		// offsetWidth as well as the rect: while the play area is hidden
+		// between players both read 0, and falling back to 1 there would
+		// place the tokens as if the map were at natural size. Reuse the last
+		// good scale instead -- the map is the same size when it reappears.
+		const shown = mapEl.getBoundingClientRect().width || mapEl.offsetWidth;
+		if (!shown) return this.lastMapScale || 1;
+		this.lastMapScale = shown / Number(this.picWidth);
+		return this.lastMapScale;
+	}
+
+	// natural-pixel point -> rendered-pixel offset. `half` centres the token
+	// art on the point: 32 for the 64x64 crosshair, 16 for the 32x32 dots.
+	// (The old code subtracted 8, sizing the dots as if they were 16x16,
+	// so every dot sat down-and-right of the point it marked.)
+	placeToken(el, xNat, yNat, half) {
+		const s = this.getMapScale();
+		const left = (Number(xNat) * s) - half;
+		const top  = (Number(yNat) * s) - half;
+		el.style = `left: ${left}px; top:${top}px; z-index:50;`;
+	}
+
 	positionBlackCrossHair() {
 		console.log("positionBlackCrossHair() ")
 		const loc = this.map.get("Loc").toString();
@@ -359,9 +401,7 @@ class GameL extends Game {//console.log(" =" + );
 		this.ansLocY = loc.substring(3);
 		console.log("ansX " + this.ansLocX)
 		console.log("ansy " + this.ansLocY)
-		const xxPt = this.ansLocX - 32 ;
-		const yyPt = this.ansLocY - 32;
-		this.blackCrossHair.style = `left: ${xxPt}px; top:${yyPt}px; z-index:50;`;		
+		this.placeToken(this.blackCrossHair, this.ansLocX, this.ansLocY, 32);
 	}
 
 	hideDot(){console.log("hideDot " + this.dotBeingDisplayed)
@@ -496,10 +536,12 @@ class GameL extends Game {//console.log(" =" + );
         this.picHeight = theMapArr[3];
 		
 
-		buf+= theMapArr[0];
+		// Append the map ALONE below. `buf` still holds the lead-in images
+		// appended a few lines above, so adding the map to `buf` and
+		// re-appending the whole string inserted every lead-in image twice.
 		console.log("GetData theMapArr= " + theMapArr);
 		
-		gamePlayArea.innerHTML = gamePlayArea.innerHTML + buf;
+		gamePlayArea.innerHTML = gamePlayArea.innerHTML + theMapArr[0];
 		this.addDots();
 		console.log("this.blackCrossHair.checkVisibility= " + this.blackCrossHair.checkVisibility);
 

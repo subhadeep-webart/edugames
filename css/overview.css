@@ -83,6 +83,11 @@ body.tsd-overview::before {
   border: 0;
   background: transparent;
   padding: 0;
+  /* The icon scales down to ~29x34 on tablet/mobile, which is under the
+     44x44 minimum target size (WCAG 2.1 SC 2.5.5). Grow the hit area
+     without growing the artwork -- the img keeps its own clamp() size. */
+  min-width: 44px;
+  min-height: 44px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: transform .2s var(--tsd-ease), filter .2s var(--tsd-ease);

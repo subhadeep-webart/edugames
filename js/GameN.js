@@ -57,7 +57,7 @@ class GameN extends Game{//console.log("GameN  = " + );
 	showSinglePlayerPregameNotice() {
 		const theTime = bidButs.getTimeForGameLND();
 		console.log("GameN.showPregameNotice() top ");
-		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><button type="button" class="tsd-pregame-back" aria-label="Go back" onclick="history.back()"><img src="images/new-images/back_button.svg" width="44" height="51" alt=""></button><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
+		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
      <p>The next Game requires you to select a number.</p>
      <font size="4"><p>The point award is a function of how close you get to the correct number.</p></font></div></div><div class="tsd-pregame-foot"><button type="button" class="tsd-pregame-start" onclick="startGameN()"><i class="tsd-pregame-play" aria-hidden="true"></i><span>Start Round</span></button></div></div>`
 
@@ -69,7 +69,7 @@ class GameN extends Game{//console.log("GameN  = " + );
 	showPregameNotice() {
 		const theTime = bidButs.getTimeForGameLND()
 		console.log("GameN.showPregameNotice() top ");
-		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><button type="button" class="tsd-pregame-back" aria-label="Go back" onclick="history.back()"><img src="images/new-images/back_button.svg" width="44" height="51" alt=""></button><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
+		const buf = `<div class="tsd-pregame"><div class="tsd-pregame-head"><div class="tsd-pregame-title">Pre-Game Notice</div></div><div class="tsd-pregame-rules"><div class="tsd-pregame-rules-inner"><font size="5">
      <p>The next Game requires each player to select a number.  
      <p><b>The player closest to the correct number wins.</b></p></p>
      <font size="4"><p>The point award is a function of how much closer the winner is than the looser.</p></font>
@@ -486,11 +486,9 @@ class GameN extends Game{//console.log("GameN  = " + );
 				const arrowInsrtPt = document.getElementById("arrowInsrtPt"  + i);
 				const rect = arrowInsrtPt.getBoundingClientRect();
 				const color = plu.players[i].color;
-				const colorX = color.charAt(0).toUpperCase() + color.slice(1);
-				const arr = [];
-				arr.push("}P.AA.Pi.Th.Sy.To.Ar." + colorX + "UpArrow.AA.jpg'");
-				arr.push("id='" + color + "Arrow'");
-				const img = getImageFile(arr)
+				//Presentation only: local transparent PNG in the theme's
+				//player colours -- see getUpArrowImage() in script.js.
+				const img = [getUpArrowImage(i, color + "Arrow", "upArrow")];
 				gamePlayArea.innerHTML = gamePlayArea.innerHTML + img[0];
 				const arrowName = color + "Arrow";
 				const theArrow = document.getElementById(arrowName);
@@ -532,25 +530,24 @@ class GameN extends Game{//console.log("GameN  = " + );
 		}
 
 		const HTMLlayout = `<div style=" text-align: left; text-indent: 0px; padding: 0px 0px 0px 0px; margin: 0px 0px 0px 0px;">
-<table width="500px" border="0" cellpadding="0" cellspacing="0" id="tblTitle" 
-style="border-color: #000080; border-style: solid; background-color: #00ffff;"><caption style="font-size: 24px;>Your Selection</caption>
+<table width="500px" border="0" cellpadding="0" cellspacing="0" id="tblTitle"><caption style="font-size: 24px;">Your Selection</caption>
 <tr valign="center">
 <td colspan="3" "><div id="displayBox" ><b><font size="70px">-</font></b></div><br />
 </td>
 </tr>
 <tr valign="center" ><font size="8px">
-  <td width="33%"><div style="text-align:left   " style="font-weight: bold; font-size: 24pt;" class="nbrDisplay" id="displayTextLow">300</div><br />
-  </td>                                         
-  <td width="33%"><div style="text-align:center; "  class="nbrDisplay" id="displayTextMid">1000</div><br />
+  <td width="33%" class="gameDCell"><div class="nbrDisplay" id="displayTextLow">300</div>
   </td>
-  <td width="33%"><div  style="text-align:right; "  class="nbrDisplay" id="displayTextHi" >3000</div><br />
+  <td width="33%" class="gameDCell"><div class="nbrDisplay" id="displayTextMid">1000</div>
+  </td>
+  <td width="33%" class="gameDCell"><div class="nbrDisplay" id="displayTextHi" >3000</div>
   </td>
 </tr>
 <tr><td colspan="3"><div id="nbrLineInsrtPt">${theNbrLine}</div></td></tr>
 <tr valign="top">
   <td colspan="3" >  
-  <div><input type="range" id="sliderN" class="slider" width="500px" min="300" max="3000" value="0" oninput="gameN.setDisplay(this.value)"  
-  onchange="gameN.regHit(this.value)" style="background:${greenBG};"  ></div> 
+  <div><input type="range" id="sliderN" class="slider" width="500px" min="300" max="3000" value="0" oninput="gameN.setDisplay(this.value)"
+  onchange="gameN.regHit(this.value)"  ></div>
   </td>
 </tr></table></div> `
 

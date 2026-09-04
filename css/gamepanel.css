@@ -21,18 +21,45 @@
 
 body.tsd-panel {
   margin: 0;
-  min-height: 100vh;
+  /* Lock the body to the viewport so the game never scrolls: the client
+     asked for the whole screen to fit at once. dvh first (mobile browsers
+     shrink the visible area when the URL bar shows), with vh as the
+     fallback for browsers that do not know dvh. */
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--tsd-bg-gradient);
   background-attachment: fixed;
   color: var(--tsd-text);
   font-family: var(--tsd-font-body);
 }
 
+/* The page is a fixed header + scorebar + question bar, then a play area
+   that takes whatever height is left over. Previously every band was sized
+   from `vw` clamps that ignore viewport HEIGHT, so on a 1366x768 or
+   1280x720 laptop the stack added up to ~850px and the last row of a
+   picture grid fell below the fold. Making this a flex column and letting
+   .tsd-play-area flex into the remainder removes the overflow instead of
+   just hiding it. */
 .tsd-panel-page {
   max-width: var(--tsd-container);
   margin: 0 auto;
-  padding: clamp(12px, 1.6vw, 26px) var(--tsd-gutter)
-           clamp(30px, 4vw, 60px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* min-height:0 so the flex children below may shrink past their content;
+     without it a flex item's automatic minimum size re-introduces overflow. */
+  min-height: 0;
+  padding: clamp(8px, 1.2vw, 26px) var(--tsd-gutter) clamp(8px, 1.2vw, 24px);
+  box-sizing: border-box;
+  gap:6px;
+}
+
+/* The three fixed bands keep their natural height ... */
+.tsd-panel-header,
+.tsd-scorebar,
+.tsd-question-bar {
+  flex: none;
 }
 
 /* ---- header ------------------------------------------------------------ */
@@ -40,8 +67,10 @@ body.tsd-panel {
 .tsd-panel-header {
   display: flex;
   align-items: center;
-  gap: clamp(10px, 1.4vw, 22px);
-  margin-bottom: clamp(14px, 1.8vw, 28px);
+  /* tight gap: the back button and the round/mode text read as one
+     left-hand cluster, so they sit close together. */
+  gap: clamp(8px, .9vw, 14px);
+  margin-bottom: clamp(8px, 1vw, 16px);
 }
 
 /* Back button (was the logo). The SVG carries its own colour. */
@@ -61,13 +90,21 @@ body.tsd-panel {
 }
 
 .tsd-back-but img {
-  width: clamp(34px, 3.2vw, 44px);
+  /* Was clamp(34px,3.2vw,44px) and it set the whole header's height (51px).
+     Smaller so the header band is shorter -- the banner was eating space
+     the play area needed. */
+  width: clamp(26px, 2.2vw, 32px);
   height: auto;
   display: block;
 }
 
-.tsd-back-but:hover  { transform: translateX(-2px); }
-.tsd-back-but:active { transform: scale(.94); }
+.tsd-back-but:hover {
+  transform: translateX(-2px);
+}
+
+.tsd-back-but:active {
+  transform: scale(.94);
+}
 
 .tsd-back-but:focus-visible {
   outline: 2px solid var(--tsd-text);
@@ -75,23 +112,28 @@ body.tsd-panel {
   border-radius: 10px;
 }
 
-/* Round information + game mode, centred between the back button and the
-   controls. No glow -- plain text reads cleaner here. */
+/* Round information + game mode. Sits immediately BESIDE the back button
+   (justify-content:flex-start) rather than centred in the header: the
+   centred version left a wide empty gap either side, which made the band
+   read as a tall banner. Grouping it with the back button reads as one
+   left-hand cluster and lets the header be shorter. */
 .tsd-panel-status {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: clamp(10px, 1.4vw, 26px);
+  justify-content: flex-start;
+  gap: clamp(8px, 1vw, 16px);
 
   margin: 0;
-  padding: 0 clamp(10px, 1.4vw, 24px);
+  padding: 0;
   border: 0;
   background: none;
 
-  text-align: center;
-  font-size: clamp(15px, 1.75vw, 30px);
+  text-align: left;
+  /* was clamp(15px,1.75vw,30px) -- 24px at 1366 was the tallest text on
+     the page after the scores. */
+  font-size: clamp(13px, 1.15vw, 19px);
   font-weight: 800;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -100,7 +142,11 @@ body.tsd-panel {
   text-overflow: ellipsis;
 }
 
-.tsd-panel-status > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.tsd-panel-status>span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* hairline divider between the round and the game mode */
 .tsd-panel-sep {
@@ -126,8 +172,9 @@ body.tsd-panel {
   align-items: center;
   justify-content: center;
 
-  width: clamp(34px, 3vw, 46px);
-  height: clamp(34px, 3vw, 46px);
+  /* was clamp(34px,3vw,46px) */
+  width: clamp(26px, 2.2vw, 32px);
+  height: clamp(26px, 2.2vw, 32px);
   padding: 0;
   border-radius: 50%;
   border: 1.5px solid var(--tsd-accent-pink);
@@ -146,11 +193,18 @@ body.tsd-panel {
   display: block;
 }
 
-.tsd-icon-but:hover  { background: rgba(253, 12, 117, .18); }
+.tsd-icon-but:hover {
+  background: rgba(253, 12, 117, .18);
+}
 
 /* sound muted — dim the button so the off state reads at a glance */
-.tsd-icon-but.is-muted { opacity: .55; }
-.tsd-icon-but:active { transform: scale(.94); }
+.tsd-icon-but.is-muted {
+  opacity: .55;
+}
+
+.tsd-icon-but:active {
+  transform: scale(.94);
+}
 
 .tsd-icon-but:focus-visible,
 .tsd-exit-but:focus-visible {
@@ -168,20 +222,27 @@ body.tsd-panel {
   justify-content: center;
   gap: 10px;
 
-  padding: clamp(8px, .85vw, 13px) clamp(14px, 1.5vw, 24px);
+  /* was 8-13px / 14-24px padding at 12-17px type -- 44px tall */
+  padding: clamp(5px, .5vw, 8px) clamp(10px, 1vw, 16px);
   border-radius: 999px;
   border: 1px solid var(--tsd-hairline-soft, var(--tsd-hairline));
   background: transparent;
   color: var(--tsd-text);
-  font-size: clamp(12px, 1.05vw, 17px);
+  font-size: clamp(11px, .85vw, 14px);
   font-family: inherit;
   white-space: nowrap;
   cursor: pointer;
   transition: background .18s var(--tsd-ease);
 }
 
-.tsd-exit-but img { width: 1.15em; height: auto; }
-.tsd-exit-but:hover { background: rgba(255, 255, 255, .08); }
+.tsd-exit-but img {
+  width: 1.15em;
+  height: auto;
+}
+
+.tsd-exit-but:hover {
+  background: rgba(255, 255, 255, .08);
+}
 
 /* ---- header help menu --------------------------------------------------
    #helpDropDownMenu stays a <form> because script.js calls .reset() on it,
@@ -207,8 +268,8 @@ body.tsd-panel {
   display: inline-flex;
   align-items: center;
 
-  padding: clamp(7px, .75vw, 11px) clamp(30px, 2.6vw, 40px)
-           clamp(7px, .75vw, 11px) clamp(14px, 1.5vw, 24px);
+  /* was 7-11px vertical / 30-40px right / 14-24px left -- 40px tall */
+  padding: clamp(5px, .5vw, 7px) clamp(22px, 2vw, 28px) clamp(5px, .5vw, 7px) clamp(10px, 1vw, 15px);
   border-radius: 999px;
   border: 1px solid var(--tsd-hairline-soft, var(--tsd-hairline));
   background-color: transparent;
@@ -220,15 +281,17 @@ body.tsd-panel {
 
   color: var(--tsd-text);
   font-family: inherit;
-  font-size: clamp(12px, 1.05vw, 17px);
+  font-size: clamp(11px, .85vw, 14px);
   line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color .18s var(--tsd-ease),
-              border-color .18s var(--tsd-ease);
+    border-color .18s var(--tsd-ease);
 }
 
-.tsd-help-select:hover { background-color: rgba(255, 255, 255, .08); }
+.tsd-help-select:hover {
+  background-color: rgba(255, 255, 255, .08);
+}
 
 .tsd-help-select:focus-visible {
   outline: 2px solid var(--tsd-text);
@@ -247,8 +310,11 @@ body.tsd-panel {
    both opt in to base-select. Ignored elsewhere, so the rules above remain
    the fallback. */
 @supports (appearance: base-select) {
+
   .tsd-help-select,
-  .tsd-help-select::picker(select) { appearance: base-select; }
+  .tsd-help-select::picker(select) {
+    appearance: base-select;
+  }
 
   .tsd-help-select {
     display: inline-flex;
@@ -262,7 +328,10 @@ body.tsd-panel {
     color: var(--tsd-text);
     transition: transform .18s var(--tsd-ease);
   }
-  .tsd-help-select:open::picker-icon { transform: rotate(180deg); }
+
+  .tsd-help-select:open::picker-icon {
+    transform: rotate(180deg);
+  }
 
   /* Leave `display` alone. The popup sizes itself to its content as a
      block; switching it to flex made it collapse to a short fixed box with
@@ -298,7 +367,9 @@ body.tsd-panel {
     cursor: pointer;
   }
 
-  .tsd-help-select option:last-of-type { margin-bottom: 0; }
+  .tsd-help-select option:last-of-type {
+    margin-bottom: 0;
+  }
 
   /* "Help Menu" is the placeholder, not a destination */
   .tsd-help-select option:first-of-type {
@@ -313,7 +384,9 @@ body.tsd-panel {
     background: rgba(253, 12, 117, .28);
   }
 
-  .tsd-help-select option::checkmark { display: none; }
+  .tsd-help-select option::checkmark {
+    display: none;
+  }
 }
 
 /* ---- scoreboard row ----------------------------------------------------
@@ -331,29 +404,49 @@ body.tsd-panel {
 .tsd-scorebar {
   display: grid;
   grid-template-columns:
-    minmax(0, 1fr)
-    minmax(0, 324px)
-    minmax(0, 275px)
-    minmax(0, 324px)
-    minmax(0, 1fr);
+    minmax(0, 1fr) minmax(0, 324px) minmax(0, 275px) minmax(0, 324px) minmax(0, 1fr);
   /* center, not stretch: the bid boxes have a fixed design height (160px)
      and must not be stretched to match the tallest cell in the row. */
   align-items: center;
   gap: clamp(8px, 1vw, 18px);
-  margin-bottom: clamp(18px, 2.4vw, 40px);
+  /* The clock card is taller than the bid panels either side of it and is
+     centred in the row, so it overhangs the row's nominal bottom edge and
+     ate most of this margin -- which is why the question line read as
+     sitting hard against the bidding block. Raised so the question keeps
+     clear air beneath the clock's lowest point, not just beneath the
+     shorter cards. Still clamped against vw so a short screen gives the
+     space back to the play area rather than pushing it below the fold. */
+  margin-bottom: clamp(32px, 4.2vw, 72px);
 
-  /* The player cards carry decorative brackets at top/left -6px and
-     bottom/right -6px, which reach 6px outside the card box. The page
-     gutter is only 15px, so the outer brackets -- Player 1's on the left,
-     Player 2's on the right -- came within a few pixels of the viewport
-     and the cards read as pinned to the edge.
-
-     Pad the row by the overhang so both brackets sit inside the gutter.
-     Only the scorebar needs this; nothing else bleeds outside its box. */
-  padding-inline: 8px;
+  /* This row used to be padded by 8px to keep the player cards' decorative
+     corner brackets inside the page gutter. The brackets are gone (see
+     .tsd-pl-card::before), so nothing bleeds outside the card box any more
+     and the cards can use the full width. */
+  padding-inline: 0;
 }
 
 /* ---- player cards ------------------------------------------------------ */
+
+/* PlayerLineUp.js:293 hides player 2 in single-player mode with
+   `secondPlayerBox.hidden = true`. The card's own `display:flex` overrides
+   the hidden attribute's UA `display:none`, which left an empty red card on
+   screen in single-player mode, so honour the attribute explicitly. */
+.tsd-pl-card[hidden] {
+  display: none;
+}
+
+/* Same single-player state, second half of it: hiding player 2's card left
+   player 2's BID PANEL on screen, with all seven numbers live, belonging to
+   a player who does not exist -- and an asymmetric gap where the card was.
+
+   `hidden` on #secondPlayerBox is the only signal the DOM carries for
+   single-player mode, so match on it from the shared .tsd-scorebar parent
+   (the bid panel is a preceding sibling, so a sibling combinator cannot
+   reach it). Presentation only -- BidButs.js still builds both panels and
+   the game logic is untouched; the orphan is simply not drawn. */
+.tsd-scorebar:has(> #secondPlayerBox[hidden]) .tsd-bid-panel--p2 {
+  display: none;
+}
 
 .tsd-pl-card {
   position: relative;
@@ -378,57 +471,71 @@ body.tsd-panel {
   border-color: var(--tsd-p2-red);
 }
 
-/* ---- offset corner brackets -------------------------------------------
-   The design shows TWO SEPARATE brackets sitting outside the card: one
-   hugging the top-left corner, one hugging the bottom-right. They are
-   detached from each other, so each pseudo-element covers only ~55% of
-   the card and carries just two borders. (The previous rule stretched a
-   single full-size box with inset:-6px, which joined the two sides into
-   one continuous L along the whole edge -- the "two sided bar".)         */
-.tsd-pl-card::before,
-.tsd-pl-card::after {
-  content: "";
-  position: absolute;
-  width:  55%;
-  height: 55%;
-  pointer-events: none;
-  z-index: -1;
+/* ---- offset corner brackets -- REMOVED --------------------------------
+   Two detached brackets used to sit outside the card, hugging the
+   top-left and bottom-right corners. Removed at the client's request: the
+   card's own coloured border already identifies the player, and the
+   brackets overhung the page gutter, which forced extra padding on the
+   scorebar.
+
+   The rules are kept below rather than deleted so the decoration can be
+   restored by removing this one `content: none` block.                  */
+/* The bracket rules that used to live here (two absolutely-positioned
+   pseudo-elements hugging the top-left and bottom-right corners) have been
+   deleted at the client's request -- the card's own coloured border already
+   identifies the player. --tsd-pl-bracket is left defined below because the
+   card's border-width still reads --tsd-pl-bracket-w. */
+
+.tsd-pl-card--p1 {
+  --tsd-pl-bracket: var(--tsd-blue);
 }
 
-/* top-left bracket */
-.tsd-pl-card::before {
-  top:  -6px;
-  left: -6px;
-  border-top:  var(--tsd-pl-bracket-w) solid var(--tsd-pl-bracket);
-  border-left: var(--tsd-pl-bracket-w) solid var(--tsd-pl-bracket);
-  border-radius: 18px 0 0 0;
+.tsd-pl-card--p2 {
+  --tsd-pl-bracket: var(--tsd-p2-red);
 }
-
-/* bottom-right bracket */
-.tsd-pl-card::after {
-  right:  -6px;
-  bottom: -6px;
-  border-bottom: var(--tsd-pl-bracket-w) solid var(--tsd-pl-bracket);
-  border-right:  var(--tsd-pl-bracket-w) solid var(--tsd-pl-bracket);
-  border-radius: 0 0 18px 0;
-}
-
-.tsd-pl-card--p1 { --tsd-pl-bracket: var(--tsd-blue); }
-.tsd-pl-card--p2 { --tsd-pl-bracket: var(--tsd-p2-red); }
 
 /* avatar — same placeholder pattern as the setup page (css/setup.css) */
 .tsd-pl-avatar {
   flex: none;
   display: block;
-  width:  clamp(40px, 3.8vw, 62px);
+  width: clamp(40px, 3.8vw, 62px);
   height: clamp(40px, 3.8vw, 62px);
   border-radius: 50%;
   overflow: hidden;
   background: #1A1748;
 }
 
-.tsd-pl-card--p1 .tsd-pl-avatar { border: 2.5px solid var(--tsd-blue); }
-.tsd-pl-card--p2 .tsd-pl-avatar { border: 2.5px solid #E040C8; }
+/* On a narrow card the avatar was taking most of the width and leaving the
+   score barely 56px to sit in, which pushed a four-digit total out past the
+   card edge. Trimming it here buys the text the room it needs; the ring is
+   still large enough to read as a portrait. */
+@media (max-width: 1360px) {
+  .tsd-pl-avatar {
+    width: clamp(32px, 2.9vw, 44px);
+    height: clamp(32px, 2.9vw, 44px);
+  }
+}
+
+/* At 1280 the card is only 145px. After its padding, the avatar and the
+   gap, the text body was left 68px for a "Set Total = 12400" needing 75 --
+   so the line was clipped by 7px. Trimming the avatar and the gap buys the
+   text back exactly that, and the ring still reads as a portrait. */
+@media (max-width: 1300px) {
+  .tsd-pl-avatar {
+    width: clamp(28px, 2.4vw, 36px);
+    height: clamp(28px, 2.4vw, 36px);
+  }
+
+  .tsd-pl-card { gap: 6px; padding-inline: 10px; }
+}
+
+.tsd-pl-card--p1 .tsd-pl-avatar {
+  border: 2.5px solid var(--tsd-blue);
+}
+
+.tsd-pl-card--p2 .tsd-pl-avatar {
+  border: 2.5px solid #E040C8;
+}
 
 .tsd-pl-avatar img {
   width: 100%;
@@ -446,7 +553,10 @@ body.tsd-panel {
   color: rgba(255, 255, 255, .35);
 }
 
-.tsd-pl-avatar .tsd-avatar-empty svg { width: 42%; height: auto; }
+.tsd-pl-avatar .tsd-avatar-empty svg {
+  width: 42%;
+  height: auto;
+}
 
 .tsd-pl-body {
   min-width: 0;
@@ -459,8 +569,13 @@ body.tsd-panel {
    The markup puts P2's avatar AFTER the body (it was authored as a mirror
    image of P1), so `order` pulls it back to the front visually. The DOM is
    left alone — every id in it is a live global the game scripts write to. */
-.tsd-pl-card--p2 .tsd-pl-body { text-align: left; }
-.tsd-pl-card--p2 .tsd-pl-avatar { order: -1; }
+.tsd-pl-card--p2 .tsd-pl-body {
+  text-align: left;
+}
+
+.tsd-pl-card--p2 .tsd-pl-avatar {
+  order: -1;
+}
 
 .tsd-pl-slot {
   margin: 0 0 4px;
@@ -490,22 +605,121 @@ body.tsd-panel {
   color: var(--tsd-text-muted);
 }
 
-/* #rndTotL / #rndTotR — the running score */
+/* ---- card content ------------------------------------------------------
+   The client asked the card to read simply:
+
+     name
+     point
+     set total
+
+   so the two extra label lines are hidden: the "PLAYER 1" / "PLAYER 2"
+   slot heading (the card's colour and side already say which player it is)
+   and the "Total Point" caption above the number.
+
+   Hidden, not deleted -- both stay in the DOM so anything that looks them
+   up keeps working, and either can be brought back by removing it from
+   this one rule. */
+.tsd-pl-slot,
+.tsd-pl-caption {
+  display: none;
+}
+
+/* #rndTotL / #rndTotR — the running score.
+
+   The label is a ::before rather than markup because Interface.js writes
+   `rndTotL.textContent = ...` on every score change, which would wipe out
+   any label element inside. A pseudo-element is not part of textContent, so
+   it survives every rewrite and the game code needs no change.
+
+   The separate "Total Point" caption above is hidden (see .tsd-pl-caption)
+   -- this replaces it inline, so the score reads "Point: 0" on one line. */
+/* Label and number sit on ONE line, "POINT  0", rather than stacked.
+
+   Stacking was chosen when the number was up to 29px: at that size an
+   inline label pushed a four-digit score past the edge of a ~145px card.
+   The number is smaller now, so the pair fits side by side -- and the card
+   reads as a tidy row instead of a tall column.
+
+   The overflow risk that forced the stack is handled rather than ignored:
+   the row wraps. `min-width:0` alone did NOT hold -- with `nowrap` the
+   number cannot shrink or break, so a four-digit score still pushed past
+   the card edge (measured: 7px over at 1280, 3px at 1920). Allowing the
+   line to wrap lets the number drop under its label in the rare wide case
+   instead of overflowing, and it stays on one line everywhere else. */
 .tsd-pl-card .pt {
-  margin: 2px 0 0;
-  font-size: clamp(16px, 1.65vw, 27px);
+  display: flex;
+  align-items: baseline;
+  /* nowrap: "POINT 0" stays on ONE line. The wrap was added to stop a
+     four-digit score overflowing the card, but it also let the number drop
+     under its label, and centring made the row sit apart from the name and
+     set-total lines either side of it. Both are handled below instead: the
+     label holds its width, the number shrinks, and neither leaves the row. */
+  flex-wrap: nowrap;
+  /* flex-start, matching .playerName and .tsd-pl-total, which both inherit
+     the card's left alignment. Centring this one row made it the odd one
+     out in the stack. */
+  justify-content: flex-start;
+  gap: clamp(5px, .5vw, 9px);
+  margin: clamp(2px, .25vw, 4px) 0 0;
+
+  /* was clamp(19px,1.75vw,29px). Sized down so the number sits WITH its
+     label rather than towering over it -- the card no longer needs the
+     score to be the loudest thing in the scorebar. */
+  /* Sized so the widest realistic pairing -- "POINT" plus a four-digit
+     score -- still fits the card on ONE line. The number is a bare text
+     node (Interface.js writes textContent), so it is an anonymous flex item
+     that cannot be selected and cannot be told to shrink; the only lever is
+     the font size, and it has to clear the narrowest card (~145px at 1280).
+     Measured at 8850: 7px over at the old 1.25vw, 0 at 1.05vw. */
+  font-size: clamp(14px, 1.05vw, 19px);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.15;
+  white-space: nowrap;
+  min-width: 0;
   color: var(--tsd-text);
 }
 
-/* #setTotL / #setTotR */
-.tsd-pl-total {
-  margin-top: clamp(4px, .45vw, 8px);
-  font-size: clamp(8px, .65vw, 11px);
+.tsd-pl-card .pt::before {
+  content: "Point";
+  /* flex item now, not a block: `display:block` on a flex child is
+     blockified to the same thing, but stating it as an inline-level label
+     keeps the intent clear. flex:none so the label keeps its full width and
+     only the number gives way if the card gets tight. */
+  flex: none;
+  margin-bottom: 0;
+
+  font-size: clamp(8px, .62vw, 11px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: .05em;
+  text-transform: uppercase;
   color: var(--tsd-text-muted);
 }
 
+/* #setTotL / #setTotR */
+/* Interface.js writes the whole string ("Set Total = 120") into this node,
+   so the label cannot be split off into a pseudo-element the way the Point
+   row above does. Only the size is lifted, to sit properly under it. */
+.tsd-pl-total {
+  margin-top: clamp(4px, .45vw, 8px);
+  /* A flat size, NOT a vw clamp. The card barely changes width across
+     breakpoints -- measured 208px at 1920, 213px at 1440, 145px at 1280 --
+     but a vw value grows with the screen, so at 1920 it reached 13px inside
+     a 96px-wide body and clipped.
+
+     Interface.js writes the whole string ("Set Total = 12400") into this
+     one node, so it cannot be split or shrunk per-part, and `nowrap` below
+     clips rather than wraps. The size therefore has to suit the card, and
+     the card is always narrow. */
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  line-height: 1.25;
+  white-space: nowrap;
+  color: var(--tsd-text-muted);
+}
+
+/* ---- bid panels --------------------------------------------------------
 /* ---- bid panels --------------------------------------------------------
    #insrtpt0X / #insrtpt1X (.butHolder) are the insert points BidButs.js
    fills with its own bidButs table of .but2Player buttons.               */
@@ -529,7 +743,7 @@ body.tsd-panel {
   align-items: stretch;
   justify-content: center;
   text-align: center;
-  gap: 12px;
+  gap: 8px;
 
   min-width: 0;
   width: 100%;
@@ -537,10 +751,15 @@ body.tsd-panel {
   /* Figma height is 160px, but the button count is data-driven
      (BidButs.createButs is called with rightAnsArray.length / itemMax), so a
      round with many answers needs more rows. min-height holds the design
-     size for the common case and grows instead of clipping. */
-  min-height: 160px;
+     size for the common case and grows instead of clipping.
+
+     min() caps it against viewport height so the design size applies on a
+     normal screen but yields on a short one -- otherwise this band and the
+     clock below claimed the whole of a 640px-tall viewport and left the
+     play area nothing. */
+  min-height: min(160px, 22vh);
   margin-inline: auto;
-  padding: 16px;
+  padding: 14px;
   box-sizing: border-box;
 
   border-radius: 20px;
@@ -572,7 +791,10 @@ body.tsd-panel {
    on them here; only size them.
    flex: none — letting these grow would stretch the box past its 160px
    design height. */
-.tsd-bid-panel > div { flex: none; min-width: 0; }
+.tsd-bid-panel>div {
+  flex: none;
+  min-width: 0;
+}
 
 /* BidButs.js emits a table.bidButs; flatten it to a wrapping grid so the
    numbers lay out 6-across as in the design. */
@@ -592,17 +814,40 @@ body.tsd-panel {
 }
 
 /* BidButs.js breaks the numbers into two rows itself (one <tr> per row).
-   Lay each row out as a 6-column grid so the wrap matches the design
-   regardless of how many buttons the round asks for. */
+
+   Auto-flow columns rather than a fixed `repeat(6, 30px)`: the fixed track
+   count reserved six slots whichever way the round went, so a short row of
+   four numbers was laid out in a six-wide grid and the buttons bunched up
+   against each other on the left of it. Letting the columns follow the
+   buttons means a row of four is a four-column grid, centred, with the gap
+   below applied evenly between them. Rows of six still wrap exactly as
+   before -- BidButs.js decides the wrap, not this rule. */
 .tsd-bid-panel .bidButs td {
   display: grid;
-  grid-template-columns: repeat(6, 30px);
+  /* WRAPPING rows of fixed 30px squares, rather than one row that squeezes.
+
+     BidButs.js is constructed with rowLength 10 (ControlPanel.js), so it
+     only inserts its own row break past ten buttons -- a ten-button round
+     put all ten on a single line. Fitting ten across 275px forced the
+     squares down to ~23px, which is both cramped and too narrow for the
+     two digits of "10".
+
+     auto-fit + a fixed 30px track lets the grid wrap by itself: as many
+     30px squares as fit on a line at full size, the rest on the next line.
+     Ten buttons become two comfortable rows instead of one crushed one,
+     and the squares never leave their design size. The wrap is purely
+     visual -- BidButs.js still emits the same buttons in the same order. */
+  grid-auto-flow: row;
+  grid-template-columns: repeat(auto-fit, 30px);
   justify-content: center;
-  gap: 8px;
+  /* 8px read as cramped at 30px squares -- the numbers touched visually. */
+  gap: 12px;
 }
 
-/* rows after the first need the same gap between them */
-.tsd-bid-panel .bidButs tr + tr td { margin-top: 6px; }
+/* rows after the first need comparable separation */
+.tsd-bid-panel .bidButs tr+tr td {
+  margin-top: 12px;
+}
 
 /* the individual bid numbers — outlined squares, not solid fills.
    Figma: 30 × 30, border 1.05px #FFFFFF40 (= --tsd-hairline). */
@@ -611,8 +856,12 @@ body.tsd-panel {
   -webkit-appearance: none;
   margin: 0;
 
-  width:  30px;
-  height: 30px;
+  /* Fills its 30px track exactly. The track no longer shrinks (the grid
+     wraps instead of squeezing), so this is the design size in both axes. */
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  min-width: 0;
   padding: 0;
   box-sizing: border-box;
   border-radius: 6px;
@@ -628,9 +877,17 @@ body.tsd-panel {
   transition: transform .15s var(--tsd-ease), border-color .15s var(--tsd-ease);
 }
 
-.tsd-bid-panel--p1 .but2Player:hover { border-color: var(--tsd-blue); }
-.tsd-bid-panel--p2 .but2Player:hover { border-color: var(--tsd-modal-red); }
-.tsd-bid-panel .but2Player:active    { transform: scale(.92); }
+.tsd-bid-panel--p1 .but2Player:hover {
+  border-color: var(--tsd-blue);
+}
+
+.tsd-bid-panel--p2 .but2Player:hover {
+  border-color: var(--tsd-modal-red);
+}
+
+.tsd-bid-panel .but2Player:active {
+  transform: scale(.92);
+}
 
 /* A bid takes every number up to it out of play. Those stay visible and
    readable — just muted — rather than being blanked out. */
@@ -662,7 +919,7 @@ body.tsd-panel {
    everything below is scoped to .tsd-bid-panel.
    Rows are fixed by the JS: it breaks after I and after R (9 / 9 / 8).   */
 
-.tsd-bid-panel .butHolder > table {
+.tsd-bid-panel .butHolder>table:not(.bidButs) {
   border-spacing: 0;
   border-collapse: separate;
   margin: 0;
@@ -670,10 +927,10 @@ body.tsd-panel {
 }
 
 /* flatten the table so each <td> can be its own centred grid row */
-.tsd-bid-panel .butHolder > table,
-.tsd-bid-panel .butHolder > table tbody,
-.tsd-bid-panel .butHolder > table tr,
-.tsd-bid-panel .butHolder > table td {
+.tsd-bid-panel .butHolder>table:not(.bidButs),
+.tsd-bid-panel .butHolder>table:not(.bidButs) tbody,
+.tsd-bid-panel .butHolder>table:not(.bidButs) tr,
+.tsd-bid-panel .butHolder>table:not(.bidButs) td {
   display: block;
   border: 0;
   padding: 0;
@@ -691,13 +948,13 @@ body.tsd-panel {
    row at the full 28px would need 300px against the 271px available, so
    the column is whatever 271px divides into instead, and the keys shrink
    the ~2px needed to fit.                                                */
-.tsd-bid-panel .butHolder > table td {
+.tsd-bid-panel .butHolder>table:not(.bidButs) td {
   /* One column = the spec's 28px, or narrower if the panel genuinely
      cannot afford 9 across. Declared on the row rather than the key so the
      short last row (8 keys) reuses the same width and its columns line up
      with the rows above. */
-  --tsd-key-gap: 5px;
-  --tsd-key: min(28px, calc((100% - 8 * var(--tsd-key-gap)) / 9));
+  --tsd-key-gap: 4px;
+  --tsd-key: min(24px, calc((100% - 8 * var(--tsd-key-gap)) / 9));
 
   display: grid;
   grid-template-columns: repeat(9, var(--tsd-key));
@@ -707,15 +964,49 @@ body.tsd-panel {
 
 /* the last row is 8 keys (S-Z) — same column width, one fewer column, and
    justify-content: center above keeps it centred under the rows above */
-.tsd-bid-panel .butHolder > table tr:last-child td {
+.tsd-bid-panel .butHolder>table:not(.bidButs) tr:last-child td {
   grid-template-columns: repeat(8, var(--tsd-key));
 }
 
-.tsd-bid-panel .butHolder > table tr + tr td { margin-top: 5px; }
+.tsd-bid-panel .butHolder>table:not(.bidButs) tr+tr td {
+  margin-top: 4px;
+}
 
 /* the alpha bar is wider than the bid-number grid; let it use the full
    panel width rather than being boxed in by the .butHolder centring. */
-.tsd-bid-panel .butHolder:has(> table) { width: 100%; }
+.tsd-bid-panel .butHolder:has(> table) {
+  width: 100%;
+}
+
+/* The loose "ANSWER GOES HERE" caption.
+
+   AlphaBar.js emits its <option> AFTER the </select> has already closed
+   (AlphaBar.js:457), so the browser drops the tag and keeps the text — it
+   arrives as a bare text node, with no element to select. In this flex
+   container it becomes an anonymous flex item, which cannot be targeted
+   either.
+
+   So it is sized through the container instead: shrink the font here and
+   restore it on the real children, which are all selectable. That reaches
+   the text node and nothing else. A markup bug in the JS is what puts it
+   here; this only stops it shouting. */
+.tsd-bid-panel .butHolder:has(> table) {
+  flex-wrap: wrap;
+  row-gap: 2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--tsd-text-muted);
+}
+
+.tsd-bid-panel .butHolder:has(> table)>table,
+.tsd-bid-panel .butHolder:has(> table)>select,
+.tsd-bid-panel .butHolder:has(> table)>div {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--tsd-text);
+}
 
 /* A 9-key row at the spec'd 28px needs 9*28 + 8*5 = 292px, plus the
    panel's 2*16px padding = 324px — more than the 303px design ceiling set
@@ -723,7 +1014,9 @@ body.tsd-panel {
    holding the alpha bar, so the keys keep their 28px instead of shrinking
    to fit. The bid-number grid is untouched: at 6*30 + 5*8 = 220px it was
    never near the limit. */
-.tsd-bid-panel:has(.butHolder > table) { max-width: 324px; }
+.tsd-bid-panel:has(.butHolder > table) {
+  max-width: 288px;
+}
 
 /* ---- the letter keys ---------------------------------------------------
    Square keys, per spec: 28 x 28, radius 4.2px, 1.05px solid #FFFFFF40
@@ -732,8 +1025,13 @@ body.tsd-panel {
    --tsd-key-team is the player colour, set once per panel, so every state
    rule below stays player-agnostic.                                      */
 
-.tsd-bid-panel--p1 .butHolder { --tsd-key-team: var(--tsd-blue); }
-.tsd-bid-panel--p2 .butHolder { --tsd-key-team: var(--tsd-accent-pink); }
+.tsd-bid-panel--p1 .butHolder {
+  --tsd-key-team: var(--tsd-blue);
+}
+
+.tsd-bid-panel--p2 .butHolder {
+  --tsd-key-team: var(--tsd-accent-pink);
+}
 
 .tsd-bid-panel .alphaBut0,
 .tsd-bid-panel .alphaBut1,
@@ -761,22 +1059,22 @@ body.tsd-panel {
     linear-gradient(180deg,
       rgba(255, 255, 255, .10) 0%,
       rgba(255, 255, 255, .02) 55%,
-      rgba(255, 255, 255, 0)   100%),
+      rgba(255, 255, 255, 0) 100%),
     rgba(10, 8, 45, .55);
 
   color: var(--tsd-text);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 700;
   line-height: 1;
   text-align: center;
   letter-spacing: .04em;
   cursor: pointer;
   transition: transform .12s var(--tsd-ease),
-              color .15s var(--tsd-ease),
-              border-color .15s var(--tsd-ease),
-              background .15s var(--tsd-ease),
-              box-shadow .15s var(--tsd-ease);
+    color .15s var(--tsd-ease),
+    border-color .15s var(--tsd-ease),
+    background .15s var(--tsd-ease),
+    box-shadow .15s var(--tsd-ease);
 }
 
 /* "-I Give Up" is injected ahead of the A key in single-player mode. It is
@@ -832,16 +1130,21 @@ body.tsd-panel {
 
 /* the lift, the press scale and the glow are decoration */
 @media (prefers-reduced-motion: reduce) {
+
   .tsd-bid-panel .alphaBut0,
   .tsd-bid-panel .alphaBut1,
-  .tsd-bid-panel .alphaBut { transition: none; }
+  .tsd-bid-panel .alphaBut {
+    transition: none;
+  }
 
   .tsd-bid-panel .alphaBut0:hover,
   .tsd-bid-panel .alphaBut1:hover,
   .tsd-bid-panel .alphaBut:hover,
   .tsd-bid-panel .alphaBut0:active,
   .tsd-bid-panel .alphaBut1:active,
-  .tsd-bid-panel .alphaBut:active { transform: none; }
+  .tsd-bid-panel .alphaBut:active {
+    transform: none;
+  }
 }
 
 /* ---- the answer dropdown (select.DDM) ---------------------------------
@@ -855,10 +1158,10 @@ body.tsd-panel {
   width: 100%;
   /* the panel is align-items: stretch, so centre this explicitly rather
      than relying on the flex alignment to do it */
-  max-width: 292px;
-  margin-top: 10px;
+  max-width: 248px;
+  margin-top: 6px;
   margin-inline: auto;
-  padding: 7px 30px 7px 12px;
+  padding: 5px 26px 5px 10px;
 
   border-radius: 6px;
   border: 1.05px solid var(--tsd-hairline);
@@ -871,7 +1174,7 @@ body.tsd-panel {
 
   color: var(--tsd-text);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 500;
   line-height: 1.3;
   cursor: pointer;
@@ -879,10 +1182,18 @@ body.tsd-panel {
 }
 
 .tsd-bid-panel--p1 .DDM:hover,
-.tsd-bid-panel--p1 .DDM:focus { border-color: var(--tsd-blue); }
+.tsd-bid-panel--p1 .DDM:focus {
+  border-color: var(--tsd-blue);
+}
+
 .tsd-bid-panel--p2 .DDM:hover,
-.tsd-bid-panel--p2 .DDM:focus { border-color: var(--tsd-accent-pink); }
-.tsd-bid-panel .DDM:focus { outline: none; }
+.tsd-bid-panel--p2 .DDM:focus {
+  border-color: var(--tsd-accent-pink);
+}
+
+.tsd-bid-panel .DDM:focus {
+  outline: none;
+}
 
 /* The options themselves. In browsers that still render the popup list
    natively this is all that can be reached — it at least stops the list
@@ -898,8 +1209,11 @@ body.tsd-panel {
    by browsers that do not support it, which keeps the rules above as the
    fallback. */
 @supports (appearance: base-select) {
+
   .tsd-bid-panel .DDM,
-  .tsd-bid-panel .DDM::picker(select) { appearance: base-select; }
+  .tsd-bid-panel .DDM::picker(select) {
+    appearance: base-select;
+  }
 
   /* re-state the closed control: base-select drops the UA skin, and with
      it the background-image chevron, which now belongs to ::picker-icon */
@@ -926,7 +1240,9 @@ body.tsd-panel {
   /* Keep the JS's hide working. Chrome serialises the inline value without
      the space, so match both forms -- verified in the browser. */
   .tsd-bid-panel .DDM[style*="display:none"],
-  .tsd-bid-panel .DDM[style*="display: none"] { display: none !important; }
+  .tsd-bid-panel .DDM[style*="display: none"] {
+    display: none !important;
+  }
 
   .tsd-bid-panel .DDM::selectedcontent {
     flex: 1 1 auto;
@@ -941,7 +1257,10 @@ body.tsd-panel {
     color: var(--tsd-text-muted);
     transition: transform .15s var(--tsd-ease);
   }
-  .tsd-bid-panel .DDM:open::picker-icon { transform: rotate(180deg); }
+
+  .tsd-bid-panel .DDM:open::picker-icon {
+    transform: rotate(180deg);
+  }
 
   /* the popup list */
   .tsd-bid-panel .DDM::picker(select) {
@@ -968,13 +1287,16 @@ body.tsd-panel {
   .tsd-bid-panel .DDM::picker(select)::-webkit-scrollbar {
     width: 6px;
   }
+
   .tsd-bid-panel .DDM::picker(select)::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .tsd-bid-panel .DDM::picker(select)::-webkit-scrollbar-thumb {
     border-radius: 3px;
     background: rgba(255, 255, 255, .28);
   }
+
   .tsd-bid-panel .DDM::picker(select)::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, .45);
   }
@@ -1006,13 +1328,19 @@ body.tsd-panel {
 
   .tsd-bid-panel--p1 .DDM option:hover,
   .tsd-bid-panel--p1 .DDM option:focus,
-  .tsd-bid-panel--p1 .DDM option:checked { background: rgba(6, 131, 252, .30); }
+  .tsd-bid-panel--p1 .DDM option:checked {
+    background: rgba(6, 131, 252, .30);
+  }
 
   .tsd-bid-panel--p2 .DDM option:hover,
   .tsd-bid-panel--p2 .DDM option:focus,
-  .tsd-bid-panel--p2 .DDM option:checked { background: rgba(253, 12, 117, .30); }
+  .tsd-bid-panel--p2 .DDM option:checked {
+    background: rgba(253, 12, 117, .30);
+  }
 
-  .tsd-bid-panel .DDM option::checkmark { display: none; }
+  .tsd-bid-panel .DDM option::checkmark {
+    display: none;
+  }
 }
 
 /* ---- centre bidding / timer card --------------------------------------
@@ -1032,7 +1360,9 @@ body.tsd-panel {
   min-width: 0;
   width: 100%;
   max-width: 275px;
-  min-height: 203px;
+  /* design height, capped against viewport height on short screens -- see
+     the bid panel above. */
+  min-height: min(203px, 28vh);
   margin-inline: auto;
   padding: 18px 20px;
   box-sizing: border-box;
@@ -1090,7 +1420,7 @@ body.tsd-panel {
   flex: none;
   /* sized in em so the zaps track the label rather than towering over it
      now that the text is caption-sized */
-  width:  1.35em;
+  width: 1.35em;
   height: 1.5em;
   background-repeat: no-repeat;
   background-position: center;
@@ -1107,7 +1437,9 @@ body.tsd-panel {
 
 /* #centerDisplay is emptied between rounds; hide the zaps when there is
    no status text so two bolts do not float in an empty card. */
-.tsd-bid-clock #centerDisplay:empty { display: none; }
+.tsd-bid-clock #centerDisplay:empty {
+  display: none;
+}
 
 /* #timeBox — the countdown. The <input> is still the live element (seven
    places in the game scripts write to its .value, and its onclick sets the
@@ -1193,31 +1525,44 @@ body.tsd-panel {
    #timeBox's countdown into an inline width. The transition is a shade
    longer than the 1s tick so the bar glides continuously rather than
    stepping once a second; `linear` keeps the motion even. */
-.tsd-clock-bar > i {
+.tsd-clock-bar>i {
   display: block;
   height: 100%;
-  width: 45%;                       /* starting value; the JS takes over */
+  width: 45%;
+  /* starting value; the JS takes over */
   border-radius: 999px;
   background: var(--tsd-bid-bar-gradient);
   transition: width 1.05s linear, background .3s var(--tsd-ease);
 }
 
 /* the last five seconds — the bar turns to the alert gradient and pulses */
-.tsd-clock-bar[data-tsd-low] > i {
+.tsd-clock-bar[data-tsd-low]>i {
   background: linear-gradient(90deg,
-                var(--tsd-accent-orange) 0%,
-                var(--tsd-accent-pink)  100%);
+      var(--tsd-accent-orange) 0%,
+      var(--tsd-accent-pink) 100%);
   animation: tsd-clock-pulse .9s ease-in-out infinite;
 }
 
 @keyframes tsd-clock-pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: .55; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .55;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tsd-clock-bar > i { transition: none; }
-  .tsd-clock-bar[data-tsd-low] > i { animation: none; }
+  .tsd-clock-bar>i {
+    transition: none;
+  }
+
+  .tsd-clock-bar[data-tsd-low]>i {
+    animation: none;
+  }
 }
 
 /* ---- action buttons ---------------------------------------------------
@@ -1239,30 +1584,126 @@ body.tsd-panel {
   width: 100%;
 }
 
-/* Next Round is the primary action, so it keeps the middle and the other
-   two sit either side of it. */
-.tsd-clock-actions #ansBut       { order: 1; }
-.tsd-clock-actions #nextRoundBut { order: 2; }
-.tsd-clock-actions #checkBut     { order: 3; }
-
-/* The clock is 275px wide, so three buttons across leaves ~73px each once
-   the padding and gaps are taken out. Override the shared .btn sizing with
-   something that actually fits: smaller type, tighter padding, and each
-   button free to shrink to its share of the row.
-
-   "Next Round" is two words and needs the most room, so it gets a slightly
-   larger share than the two single-word buttons either side. */
+/* Next Round is the only button left in this column -- Answers and Check
+   moved to .tsd-action-bar at the end of the question row. It no longer has
+   to share ~73px with two others, so it takes the clock's full width at a
+   legible size instead of the shrunken type the three-across row needed. */
 .tsd-clock-actions .btn {
-  flex: 1 1 0;
+  width: 100%;
   min-width: 0;
-  padding: clamp(7px, .7vw, 10px) clamp(4px, .5vw, 8px);
-  font-size: clamp(9px, .68vw, 11px);
-  letter-spacing: .02em;
+  padding: clamp(9px, .95vw, 14px) clamp(10px, 1vw, 16px);
+  font-size: clamp(11px, .95vw, 15px);
+  letter-spacing: .04em;
   text-align: center;
   white-space: nowrap;
 }
 
-.tsd-clock-actions #nextRoundBut { flex-grow: 1.35; }
+/* ---- action cluster in the question row --------------------------------
+   Answers and Check. These used to be a full-width bordered band UNDER the
+   play area, which parked the primary action at the bottom of the screen,
+   away from both the question and the answers.
+
+   They now sit at the trailing end of .tsd-question-bar, on the challenge
+   line itself: Check is next to the thing being checked, and it is on the
+   eye's path between the question and the play area instead of below the
+   fold of attention. Being a plain inline cluster, it also needs no band,
+   no hairline and no empty-state rule -- when the game hides both buttons
+   the cluster simply collapses to nothing.
+
+   The row deliberately does NOT set `display` on the buttons: script.js
+   shows and hides them with el.style.display = "block" / "none", and an
+   inline style wins over any rule here anyway. Styling display on .btn
+   would fight that. Only layout, spacing and the button skin are set. */
+/* ---- action cluster (Answers / Check) ---------------------------------
+   These sit at the end of .tsd-question-bar, which is a centred flex ROW.
+   So this is an inline cluster, NOT a full-width footer band: width:100%
+   plus a border-top here would collapse to content width against the row
+   and leave a stray hairline floating beside the question.
+
+   align-self keeps the buttons on the question's first line rather than
+   stretching down its full height when the hint text wraps to two lines. */
+.tsd-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  align-self: center;
+  gap: clamp(8px, .9vw, 14px);
+
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+/* The buttons. This deliberately does NOT set `display` on .btn:
+   script.js and Interface.js show and hide them with
+   el.style.display = "block" / "none", and an inline style beats any rule
+   here -- styling display would fight the game's own show/hide. */
+.tsd-action-bar .btn {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+
+  padding: clamp(8px, .85vw, 13px) clamp(14px, 1.5vw, 24px);
+  border-radius: 10px;
+  border: 1.5px solid var(--tsd-btn-border);
+  background: transparent;
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(10px, .85vw, 14px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .18s var(--tsd-ease), transform .18s var(--tsd-ease);
+}
+
+.tsd-action-bar .btn:hover {
+  background: rgba(6, 131, 252, .2);
+}
+
+.tsd-action-bar .btn:active {
+  transform: scale(.97);
+}
+
+/* Check is the round's primary action, but it is styled the same way Next
+   Round is: a transparent fill inside a gradient BORDER, rather than a
+   solid gradient slab. The filled version read as a heavy block sitting on
+   the question line; matching Next Round keeps the two primary actions
+   consistent and lets the button sit on the background instead of on top
+   of it.
+
+   The two-layer background is the standard gradient-border trick: the
+   first layer paints the page colour over the padding box, the second
+   paints the gradient over the border box, so only the 1px border ring
+   shows the gradient. `transparent` alone cannot do this -- a plain border
+   colour cannot hold a gradient.
+
+   The padding-box layer uses --tsd-bg-top rather than the clock card's
+   colour: this button sits on the page, and the page gradient is at its
+   top colour by the question line where the button lives. */
+.tsd-action-bar #checkBut {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--tsd-bg-top), var(--tsd-bg-top)) padding-box,
+    var(--tsd-primary-gradient) border-box;
+  box-shadow: none;
+}
+
+/* keep the gradient ring on hover; brighten the fill inside it instead */
+.tsd-action-bar #checkBut:hover {
+  background:
+    linear-gradient(rgba(6, 131, 252, .2), rgba(6, 131, 252, .2)) padding-box,
+    var(--tsd-primary-gradient) border-box;
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.tsd-action-bar .btn:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 2px;
+}
 
 .tsd-clock-actions .btn,
 .tsd-bid-clock .btn {
@@ -1299,7 +1740,9 @@ body.tsd-panel {
 }
 
 .tsd-clock-actions .btn:hover,
-.tsd-bid-clock .btn:hover { background: rgba(6, 131, 252, .2); }
+.tsd-bid-clock .btn:hover {
+  background: rgba(6, 131, 252, .2);
+}
 
 /* keep the gradient border on hover; brighten the fill instead */
 .tsd-bid-clock #nextRoundBut:hover {
@@ -1309,7 +1752,9 @@ body.tsd-panel {
 }
 
 .tsd-clock-actions .btn:active,
-.tsd-bid-clock .btn:active { transform: scale(.97); }
+.tsd-bid-clock .btn:active {
+  transform: scale(.97);
+}
 
 .tsd-clock-actions .btn:focus-visible,
 .tsd-bid-clock .btn:focus-visible {
@@ -1321,10 +1766,12 @@ body.tsd-panel {
 
 .tsd-question-bar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: clamp(10px, 1.4vw, 26px);
-  margin-bottom: clamp(12px, 1.6vw, 24px);
+  gap: clamp(8px, 1vw, 18px);
+  /* was clamp(12px,1.6vw,24px) -- tightened so the question sits closer to
+     the play area it introduces, rather than floating between the two. */
+  margin-bottom: clamp(6px, .8vw, 12px);
 }
 
 .tsd-question-main {
@@ -1336,10 +1783,13 @@ body.tsd-panel {
 /* #qBox — the JS writes the question text here and toggles its display */
 .tsd-question-main #qBox {
   margin: 0;
-  /* 24px is the ceiling; it still scales down on a narrow viewport */
-  font-size: clamp(16px, 1.85vw, 24px);
+  /* Sits between the two extremes tried before: 24px made the question the
+     loudest thing on screen and 19px sat back too far to read comfortably
+     across the room. 22px keeps it clearly the heading of the round without
+     competing with the answers it introduces. */
+  font-size: clamp(16px, 1.7vw, 22px);
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.25;
   color: var(--tsd-text);
 }
 
@@ -1353,7 +1803,9 @@ body.tsd-panel {
    The markup is left in place (removing it is a content decision, not a
    styling one) and the rule below is kept intact, so wiring it up later is
    just a matter of a script filling it and setting .is-shown. */
-.tsd-question-hint { display: none; }
+.tsd-question-hint {
+  display: none;
+}
 
 .tsd-question-hint.is-shown {
   display: flex;
@@ -1365,7 +1817,12 @@ body.tsd-panel {
   color: var(--tsd-body-text);
 }
 
-.tsd-question-hint svg { width: 1.2em; height: auto; flex: none; color: var(--tsd-blue); }
+.tsd-question-hint svg {
+  width: 1.2em;
+  height: auto;
+  flex: none;
+  color: var(--tsd-blue);
+}
 
 /* ---- play area ---------------------------------------------------------
    #gamePlayArea and the insert points are filled by the Game* renderers,
@@ -1373,9 +1830,35 @@ body.tsd-panel {
    the container — never the generated contents.                          */
 
 .tsd-play-area {
-  /* min-height only -- the GameI stage is magnified (see #imageInsertPt) and
-     can render taller than this; the area must grow to it, never clip it. */
-  min-height: clamp(220px, 30vw, 460px);
+  /* Takes the height left over by the header, scorebar and question bar
+     rather than asserting a size of its own. The old
+     `min-height: clamp(220px, 30vw, 460px)` was width-derived, so on a
+     short screen it demanded 410-460px the page did not have and pushed
+     the grid below the fold.
+
+     min-height:0 lets this shrink below its content; the content is then
+     scaled to fit by the rules further down, so nothing is clipped. */
+  flex: 1 1 auto;
+  /* height:0 + flex-grow gives this a DEFINITE height (the leftover space)
+     rather than a content-derived one. That matters twice: it stops the
+     content from inflating the band, and it gives the percentage
+     max-height on the GameI stage below something real to resolve
+     against. */
+  height: 0;
+  /* min-height:0, NOT a vh floor. A floor here cannot create space that the
+     bands above have already taken -- it just pushes the page past the
+     viewport and brings the scrollbar back. The play area's share is
+     protected the other way round: by capping those bands with min()
+     against vh (see .tsd-bid-panel and .tsd-bid-clock), which leaves this
+     band real space to flex into. */
+  min-height: 0;
+
+  /* NO SCROLLBAR ANYWHERE -- the client's requirement is that the whole
+     game is visible at once, so this band must never scroll either. Content
+     is scaled down to fit instead (see the fit rules below and the
+     --tsd-fit-scale block). hidden is the backstop only; if it ever clips,
+     the scale rules are what need adjusting. */
+  overflow: hidden;
 
   /* Every renderer's output is centred here, once, rather than each game
      type getting its own :has() patch. The generated content is a mix of
@@ -1383,14 +1866,70 @@ body.tsd-panel {
      the inline/inline-block cases and the margin rule below covers the
      block-level ones. */
   text-align: center;
+
+  /* Vertically centre the round's content in the band.
+
+     The band always claims the full leftover height (`height:0` + flex-grow
+     above) because js-ui/tsd-fit-screen.js needs a definite box to measure
+     against. On a round whose content is shorter than that, the content sat
+     hard against the top and left ~200px of dead space between it and the
+     action bar below, which made the bar read as a strip floating in
+     nothing.
+
+     align-content works on block containers and only distributes free
+     space: it does not change the box model or the stacking, so the
+     `transform-origin: top center` that the fit-scale rules rely on still
+     lines up with where the content actually starts. When the content is
+     taller than the band there is no free space to distribute and this
+     becomes a no-op, leaving the scale-to-fit path untouched. */
+  align-content: center;
+}
+
+/* ...except on the drag-and-drop board, which reads as a panel the question
+   introduces rather than as artwork floating in a band. Centring it left a
+   visible run of dead space between the question and the top of the panels
+   even once they stopped stretching, so this round anchors to the top and
+   the leftover space collects below the board instead. */
+.tsd-play-area:has(#tabl),
+.tsd-play-area:has(#theTable) {
+  align-content: start;
+}
+
+/* Box-grid rounds (E, M, P, U) sit high in the band for the same reason.
+
+   Centring a 4x3 grid in a band that claims all the leftover height left a
+   tall run of dead space between the question and the top of the panel,
+   which read as the question floating away from the answers it introduces.
+
+   Not `start` -- that would push the panel hard against the question. A
+   small top offset keeps them related but distinct, and the remaining free
+   space collects below the panel instead of above it. When the grid is tall
+   enough to fill the band (a 10-row round) there is no free space to
+   distribute and this is a no-op, so the scale-to-fit path is untouched. */
+.tsd-play-area:has(#gamePlayArea > table > tbody > tr > td .gridInsrtPt) {
+  align-content: start;
+}
+
+/* The offset is a MARGIN on the panel, not padding on the band.
+
+   js-ui/tsd-fit-screen.js measures each child as `offsetTop + height`
+   against the band's clientHeight. clientHeight INCLUDES padding while
+   offsetTop is measured from the padding edge, so padding here would add to
+   what the content appears to need without adding to the space available --
+   and because the scale transform originates at the top of the padded box,
+   a tall grid would still be pushed down and clipped at the bottom. A
+   margin is part of neither measurement's discrepancy: it moves the panel
+   and is scaled away with it. */
+.tsd-play-area #gamePlayArea:has(> table > tbody > tr > td .gridInsrtPt) {
+  margin-top: clamp(4px, 1.2vh, 18px);
 }
 
 /* Block-level generated content has a width of its own, so text-align does
    not move it — centre it with auto margins instead. Restricted to the
    insert points' own children so nothing deeper is disturbed. */
-.tsd-play-area > #gameInsrtPt > table,
-.tsd-play-area > #gamePlayArea > table,
-.tsd-play-area > #imageInsertPt > img {
+.tsd-play-area>#gameInsrtPt>table,
+.tsd-play-area>#gamePlayArea>table,
+.tsd-play-area>#imageInsertPt>img {
   margin-inline: auto;
 }
 
@@ -1402,9 +1941,157 @@ body.tsd-panel {
 .tsd-play-area #right,
 .tsd-play-area .container,
 .tsd-play-area .containerC,
-.tsd-play-area .tsd-pregame-rules { text-align: initial; }
+.tsd-play-area .tsd-pregame-rules {
+  text-align: initial;
+}
 
-.tsd-play-area #gamePlayArea { min-width: 0; }
+.tsd-play-area #gamePlayArea {
+  min-width: 0;
+}
+
+/* ---- fit generated media to the band -----------------------------------
+   The renderers emit images at their natural size (GameO/GameP write a
+   plain <img id="theImage"> with no dimensions), so a 448x352 picture
+   claimed 352px of a band that may only be 334px tall and the bottom of
+   the artwork fell out of view.
+
+   Capping height rather than width is what makes the page fit: the
+   constraint here is vertical. `width:auto` alongside it keeps the aspect
+   ratio, so pictures shrink proportionally on a short screen and are left
+   at natural size on a tall one.
+
+   #imageInsertPt is excluded -- the GameI stage is zoomed and its cover
+   panels are positioned in image pixels, so it is capped separately
+   above, in its own unzoomed coordinate space. */
+/* Step 1 -- let anything that CAN shrink on its own do so first, so the
+   uniform scale in step 2 has as little work to do as possible (a picture
+   that simply fits its band needs no scaling at all, and unscaled text is
+   always crisper).
+
+   #imageInsertPt is excluded: the GameI stage is zoomed and its cover
+   panels are positioned in image pixels, so it is capped separately in its
+   own unzoomed coordinate space further down. */
+.tsd-play-area>#gameInsrtPt img,
+.tsd-play-area>#gamePlayArea img,
+.tsd-play-area>#insrtPtA img,
+.tsd-play-area>#insrtPtB img {
+  max-height: 100%;
+  max-width: 100%;
+  /* height/width auto so an HTML width="503" attribute cannot hold the
+     image at its natural size; the aspect ratio is preserved. */
+  height: auto;
+  width: auto;
+  object-fit: contain;
+}
+
+/* The Pre-Game Notice is written into #gamePlayArea while the round's own
+   board may already be sitting in #gameInsrtPt, so the two stack and their
+   combined height (606 + 385 = 1061px on a GameO round) is far more than
+   the band -- which made the fit scaler shrink everything to its minimum
+   even though the notice itself fits comfortably.
+
+   The notice is a modal-style overlay: it covers the board until "Start
+   Round" is pressed. Floating it over the band instead of below it is
+   what it already looks like, and it takes the board's height out of the
+   measurement. Purely presentational -- both elements keep their ids, stay
+   in the DOM, and the JS that shows and clears them is untouched. */
+.tsd-play-area {
+  position: relative;
+}
+
+.tsd-play-area>#gamePlayArea:has(.tsd-pregame),
+.tsd-play-area>#gamePlayArea.has-pregame {
+  /* :has() fallback, set by JS */
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  /* NOT align-items:center. A centred flex item that grows taller than its
+     scroll container overflows in BOTH directions, and the overflow above
+     the container's top edge is unreachable -- the scrollbar cannot go
+     past zero -- so the notice's heading gets clipped off with no way to
+     scroll back to it. `safe center` centres while there is room and falls
+     back to flex-start once there is not; the auto margins below do the
+     same for browsers that do not support the `safe` keyword. */
+  align-items: safe center;
+  justify-content: safe center;
+  /* Overflow the band a little so a taller board underneath is covered to
+     its edges rather than showing as strips above and below the notice. */
+  inset-block: -24px;
+  overflow: auto;
+  /* The notice is modal, so the board behind it must not read as a second,
+     competing screen. A scrim over the whole band -- opaque enough to hide
+     the board, tinted to the panel background -- keeps the notice the only
+     thing being read. Blur is a progressive extra: browsers without it
+     still get the flat scrim. */
+  background: var(--tsd-pg-scrim);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* Auto margins on the flex item centre it while there is spare room and
+   collapse to the gutter once there is not -- the same "centre, but never
+   clip the top" behaviour as `safe center`, for browsers without it. The
+   card must not be squashed to fit either: flex would otherwise shrink it
+   and the text would be cut instead of scrolled. */
+.tsd-play-area>#gamePlayArea:has(.tsd-pregame) .tsd-pregame,
+.tsd-play-area>#gamePlayArea.has-pregame .tsd-pregame {
+  flex: 0 0 auto;
+  margin-block: auto;
+  min-height: 0;
+}
+
+/* The gutter itself, so the card never sits flush against the scrim edge
+   on a screen too short to centre it. */
+.tsd-play-area>#gamePlayArea:has(.tsd-pregame),
+.tsd-play-area>#gamePlayArea.has-pregame {
+  padding-block: clamp(8px, 1.5vh, 20px);
+  /* no universal reset in this sheet, so state it: the padding has to sit
+     inside inset:0, not add to it. */
+  box-sizing: border-box;
+}
+
+/* Step 2 -- the catch-all. Content whose size comes from somewhere CSS
+   cannot reach (inline width/height written by a renderer, question-data
+   font sizes, the user's font-size setting) is shrunk as a whole by
+   js-ui/tsd-fit-screen.js, which measures the overflow and sets
+   --tsd-fit-scale. Default 1 = untouched, so on a screen with room to
+   spare this rule does nothing at all.
+
+   The scale is uniform, so nothing is distorted, and transform-origin is
+   the top centre to match the centred layout above it. */
+.tsd-play-area {
+  --tsd-fit-scale: 1;
+}
+
+.tsd-play-area>#ansBar,
+.tsd-play-area>#gameInsrtPt,
+.tsd-play-area>#imageInsertPt,
+.tsd-play-area>#gamePlayArea,
+.tsd-play-area>#insrtPtA,
+.tsd-play-area>#insrtPtB {
+  transform: scale(var(--tsd-fit-scale));
+  transform-origin: top center;
+}
+
+/* ...but NOT while the Pre-Game Notice is up. In that state #gamePlayArea
+   is no longer a content box -- it is the full-band modal overlay that
+   paints the scrim. Scaling it shrinks the scrim itself, and with
+   transform-origin at the top centre the box also lifts, so the notice's
+   heading ends up above the visible area and clipped. Scale the CARD
+   instead: same fit behaviour, and the scrim keeps covering the band. */
+.tsd-play-area>#gamePlayArea:has(.tsd-pregame),
+.tsd-play-area>#gamePlayArea.has-pregame {
+  transform: none;
+}
+
+.tsd-play-area>#gamePlayArea:has(.tsd-pregame) .tsd-pregame,
+.tsd-play-area>#gamePlayArea.has-pregame .tsd-pregame {
+  transform: scale(var(--tsd-fit-scale));
+  /* centre origin, because the card is centred in the overlay -- a top
+     origin would leave the shrunk card hanging off-centre. */
+  transform-origin: center center;
+}
 
 /* ---- drag & drop panels (GameC) ----------------------------------------
    GameC.js builds:
@@ -1433,19 +2120,23 @@ body.tsd-panel {
   border: 0 !important;
 }
 
-.tsd-play-area #tabl > tbody,
-.tsd-play-area #theTable > tbody { display: block; }
+.tsd-play-area #tabl>tbody,
+.tsd-play-area #theTable>tbody {
+  display: block;
+}
 
-.tsd-play-area #tabl > tbody > tr,
-.tsd-play-area #theTable > tbody > tr {
+.tsd-play-area #tabl>tbody>tr,
+.tsd-play-area #theTable>tbody>tr {
   display: flex;
-  align-items: stretch;              /* equal-height cells */
+  align-items: stretch;
+  /* equal-height cells */
   gap: clamp(10px, 1.5vw, 24px);
 }
 
-.tsd-play-area #tabl > tbody > tr > td,
-.tsd-play-area #theTable > tbody > tr > td {
-  display: flex;                     /* so the panel can fill the cell */
+.tsd-play-area #tabl>tbody>tr>td,
+.tsd-play-area #theTable>tbody>tr>td {
+  display: flex;
+  /* so the panel can fill the cell */
   border: 0 !important;
   padding: 0;
   /* GameC.js hard-codes width='30%' on the first cell; the design shows two
@@ -1453,6 +2144,23 @@ body.tsd-panel {
   flex: 1 1 0;
   width: 50%;
   min-width: 0;
+}
+
+/* The drag-and-drop board's own table. GameC/GameO emit it as #tabl /
+   #theTable inside #gamePlayArea, where the generic table rule caps it at
+   1000px -- but the table is display:block there, so `width:100%` shrank to
+   fit its content (810px on a 1366 screen) and the two panels ended up
+   ~360px wide with a wide empty margin either side. That forced the item
+   list to run tall and the whole board to be scaled down to fit.
+
+   Making the row a full-width flex container lets the panels use the space
+   that is actually there, so the list is shorter and the type stays full
+   size. */
+.tsd-play-area #gamePlayArea #tabl,
+.tsd-play-area #gamePlayArea #theTable {
+  display: block;
+  width: 100%;
+  max-width: none;
 }
 
 /* Figma: 632 × 432, radius 20.
@@ -1465,18 +2173,62 @@ body.tsd-panel {
 .tsd-play-area .container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* was a flat 12px; on a short screen that alone cost 108px across ten
+     items. Scales with viewport height and keeps the design gap when there
+     is room. */
+  gap: clamp(4px, .7vh, 12px);
 
   box-sizing: border-box;
   width: 100%;
-  max-width: 632px;
-  /* 432px is the design height, but the item count is data-driven, so a
-     panel with many items grows. height:100% makes each panel fill its
-     table cell, and the cells equalise — so whichever side is taller sets
-     the height for BOTH and the two boxes always match. */
-  min-height: 432px;
-  height: 100%;
-  padding: 20px;
+  /* The design's 632px ceiling left the two panels ~361px wide on a 1366
+     screen with a wide empty margin either side, which forced the item
+     list to run tall and the whole board to be scaled down to 0.74 to fit.
+     Letting the panels use the width they have keeps the type at full size
+     and shortens the column. */
+  max-width: none;
+
+  /* No min-height. The old min(432px, 46vh) floor was width-derived design
+     height: on a short screen it demanded space the play area did not have
+     and pushed the bottom of the list out of view.
+
+     NOT height:100%. The play area always claims the full leftover height
+     (it is a definite box the fit scaler measures against), so a panel at
+     height:100% stretched to that full band whatever its contents -- which
+     is where the empty space inside the drop panel came from, and why the
+     board's mass sat low and far from the question.
+
+     `align-self: stretch` instead. The row (align-items:stretch on
+     #tabl > tbody > tr) already makes the two CELLS equal height, and the
+     taller side's content is what sets that height -- so stretching to the
+     cell is not the same as stretching to the play area. This is what keeps
+     the two PANELS level inside those cells: `height: auto` sized each panel
+     to its own content, so an empty drop panel collapsed to its min-height
+     floor while the item list next to it ran full height. That mismatch is
+     visible the moment the right panel starts empty (GameO deals every item
+     into #left) and again each time an item moves across.
+
+     A min-height floor gives the panels presence: sized purely to content
+     the board sat as a short strip with a large empty band beneath it. The
+     floor is expressed in vh so it grows with the screen, and stays a
+     FLOOR rather than a fixed height -- a long item list still pushes past
+     it rather than being clipped or scaled down.
+
+     It must not exceed the space the band actually has, or the fit scaler
+     shrinks the whole board to compensate; 46vh leaves room for the header,
+     scorebar, question line and action bar above and below it.
+
+     Kept modest on purpose. The floor was 430px, which on a short question
+     (seven items over four rows) left a large empty tail below the list --
+     the panels looked half-full. `align-content: space-between` on the left
+     panel used to hide that by spreading the rows apart, but with an odd
+     item count that read as broken spacing instead. The rows now pack at
+     the top, so the floor has to be close to the content's own height
+     rather than papering over the difference. */
+  min-height: min(300px, 34vh);
+  height: auto;
+  align-self: stretch;
+  /* the gap between items and the panel wall, trimmed on short screens */
+  padding: clamp(10px, 1.6vh, 20px);
 
   border-radius: 20px;
 }
@@ -1485,6 +2237,51 @@ body.tsd-panel {
 .tsd-play-area #left {
   border: 1px solid var(--tsd-dnd-panel-border);
   background: var(--tsd-dnd-panel-bg);
+}
+
+/* ---- the source items flow in columns, not one per row -----------------
+   GameC emits a flat list of <input class='draggableC'> with no table, so
+   their arrangement is entirely CSS. Stacked one per row, a long list (the
+   National Parks question has ten) runs the panel very tall and wastes the
+   width the panel already has. Laying them out as a wrapping row fits two
+   or three to a line and keeps the board short.
+
+   Scoped to :has(.draggableC) so only GameC's panel changes -- GameO's
+   #left holds .draggable <p> items and keeps its single column. */
+.tsd-play-area #left:has(.draggableC) {
+  /* A two-column grid rather than a wrapping flex row.
+
+     `align-content: space-between` used to spread the rows down the panel
+     to fill its min-height. With an odd item count that reads as broken:
+     seven parks became three pairs at 66px apart plus one item stranded on
+     its own line, against items only ~46px tall. Packing the rows at the
+     top with one honest gap keeps the list reading as a single block.
+
+     Grid also fixes the trailing item. As a flex row it grew to fill its
+     whole line; in a grid it keeps its column width and stays aligned
+     under the item above it. */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: clamp(6px, 1vh, 12px);
+}
+
+/* Each item takes a share of the row rather than the whole width. The
+   basis is a floor, not a fixed width: flex-grow lets a row's items
+   divide the space evenly, so a trailing odd item fills its line and the
+   columns stay aligned. Long names ("Great Smoky Mountains") set the
+   practical minimum, hence a basis wide enough to hold them on one line. */
+.tsd-play-area #left:has(.draggableC)>.draggableC {
+  width: auto;
+  min-width: 0;
+}
+
+/* On a narrow screen two columns would squeeze the longer park names, so
+   fall back to the original single column. */
+@media (max-width: 760px) {
+  .tsd-play-area #left:has(.draggableC) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* right — drop targets: bg #F9C8001A, border 1px #F9C80080 */
@@ -1514,7 +2311,11 @@ body.tsd-panel {
      Figma: radius 10, 1px dashed #FFFFFF40, inner fill #FFFFFF26. */
   border: 1px dashed var(--tsd-dnd-slot-border);
   border-radius: 10px;
-  padding: 6px;
+  /* 6px all round is the design's slot-to-fill gap, but it is paid twice
+     per item vertically (top and bottom) on top of the line-height, so a
+     ten-item list spent 120px on it. Keep it horizontally, compress it
+     vertically on a short screen. */
+  padding: clamp(2px, .5vh, 6px) 6px;
   /* The fill is painted on the CONTENT box, so the 6px padding above shows
      through as the gap between the dashed slot and the filled inner box.
      The fill still picks up the rounded corners from border-radius. */
@@ -1531,8 +2332,14 @@ body.tsd-panel {
   /* The fill is the content box, so its height comes from line-height
      rather than padding — this is the inner box's vertical breathing room.
      (Figma's 16px line-height applies to the text itself; the extra here
-     is what gives the filled box its height.) */
-  line-height: 38px;
+     is what gives the filled box its height.)
+
+     The design's flat 38px is the single biggest cost in a long list: ten
+     items spend 380px on it alone, which is what pushed a ten-item board
+     past the play area and made the fit scaler shrink everything. Scaling
+     it with viewport height keeps the design size where there is room and
+     compresses only when there is not. */
+  line-height: clamp(22px, 3.9vh, 38px);
   letter-spacing: .04em;
   text-align: center;
   color: var(--tsd-dnd-item-text);
@@ -1542,11 +2349,15 @@ body.tsd-panel {
 }
 
 .tsd-play-area .draggableC:hover,
-.tsd-play-area .draggable:hover { background: rgba(255, 255, 255, .22); }
+.tsd-play-area .draggable:hover {
+  background: rgba(255, 255, 255, .22);
+}
 
 /* the item being dragged (GameC.js / GameO.js toggle .dragging) */
 .tsd-play-area .draggableC.dragging,
-.tsd-play-area .draggable.dragging { opacity: .5; }
+.tsd-play-area .draggable.dragging {
+  opacity: .5;
+}
 
 /* drop targets — dashed 8,8 outline, 1px #FFFFFF40 */
 .tsd-play-area .containerC {
@@ -1564,32 +2375,61 @@ body.tsd-panel {
   font-family: var(--tsd-dnd-font);
   font-size: 18px;
   font-weight: 400;
-  line-height: 38px;          /* matches the source items */
+  line-height: 38px;
+  /* matches the source items */
   letter-spacing: .04em;
   text-align: center;
   color: var(--tsd-dnd-item-text);
 }
 
-/* the right panel's generated grid is a plain table — flatten it so each
-   drop cell stacks as a full-width row like the design */
-.tsd-play-area #right table {
+/* ---- the right panel keeps the grid the question data asks for ---------
+   GameC.js builds the drop targets as a real <tr>/<td> grid from the
+   question's own CatRows/CatCols (GameC.js:370-372). Most questions ask for
+   more than one column -- 776 of them specify CatCols=2 -- so flattening
+   every cell to a full-width row both ignored the author's layout and ran
+   the panel needlessly tall.
+
+   Keeping the rows as rows honours whatever each question specifies: a
+   CatCols=1 question still stacks, a CatCols=2 question sits two across. */
+/* #gamePlayArea table above sets border-collapse:collapse and outranks a
+   single-id selector, which merged the cells' dashed outlines into shared
+   hairlines. Match that specificity so each drop cell keeps its own box. */
+.tsd-play-area #gamePlayArea #right table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: separate !important;
+  /* the gap between drop cells, matching the source panel's item gap */
+  border-spacing: clamp(4px, .7vh, 10px);
   border: 0 !important;
+  /* cells share the width evenly instead of sizing to their text, so the
+     columns line up whatever the state names are */
+  table-layout: fixed;
 }
 
-.tsd-play-area #right table,
-.tsd-play-area #right tbody,
-.tsd-play-area #right tr { display: block; width: 100%; }
+.tsd-play-area #right tbody {
+  width: 100%;
+}
 
-.tsd-play-area #right tr { height: auto !important; }
+.tsd-play-area #right tr {
+  height: auto !important;
+}
 
-.tsd-play-area #right td.containerC { display: block; width: 100%; }
+/* The cell keeps its table-cell display so the grid survives. Table cells
+   ignore margin, so the spacing between boxes comes from border-spacing
+   above; the padding here is the slot's own breathing room, which the
+   shorthand in .containerC no longer supplies once the cell is a <td>. */
+.tsd-play-area #gamePlayArea #right td.containerC {
+  vertical-align: middle;
+  padding: 6px;
+  margin: 0;
+}
 
-.tsd-play-area .containerC p { margin: 0; }
+.tsd-play-area .containerC p {
+  margin: 0;
+}
 
-#ansBoxDiv { margin-top: clamp(12px, 1.6vw, 24px); }
+#ansBoxDiv {
+  margin-top: clamp(12px, 1.6vw, 24px);
+}
 
 #ansBox {
   width: 100%;
@@ -1607,7 +2447,8 @@ body.tsd-panel {
    (js/script.js toggles display between 'none' and 'block'), so the
    initial `display: none` here is load-bearing — do not remove it. */
 #noticeA {
-  display: none;                 /* initially hidden — script.js shows it */
+  display: none;
+  /* initially hidden — script.js shows it */
   position: fixed;
   top: 300px;
   left: 50%;
@@ -1645,26 +2486,67 @@ body.tsd-panel {
   .tsd-scorebar {
     grid-template-columns: 1fr 1fr;
   }
-  .tsd-pl-card--p1   { grid-column: 1; grid-row: 1; }
-  .tsd-pl-card--p2   { grid-column: 2; grid-row: 1; }
-  .tsd-bid-panel--p1 { grid-column: 1; grid-row: 2; }
-  .tsd-bid-panel--p2 { grid-column: 2; grid-row: 2; }
-  .tsd-bid-clock     { grid-column: 1 / -1; grid-row: 3; }
+
+  .tsd-pl-card--p1 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .tsd-pl-card--p2 {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .tsd-bid-panel--p1 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .tsd-bid-panel--p2 {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .tsd-bid-clock {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
 }
 
 @media (max-width: 720px) {
-  .tsd-panel-header  { flex-wrap: nowrap; }
-  /* #panelStatus is an empty spacer now -- it must not wrap to its own row. */
-  .tsd-panel-status  { flex: 1 1 auto; }
-  .tsd-question-bar  { flex-direction: column; align-items: center; }
+  .tsd-panel-header {
+    flex-wrap: nowrap;
+  }
+
+  /* #panelStatus must not wrap to its own row. It still carries the round
+     and game-mode text, though: at this width there is no room for it
+     beside the tools, so white-space:nowrap + text-overflow clipped each
+     span down to a single letter ("R... | G..."), which reads as damage
+     rather than as information. Hide the text and keep the element as the
+     flex spacer that pushes the tools right. */
+  .tsd-panel-status {
+    flex: 1 1 auto;
+  }
+
+  .tsd-panel-status>span {
+    display: none;
+  }
+
+  .tsd-question-bar {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .tsd-icon-but,
   .tsd-exit-but,
   .tsd-clock-actions .btn,
   .tsd-bid-clock .btn,
-  .tsd-bid-panel .but2Player { transition: none; }
+  .tsd-bid-panel .but2Player {
+    transition: none;
+  }
 }
 
 /* ---- turn-change notice -------------------------------------------------
@@ -1740,7 +2622,9 @@ body.tsd-panel {
   box-shadow: 0 12px 30px rgba(6, 131, 252, .45);
 }
 
-.tsd-play-area .tsd-turn-but:active { transform: translateY(0); }
+.tsd-play-area .tsd-turn-but:active {
+  transform: translateY(0);
+}
 
 .tsd-play-area .tsd-turn-but:focus-visible {
   outline: 2px solid var(--tsd-accent-yellow);
@@ -1748,8 +2632,13 @@ body.tsd-panel {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tsd-play-area .tsd-turn-but { transition: none; }
-  .tsd-play-area .tsd-turn-but:hover { transform: none; }
+  .tsd-play-area .tsd-turn-but {
+    transition: none;
+  }
+
+  .tsd-play-area .tsd-turn-but:hover {
+    transform: none;
+  }
 }
 
 /* ---- Game B — image box grid -------------------------------------------
@@ -1763,21 +2652,34 @@ body.tsd-panel {
    The table is flattened to a wrapping flex row so the cards keep the Figma
    size and gap instead of table-cell spacing.                            */
 
-.tsd-play-area #gameInsrtPt > table {
+.tsd-play-area #gameInsrtPt>table {
   border: 0;
   border-collapse: separate;
   margin: 0 auto;
 }
 
 /* strip the generated border='1' from every level */
-.tsd-play-area #gameInsrtPt > table,
-.tsd-play-area #gameInsrtPt > table tr,
-.tsd-play-area #gameInsrtPt > table td { border: 0; }
+.tsd-play-area #gameInsrtPt>table,
+.tsd-play-area #gameInsrtPt>table tr,
+.tsd-play-area #gameInsrtPt>table td {
+  border: 0;
+}
 
-/* rows become flex lines; cells become cards */
-.tsd-play-area #gameInsrtPt > table > tbody { display: block; }
+/* rows become flex lines; cells become cards.
 
-.tsd-play-area #gameInsrtPt > table > tbody > tr {
+   GameO renders its drag board into #gameInsrtPt too, as a table with the
+   id #theTable, so these picture-grid rules used to land on it as well --
+   and being two ids deep they OUTRANKED the GameO block above, flattening
+   its cells back to display:block. That is what broke the equal-height
+   panels: with a block cell there is no flex context, so the panel could
+   not stretch to the cell and each side sized to its own content instead
+   (an empty drop panel sat ~147px shorter than the item list beside it).
+   :not(#theTable) keeps these rules on GameB's grid where they belong. */
+.tsd-play-area #gameInsrtPt>table:not(#theTable)>tbody {
+  display: block;
+}
+
+.tsd-play-area #gameInsrtPt>table:not(#theTable)>tbody>tr {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -1785,7 +2687,7 @@ body.tsd-panel {
   margin-bottom: 18px;
 }
 
-.tsd-play-area #gameInsrtPt > table > tbody > tr > td {
+.tsd-play-area #gameInsrtPt>table:not(#theTable)>tbody>tr>td {
   display: block;
   padding: 0;
 }
@@ -1877,12 +2779,98 @@ body.tsd-panel {
   background: var(--tsd-accent-pink);
 }
 
+/* ---- the grid-picture questions (Type=Grid) ----------------------------
+   GameB.js wraps the single grid picture in #gridImageWrap and places the
+   check marks and answer bars inside it at percentage offsets. For those
+   percentages to resolve against the PICTURE, the wrapper must be a
+   positioned box that is exactly the size of the rendered picture — hence
+   an inline-block shrink-wrapping the image, and the image itself back in
+   the normal flow (TSDstyle.css sets #theImage to position:absolute, which
+   would collapse the wrapper to zero height).                            */
+.tsd-play-area #gameInsrtPt #gridImageWrap {
+  position: relative;
+  display: inline-block;
+  /* the wrapper is now what has to fit the band; the cap is inherited by
+     the image below via max-height:100%. */
+  max-width: 100%;
+  max-height: 100%;
+  line-height: 0;
+  /* no descender gap under the image */
+}
+
+.tsd-play-area #gameInsrtPt #gridImageWrap>#theImage {
+  position: static;
+  display: block;
+}
+
+/* The generic "fit any picture to the band" rule above sets width/height to
+   auto on every img in here, which would let the check-mark and answer-bar
+   graphics render at their natural file size instead of the size the markup
+   asks for. Size them relative to one grid cell so they scale with the
+   picture; --tsd-grid-cols/rows are set on the wrapper by GameB.js.       */
+/* The check mark itself, drawn rather than loaded as an image so it can sit
+   on the photograph with nothing but the tick showing. Sized to a fraction
+   of one grid cell so it scales with the picture and never swamps a face. */
+.tsd-play-area #gameInsrtPt #gridImageWrap>.tsd-ck {
+  /* The tick is the right and bottom borders of a rotated box, so the box is
+     narrow and tall: its width becomes the tick's short arm and its height
+     the long one. A real check mark has a clearly shorter left arm, hence
+     roughly a 1:2 ratio rather than a square (which reads as a "v"). */
+  width: calc(100% / var(--tsd-grid-cols, 4) * .13);
+  height: calc(100% / var(--tsd-grid-rows, 4) * .30);
+  border: 0 solid var(--tsd-ck-color, #2ecc40);
+  /* only the two sides that form the tick */
+  border-right-width: 4px;
+  border-bottom-width: 4px;
+  /* rotate the corner into a check mark. The -50%,-50% keeps it centred on
+     the cell; the rotate is appended here so it survives the inline
+     transform written by GameB.js. */
+  transform: translate(-50%, -60%) rotate(45deg) !important;
+  box-sizing: border-box;
+  /* a dark outer edge so the tick stays legible on a light face */
+  filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, .9)) drop-shadow(0 0 3px rgba(0, 0, 0, .55));
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+  /* never swallow a click meant for the picture */
+}
+
+.tsd-play-area #gameInsrtPt #gridImageWrap>.tsd-ck-blue {
+  --tsd-ck-color: #4aa3ff;
+}
+
+.tsd-play-area #gameInsrtPt #gridImageWrap>.tsd-ck-red {
+  --tsd-ck-color: #ff4d4d;
+}
+
+/* thinner strokes when the grid is dense and each cell is small */
+@media (max-width: 900px) {
+  .tsd-play-area #gameInsrtPt #gridImageWrap>.tsd-ck {
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+  }
+}
+
+.tsd-play-area #gameInsrtPt #gridImageWrap>.yellowSquare {
+  width: calc(100% / var(--tsd-grid-cols, 4) * .48);
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
 /* the player dots and check marks the renderer injects.
    They are positioned by inline styles from the JS; only their look is
    adjusted so they read as badges rather than loose thumbnails.          */
 .tsd-play-area #gameInsrtPt .dot,
 .tsd-play-area #gameInsrtPt .ckMrk {
   z-index: 3;
+}
+
+/* Only the image-based markers get the round badge treatment; the drawn
+   check mark above must stay an unadorned tick. */
+.tsd-play-area #gameInsrtPt img.dot,
+.tsd-play-area #gameInsrtPt img.ckMrk {
   border-radius: 50%;
   box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85);
 }
@@ -1901,19 +2889,42 @@ body.tsd-panel {
    allowed to wrap and the cards shrink rather than overflow the page.   */
 
 @media (max-width: 1100px) {
-  .tsd-play-area #gameInsrtPt > table > tbody > tr { gap: 14px; margin-bottom: 14px; }
-  :root { --tsd-gb-card-w: 132px; --tsd-gb-card-h: 150px; }
+  .tsd-play-area #gameInsrtPt>table>tbody>tr {
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  :root {
+    --tsd-gb-card-w: 132px;
+    --tsd-gb-card-h: 150px;
+  }
 }
 
 @media (max-width: 720px) {
-  .tsd-play-area #gameInsrtPt > table > tbody > tr { gap: 10px; margin-bottom: 10px; }
-  :root { --tsd-gb-card-w: 108px; --tsd-gb-card-h: 124px; }
-  .tsd-play-area #gameInsrtPt [id^="divR"][data-name]::before { font-size: 11px; padding: 6px 4px; }
+  .tsd-play-area #gameInsrtPt>table>tbody>tr {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  :root {
+    --tsd-gb-card-w: 108px;
+    --tsd-gb-card-h: 124px;
+  }
+
+  .tsd-play-area #gameInsrtPt [id^="divR"][data-name]::before {
+    font-size: 11px;
+    padding: 6px 4px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tsd-play-area #gameInsrtPt [id^="divR"] { transition: none; }
-  .tsd-play-area #gameInsrtPt [id^="divR"]:hover { transform: none; }
+  .tsd-play-area #gameInsrtPt [id^="divR"] {
+    transition: none;
+  }
+
+  .tsd-play-area #gameInsrtPt [id^="divR"]:hover {
+    transform: none;
+  }
 }
 
 /* ==========================================================================
@@ -1940,11 +2951,14 @@ body.tsd-panel {
   margin: 0 auto;
 }
 
-.tsd-play-area #gamePlayArea table td { border: 0; padding: 0; }
+.tsd-play-area #gamePlayArea table td {
+  border: 0;
+  padding: 0;
+}
 
 /* the generated <caption> — "SELECT THE YEAR" / "SELECT THE DAY".
    The design shows this as the hint line under the question.            */
-.tsd-play-area #gamePlayArea table > caption {
+.tsd-play-area #gamePlayArea table>caption {
   caption-side: top;
   /* both captions sit over their slider, so give them the same track width
      rather than letting each inherit its own table's width */
@@ -2036,7 +3050,8 @@ body.tsd-panel {
   max-width: var(--tsd-sl-track-w);
   margin: 0 auto;
   height: var(--tsd-sl-thumb-size);
-  background: transparent;   /* the track pseudo-elements paint instead */
+  background: transparent;
+  /* the track pseudo-elements paint instead */
   cursor: pointer;
 }
 
@@ -2045,8 +3060,7 @@ body.tsd-panel {
   height: var(--tsd-sl-track-h);
   border-radius: 999px;
   background:
-    linear-gradient(var(--tsd-sl-fill), var(--tsd-sl-fill))
-      0 / var(--tsd-sl-pct, 0%) 100% no-repeat,
+    linear-gradient(var(--tsd-sl-fill), var(--tsd-sl-fill)) 0 / var(--tsd-sl-pct, 0%) 100% no-repeat,
     var(--tsd-sl-track-bg);
 }
 
@@ -2067,7 +3081,7 @@ body.tsd-panel {
 .tsd-play-area #gamePlayArea input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width:  var(--tsd-sl-thumb-size);
+  width: var(--tsd-sl-thumb-size);
   height: var(--tsd-sl-thumb-size);
   border-radius: 50%;
   background: var(--tsd-sl-thumb);
@@ -2080,7 +3094,7 @@ body.tsd-panel {
 }
 
 .tsd-play-area #gamePlayArea input[type="range"]::-moz-range-thumb {
-  width:  var(--tsd-sl-thumb-size);
+  width: var(--tsd-sl-thumb-size);
   height: var(--tsd-sl-thumb-size);
   border-radius: 50%;
   background: var(--tsd-sl-thumb);
@@ -2169,9 +3183,17 @@ body.tsd-panel {
   color: var(--tsd-sl-label);
 }
 
-.tsd-play-area #gamePlayArea .gameDCell:nth-child(1) { text-align: left; }
-.tsd-play-area #gamePlayArea .gameDCell:nth-child(2) { text-align: center; }
-.tsd-play-area #gamePlayArea .gameDCell:nth-child(3) { text-align: right; }
+.tsd-play-area #gamePlayArea .gameDCell:nth-child(1) {
+  text-align: left;
+}
+
+.tsd-play-area #gamePlayArea .gameDCell:nth-child(2) {
+  text-align: center;
+}
+
+.tsd-play-area #gamePlayArea .gameDCell:nth-child(3) {
+  text-align: right;
+}
 
 /* ---- day row ("SELECT THE DAY") ----------------------------------------
    insertDayTable() spaces the day slider with 67px / 60px filler cells so
@@ -2196,11 +3218,16 @@ body.tsd-panel {
    malformed table markup (a <table> nested inside a <tr>, unclosed <tr>s),
    so the parser moves #dayTableInsertionPoint and there is no reliable
    ancestor to hang these rules off. The ids are unique, so this is safe. */
-#theDayTable { margin-top: 26px; }
+#theDayTable {
+  margin-top: 26px;
+}
 
 /* #dateLine carries width="500" as an HTML attribute, which still sizes its
    cell even though the image is hidden. Zero it so the cell collapses. */
-#theDayTable #dateLine { display: none; width: 0 !important; }
+#theDayTable #dateLine {
+  display: none;
+  width: 0 !important;
+}
 
 /* Both sliders pinned to the same box.
 
@@ -2231,9 +3258,9 @@ body.tsd-panel {
    As blocks the spacers collapse to nothing and the slider row simply fills
    the width, which is what makes it match #sliderDiv above. */
 #theDayTable,
-#theDayTable > tbody,
-#theDayTable > tbody > tr,
-#theDayTable > tbody > tr > td {
+#theDayTable>tbody,
+#theDayTable>tbody>tr,
+#theDayTable>tbody>tr>td {
   display: block;
   width: 100%;
   max-width: var(--tsd-sl-track-w);
@@ -2243,7 +3270,7 @@ body.tsd-panel {
 
 /* the spacer cells hold only whitespace; with the table flattened they would
    still each take a line, so remove them from the flow */
-#theDayTable > tbody > tr > td:not(:has(#sliderDay)):not(:has(#dateLine)) {
+#theDayTable>tbody>tr>td:not(:has(#sliderDay)):not(:has(#dateLine)) {
   display: none;
 }
 
@@ -2251,7 +3278,7 @@ body.tsd-panel {
    block parent, so it shrank to its text and "SELECT THE DAY" wrapped onto
    three lines. Measured: 75px against the year caption's 1000px. Make it a
    block so it spans the same width as the year caption above. */
-#theDayTable > caption {
+#theDayTable>caption {
   display: block;
   width: 100%;
   max-width: var(--tsd-sl-track-w);
@@ -2297,38 +3324,231 @@ body.tsd-panel {
   margin: 0 auto;
 }
 
+/* These were Blue/RedUpArrow.AA.jpg from the ResLibry. JPEG has no alpha, so
+   each arrow arrived inside an opaque WHITE box that sat as a white square
+   on the dark panel, and no CSS could clear it without also destroying the
+   arrow's colour (`darken`/`multiply` crush the triangle into the dark
+   ground; `invert()+screen` clears the box but shifts the hue). They are now
+   local transparent PNGs drawn in the theme's player colours -- see
+   getUpArrowImage() in js/script.js.
+
+   The size lives here because the markup no longer carries width/height
+   attributes; the JS still writes the inline `left` that positions them. */
 .tsd-play-area .upArrow {
   position: absolute;
   top: 0;
   z-index: 5;
+  width: var(--tsd-sl-answer-arrow-w);
+  height: auto;
+  /* centre the marker on the point the JS sets, as #blackDownArrow is */
+  margin-left: calc(var(--tsd-sl-answer-arrow-w) / -2);
 }
 
-/* the black answer arrow, dropped into #dateLineInsrtPt after the play */
+/* The answer marker, dropped into #dateLineInsrtPt (Game D) or
+   #nbrLineInsrtPt (Game N) once the round is checked.
+
+   getImageFile() supplies it as BlackDownArrow.AB.png -- a solid black
+   triangle on transparency. A bitmap cannot be recoloured with `color` or
+   `background`, and the file is served from the remote resource library, so
+   a filter is the only way CSS can reach it. brightness(0) crushes it to
+   pure black whatever the source pixels are, then invert(1) flips that to
+   white, which makes the result independent of the PNG's own palette.
+
+   Sized here because the source bitmap is small and renders soft when the
+   ruler scales up. The inline `left` and `z-index` that the JS writes are
+   left alone -- only the appearance changes. */
 .tsd-play-area #blackDownArrow {
   position: absolute;
   z-index: 6;
+  width: var(--tsd-sl-answer-arrow-w);
+  height: auto;
+  filter: var(--tsd-sl-answer-arrow);
+  /* centre the marker on the position the JS sets, rather than hanging it
+     to the right of that point */
+  margin-left: calc(var(--tsd-sl-answer-arrow-w) / -2);
 }
 
 /* ---- Game D responsive -------------------------------------------------- */
 
 @media (max-width: 1100px) {
-  :root { --tsd-sl-rule-h: 34px; }
-  .tsd-play-area #gamePlayArea .gameDCell { font-size: 16px; }
+  :root {
+    --tsd-sl-rule-h: 34px;
+  }
+
+  .tsd-play-area #gamePlayArea .gameDCell {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 720px) {
-  :root { --tsd-sl-rule-h: 26px; --tsd-sl-thumb-size: 20px; }
-  .tsd-play-area #gamePlayArea table > caption { font-size: 16px; }
-  .tsd-play-area #gamePlayArea .gameDCell { font-size: 14px; }
+  :root {
+    --tsd-sl-rule-h: 26px;
+    --tsd-sl-thumb-size: 20px;
+  }
+
+  .tsd-play-area #gamePlayArea table>caption {
+    font-size: 16px;
+  }
+
+  .tsd-play-area #gamePlayArea .gameDCell {
+    font-size: 14px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tsd-play-area #gamePlayArea input[type="range"]::-webkit-slider-thumb {
     transition: none;
   }
+
   .tsd-play-area #gamePlayArea input[type="range"]:hover::-webkit-slider-thumb,
   .tsd-play-area #gamePlayArea input[type="range"]:active::-webkit-slider-thumb {
     transform: none;
+  }
+}
+
+
+/* ==========================================================================
+   Game N — number line (one slider between a low and a high bound)
+
+   GameN.setUp() writes a single table into #gamePlayArea. It is the sibling
+   of Game D above and reuses that section's slider, ruler and label rules
+   wholesale — the generic `input[type="range"]` and `.gameDCell` selectors
+   there already match, so only what is specific to Game N lives here.
+
+   The structure, ids and inline handlers generated by the JS are left as
+   they are; only presentation changes.
+
+     #tblTitle           the wrapper table, with the "Your Selection" caption
+     #displayBox         the live readout — the dragged number while playing,
+                         then "You selected: N" / "Answer= N" after the check
+     #displayTextLow/Mid/Hi   the three scale labels (in .gameDCell cells)
+     #nbrLineInsrtPt     holds the #nbrLine bitmap; the ruler is drawn here
+     #sliderN            the range input
+
+   Two hardcoded colours were removed from GameN.js so this sheet can reach
+   the component at all: the table carried `background-color:#00ffff` with a
+   `#000080` border inline, and the slider's track was painted from the
+   `greenBG` global (#83ff5c) in js/script.js. Inline styles beat a
+   stylesheet, so neither could be restyled in CSS alone.
+   ========================================================================== */
+
+/* ---- the wrapper table -------------------------------------------------
+   Width="500px" is an HTML attribute on the table, so it needs overriding
+   here to share the sliders' track width with Game D.                    */
+.tsd-play-area #gamePlayArea #tblTitle {
+  /* The gutter keeps the outer scale labels ("400", "1200") off the
+     viewport edge once the track is wider than the screen. Subtracting it
+     from the width keeps the table centred on the same axis as the ruler
+     and slider below, which are capped at the same track width. */
+  width: calc(100% - 2 * var(--tsd-gutter));
+  max-width: var(--tsd-sl-track-w);
+  margin: 0 auto;
+  border: 0;
+  background: transparent;
+}
+
+/* ---- the live readout --------------------------------------------------
+   GameN writes a bare number here during play, then a sentence once the
+   round is checked. The renderer wraps it in <b><font size="70px">, which
+   is a legacy size keyword, not 70px — the font-size below is what governs.
+
+   Sized to hold "The answer is 1234" without reflowing as the value grows. */
+.tsd-play-area #gamePlayArea #displayBox {
+  display: block;
+  box-sizing: border-box;
+  width: min(100%, 340px);
+  margin: 0 auto 18px;
+  padding: 10px 18px;
+
+  border: 1px solid var(--tsd-hairline);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .08);
+
+  font-family: var(--tsd-dnd-font);
+  font-size: clamp(18px, 2vw, 26px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--tsd-text);
+}
+
+/* the <font> tag inside inherits the box's size rather than the legacy one */
+.tsd-play-area #gamePlayArea #displayBox font {
+  font-size: inherit;
+}
+
+/* ---- the scale labels --------------------------------------------------
+   The cells carry .gameDCell, so Game D's alignment, font and responsive
+   rules apply. Only the inner .nbrDisplay div needs neutralising: GameN
+   emits it inside the cell and it would otherwise sit at its own default. */
+.tsd-play-area #gamePlayArea .gameDCell .nbrDisplay {
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+}
+
+/* ---- the ruled axis ----------------------------------------------------
+   #nbrLine (NbrLine-1.gif) is a fixed 503px bitmap loaded from an absolute
+   edugames.com URL, so it can neither be recoloured nor made responsive.
+   Game D's section already hides it; here its container draws the ruler in
+   its place, matching the axis Game D uses.
+
+   The ticks are decorative: the real min/max come from the question data at
+   runtime (LowBracket / HiBracket), so the spacing is not a per-value
+   readout — it reads as a scale, and the three labels above carry the
+   actual numbers.                                                        */
+.tsd-play-area #gamePlayArea #nbrLineInsrtPt {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* The ruler and the slider live inside #tblTitle, which already carries the
+   gutter and the track-width cap, so both fill their cell rather than
+   re-applying the cap -- that would make them wider than the scale labels
+   above and knock the three rows off a shared axis. */
+.tsd-play-area #gamePlayArea #tblTitle input[type="range"] {
+  max-width: none;
+}
+
+.tsd-play-area #gamePlayArea #nbrLineInsrtPt::before {
+  content: "";
+  display: block;
+  height: var(--tsd-sl-rule-h);
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--tsd-sl-rule-line);
+  background-repeat: repeat-x;
+  background-image:
+    repeating-linear-gradient(90deg,
+      var(--tsd-sl-rule-major) 0 2px,
+      transparent 2px 20%),
+    repeating-linear-gradient(90deg,
+      var(--tsd-sl-rule-minor) 0 1px,
+      transparent 1px 4%);
+  background-size: 100% 100%, 100% 55%;
+  background-position: left bottom, left bottom;
+}
+
+/* ---- spacing between the rows -----------------------------------------
+   The renderer separates rows with <br /> inside each cell. Those collapse
+   to nothing useful once the cells are styled, so the rhythm is set here. */
+.tsd-play-area #gamePlayArea #tblTitle td {
+  padding: 0;
+}
+
+.tsd-play-area #gamePlayArea #tblTitle br {
+  display: none;
+}
+
+/* ---- Game N responsive --------------------------------------------------
+   The slider, ruler height and label sizes all follow Game D's media
+   queries through the shared tokens and .gameDCell. Only the readout needs
+   its own step down.                                                     */
+
+@media (max-width: 720px) {
+  .tsd-play-area #gamePlayArea #displayBox {
+    font-size: 18px;
+    padding: 8px 14px;
   }
 }
 
@@ -2353,8 +3573,10 @@ body.tsd-panel {
   position: relative;
   width: 100%;
   max-width: var(--tsd-pg-width);
-  margin: clamp(10px, 2vw, 26px) auto;       /* centred */
-  padding: var(--tsd-pg-pad);                /* the #FFFFFF40 rim */
+  margin: clamp(10px, 2vw, 26px) auto;
+  /* centred */
+  padding: var(--tsd-pg-pad);
+  /* the #FFFFFF40 rim */
   border-radius: var(--tsd-pg-radius);
   background: var(--tsd-pg-outer-bg);
   box-shadow: 0 4px 53.75px rgba(255, 255, 255, .3);
@@ -2370,17 +3592,19 @@ body.tsd-panel {
   z-index: 0;
 }
 
-.tsd-play-area .tsd-pregame > * { position: relative; z-index: 1; }
+.tsd-play-area .tsd-pregame>* {
+  position: relative;
+  z-index: 1;
+}
 
-/* ---- 1. header: back button + title ------------------------------------
-   Both sit in normal flow. The title takes the remaining width and centres
-   inside it, which lands it slightly right of the card's true centre —
-   matching the Figma, where the title centre is 18px right of the card's. */
+/* ---- 1. header: title ---------------------------------------------------
+   The header held a back button alongside the title until it was removed at
+   the client's request; the title is now the only child, so it centres on
+   the card's true centre rather than being offset to clear the button. */
 
 .tsd-play-area .tsd-pregame-head {
   display: flex;
   align-items: center;
-  gap: clamp(10px, 1.2vw, 18px);
   min-height: clamp(34px, 3.4vw, 48px);
   padding: var(--tsd-pg-inner-pad) var(--tsd-pg-inner-pad) 0;
 }
@@ -2393,38 +3617,6 @@ body.tsd-panel {
   font-weight: 700;
   line-height: 1.2;
   color: var(--tsd-pg-heading);
-}
-
-/* ---- back button --------------------------------------------------------
-   Same asset and behaviour as the back button on index.html and
-   overview.html, so the three screens match.                             */
-
-.tsd-play-area .tsd-pregame-back {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .2s var(--tsd-ease), filter .2s var(--tsd-ease);
-}
-
-.tsd-play-area .tsd-pregame-back img {
-  display: block;
-  width: auto;
-  height: clamp(30px, 3vw, 44px);
-}
-
-.tsd-play-area .tsd-pregame-back:hover  { transform: translateX(-2px); }
-.tsd-play-area .tsd-pregame-back:active { transform: scale(.94); }
-
-.tsd-play-area .tsd-pregame-back:focus-visible {
-  outline: 2px solid var(--tsd-text);
-  outline-offset: 3px;
-  border-radius: 8px;
 }
 
 /* ---- 2. rules ----------------------------------------------------------- */
@@ -2467,7 +3659,7 @@ body.tsd-panel {
   position: absolute;
   left: 0;
   top: .38em;
-  width:  var(--tsd-pg-bullet-size);
+  width: var(--tsd-pg-bullet-size);
   height: var(--tsd-pg-bullet-size);
   border-radius: 50%;
   border: 2px solid var(--tsd-pg-bullet);
@@ -2480,8 +3672,14 @@ body.tsd-panel {
 
 /* nested <p> — the two-player variants wrap one <p> inside another, so the
    inner one must not draw a second bullet or indent again. */
-.tsd-play-area .tsd-pregame-rules p p         { padding-left: 0; margin-bottom: 0; }
-.tsd-play-area .tsd-pregame-rules p p::before { display: none; }
+.tsd-play-area .tsd-pregame-rules p p {
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.tsd-play-area .tsd-pregame-rules p p::before {
+  display: none;
+}
 
 /* bold runs stay in the body colour — the design does not brighten them */
 .tsd-play-area .tsd-pregame-rules b {
@@ -2490,15 +3688,16 @@ body.tsd-panel {
 }
 
 /* the stray <br> runs at the end of the GameL variants */
-.tsd-play-area .tsd-pregame-rules br { display: none; }
+.tsd-play-area .tsd-pregame-rules br {
+  display: none;
+}
 
 /* ---- 3. footer: Start Round -------------------------------------------- */
 
 .tsd-play-area .tsd-pregame-foot {
   display: flex;
   justify-content: center;
-  padding: clamp(22px, 2.8vw, 40px) var(--tsd-pg-inner-pad)
-           var(--tsd-pg-inner-pad);
+  padding: clamp(22px, 2.8vw, 40px) var(--tsd-pg-inner-pad) var(--tsd-pg-inner-pad);
 }
 
 /* The icon and label form one centred group, as in the Figma: the triangle,
@@ -2549,11 +3748,11 @@ body.tsd-panel {
 /* the play triangle, masked so it takes the button's colour */
 .tsd-play-area .tsd-pregame-play {
   flex: 0 0 auto;
-  width:  var(--tsd-pg-icon);
+  width: var(--tsd-pg-icon);
   height: var(--tsd-pg-icon);
   background: currentColor;
   -webkit-mask: var(--tsd-pg-play-icon) center / contain no-repeat;
-          mask: var(--tsd-pg-play-icon) center / contain no-repeat;
+  mask: var(--tsd-pg-play-icon) center / contain no-repeat;
 }
 
 .tsd-play-area .tsd-pregame-start:hover {
@@ -2584,20 +3783,16 @@ body.tsd-panel {
     padding-left: calc(var(--tsd-pg-bullet-size) + 14px);
   }
 
-  /* the title would collide with the back button at this width */
-  .tsd-play-area .tsd-pregame-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .tsd-play-area .tsd-pregame-title { text-align: left; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tsd-play-area .tsd-pregame-start,
-  .tsd-play-area .tsd-pregame-back { transition: none; }
-  .tsd-play-area .tsd-pregame-start:hover { transform: none; }
+  .tsd-play-area .tsd-pregame-start {
+    transition: none;
+  }
+
+  .tsd-play-area .tsd-pregame-start:hover {
+    transform: none;
+  }
 }
 
 /* ==========================================================================
@@ -2655,12 +3850,18 @@ body.tsd-panel {
 }
 
 .tsd-play-area #gamePlayArea table:has(.gridInsrtPt) {
+  /* min() with the tall-grid cap (unset on a small grid, hence the
+     fallback) -- see the "tall grids" block below. Both the spacing and the
+     negative margin that compensates for it read the same expression, so
+     they stay in step. */
+  --tsd-bx-gap: min(var(--tsd-bx-btn-gap), var(--tsd-bx-btn-gap-cap, 999px));
+
   border-collapse: separate;
-  border-spacing: var(--tsd-bx-btn-gap);
+  border-spacing: var(--tsd-bx-gap);
   /* border-spacing also applies OUTSIDE the first and last row/column, which
      doubled up with the panel padding. Pull that edge back so the spacing
      shows only between the tiles. */
-  margin: calc(-1 * var(--tsd-bx-btn-gap));
+  margin: calc(-1 * var(--tsd-bx-gap));
 
   /* auto layout, but every cell is pinned to the same width below -- so the
      columns line up AND the table is only as wide as its columns need,
@@ -2680,7 +3881,9 @@ body.tsd-panel {
 
 /* createGrid() writes a literal "-------" <center> after every cell as a
    spacer. The gap is handled by border-spacing now, so hide it. */
-.tsd-play-area #gamePlayArea td:has(.gridInsrtPt) > center { display: none; }
+.tsd-play-area #gamePlayArea td:has(.gridInsrtPt)>center {
+  display: none;
+}
 
 /* the insert point carries an inline background-color:aquamarine */
 .tsd-play-area #gamePlayArea .gridInsrtPt {
@@ -2701,8 +3904,11 @@ body.tsd-panel {
   -webkit-appearance: none;
 
   width: 100%;
-  min-height: var(--tsd-bx-btn-min-h);
-  padding: var(--tsd-bx-btn-pad-y) var(--tsd-bx-btn-pad-x);
+  /* min() with the tall-grid cap, which is unset on a small grid -- see the
+     "tall grids" block below. */
+  min-height: min(var(--tsd-bx-btn-min-h), var(--tsd-bx-btn-h-cap, 999px));
+  padding: min(var(--tsd-bx-btn-pad-y), var(--tsd-bx-btn-pad-y-cap, 999px))
+           var(--tsd-bx-btn-pad-x);
   border-radius: var(--tsd-bx-btn-radius);
   /* Figma gives the tile a .4 opacity, but applying that to the element
      dims the LABEL too, which is what made the text look washed out. Bake
@@ -2744,6 +3950,51 @@ body.tsd-panel {
   opacity: 1;
 }
 
+/* ---- tall grids ---------------------------------------------------------
+   Row count comes from the question data (4 rows up to 10), so a tile
+   height that suits a 4-row grid is far too tall for a 7- or 10-row one:
+   the panel outgrows the band, and everything is then uniformly shrunk by
+   js-ui/tsd-fit-screen.js -- which costs text crispness across the WHOLE
+   grid to solve a problem that is only about vertical space.
+
+   Trading height for rows fixes it where it starts. The tiles get shorter
+   as the grid gets taller, so the panel stays inside the band on its own
+   and the label text is left at full size. Counted with :has() on the row
+   elements rather than from JS, since the row count is not exposed to CSS.
+
+   These rules sit on the table, which is more specific than the :root
+   where the narrow-screen media queries set the same tokens -- so simply
+   re-declaring --tsd-bx-btn-min-h here would beat the mobile compaction
+   and make a 7-row grid TALLER on a phone than that media query intends.
+
+   A separate `-cap` token is declared instead, and the tile takes min() of
+   the two where it is USED. Referring to a property inside its own
+   declaration would be a cycle (which CSS discards as invalid), so the cap
+   has to be a distinct name. The cap is unset by default, hence the 999px
+   fallback: with no cap in play the min() resolves to the base token and a
+   small grid is left exactly as it was.
+
+   6+ rows -- the case in the screenshot. */
+.tsd-play-area #gamePlayArea
+  table:has(.gridInsrtPt):has(> tbody > tr:nth-child(6)) .but {
+  --tsd-bx-btn-h-cap:     38px;
+  --tsd-bx-btn-pad-y-cap: 9px;
+}
+
+/* 8+ rows: tighter again. */
+.tsd-play-area #gamePlayArea
+  table:has(.gridInsrtPt):has(> tbody > tr:nth-child(8)) .but {
+  --tsd-bx-btn-h-cap:     32px;
+  --tsd-bx-btn-pad-y-cap: 6px;
+}
+
+/* The gap between tiles closes up on the same schedule -- with 7+ rows the
+   inter-row spacing is itself a meaningful share of the panel height. */
+.tsd-play-area #gamePlayArea
+  table:has(.gridInsrtPt):has(> tbody > tr:nth-child(6)) {
+  --tsd-bx-btn-gap-cap: 8px;
+}
+
 /* ---- selected -----------------------------------------------------------
    The renderers mark a pick by setting style.backgroundColor inline to the
    player's colour — player 0 is #00008B, player 1 is #8B0000
@@ -2782,7 +4033,10 @@ body.tsd-panel {
 /* ---- box-grid responsive ------------------------------------------------ */
 
 @media (max-width: 1100px) {
-  :root { --tsd-bx-btn-w: 156px; --tsd-bx-btn-pad-x: 12px; }
+  :root {
+    --tsd-bx-btn-w: 156px;
+    --tsd-bx-btn-pad-x: 12px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -2790,14 +4044,22 @@ body.tsd-panel {
     --tsd-bx-btn-w: 116px;
     --tsd-bx-btn-min-h: 32px;
     --tsd-bx-btn-pad-x: 8px;
-    --tsd-bx-btn-gap:   6px;
+    --tsd-bx-btn-gap: 6px;
   }
-  .tsd-play-area #gamePlayArea .but { font-size: 12px; }
+
+  .tsd-play-area #gamePlayArea .but {
+    font-size: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tsd-play-area #gamePlayArea .but { transition: none; }
-  .tsd-play-area #gamePlayArea .but:active { transform: none; }
+  .tsd-play-area #gamePlayArea .but {
+    transition: none;
+  }
+
+  .tsd-play-area #gamePlayArea .but:active {
+    transform: none;
+  }
 }
 
 /* ==========================================================================
@@ -2852,7 +4114,8 @@ body.tsd-panel {
 .tsd-play-area #imageInsertPt {
   position: relative;
   display: inline-block;
-  line-height: 0;                 /* no descender gap under the image */
+  line-height: 0;
+  /* no descender gap under the image */
   /* border: var(--tsd-gi-stage-border); */
   /* border-radius: var(--tsd-gi-stage-radius); */
   background: var(--tsd-gi-stage-bg);
@@ -2863,7 +4126,16 @@ body.tsd-panel {
      factor -- squashing one axis would need each panel's top AND height
      recomputed, which only the JS that writes them could do. So the height
      comes down by lowering the zoom, and the width follows.              */
-  zoom: var(--tsd-gi-stage-zoom);
+  /* --tsd-gi-fit defaults to 1 (design size); tsd-fit-screen.js lowers it
+     only when the stage would not fit the play area. */
+  zoom: calc(var(--tsd-gi-stage-zoom) * var(--tsd-gi-fit, 1));
+
+  /* NOTE: no max-height/max-width here. This element has overflow:hidden
+     (the cover panels must not spill outside the artwork), so a cap would
+     CLIP the map rather than shrink it. Fitting is done by lowering the
+     zoom itself instead -- js-ui/tsd-fit-screen.js sets --tsd-gi-fit, a
+     multiplier applied to the design zoom above, which scales the image
+     and its panels together and keeps them registered. */
 }
 
 
@@ -2892,11 +4164,14 @@ body.tsd-panel {
   border: var(--tsd-gi-panel-border);
   /* border-radius: var(--tsd-gi-panel-radius); */
   background: linear-gradient(180deg,
-                var(--tsd-gi-panel-bg)  0%,
-                var(--tsd-gi-panel-bg2) 100%);
+      var(--tsd-gi-panel-bg) 0%,
+      var(--tsd-gi-panel-bg2) 100%);
 
   font-family: var(--tsd-dnd-font);
-  font-size: 13px;
+  /* The stage is zoomed, so a fixed font-size is multiplied by that zoom and
+     a small picture ended up with huge numerals. Dividing by the zoom keeps
+     the numeral at roughly the same ON-SCREEN size whatever the picture. */
+  font-size: calc(15px / (var(--tsd-gi-stage-zoom, 3.3) * var(--tsd-gi-fit, 1)));
   font-weight: 600;
   line-height: 1;
   color: var(--tsd-gi-panel-ink);
@@ -2907,10 +4182,14 @@ body.tsd-panel {
 }
 
 /* a panel is retired with the `hidden` property, not a class */
-.tsd-play-area #imageInsertPt .butX[hidden] { display: none; }
+.tsd-play-area #imageInsertPt .butX[hidden] {
+  display: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .tsd-play-area #imageInsertPt .butX { transition: none; }
+  .tsd-play-area #imageInsertPt .butX {
+    transition: none;
+  }
 }
 
 /* ======================================================================
@@ -2926,9 +4205,13 @@ body.tsd-panel {
    data: the code stores no per-player answer, and only the bid winner
    ever plays a round.                                                   */
 
-.tsd-result-card { display: none; }
+.tsd-result-card {
+  display: none;
+}
 
-.tsd-scorebar.is-result .tsd-bid-panel { display: none; }
+.tsd-scorebar.is-result .tsd-bid-panel {
+  display: none;
+}
 
 /* The clock physically sits between the two bid slots, so the card cannot
    span columns 2..4 without swallowing it. Instead the row is re-columned
@@ -2937,15 +4220,20 @@ body.tsd-panel {
    player 1 | result card | clock | player 2 -- the reference layout. */
 .tsd-scorebar.is-result {
   grid-template-columns:
-    minmax(0, 1fr)
-    minmax(0, 646px)
-    minmax(0, 275px)
-    minmax(0, 1fr);
+    minmax(0, 1fr) minmax(0, 646px) minmax(0, 275px) minmax(0, 1fr);
 }
 
-.tsd-scorebar.is-result .tsd-pl-card--p1 { grid-column: 1; }
-.tsd-scorebar.is-result .tsd-bid-clock   { grid-column: 3; }
-.tsd-scorebar.is-result .tsd-pl-card--p2 { grid-column: 4; }
+.tsd-scorebar.is-result .tsd-pl-card--p1 {
+  grid-column: 1;
+}
+
+.tsd-scorebar.is-result .tsd-bid-clock {
+  grid-column: 3;
+}
+
+.tsd-scorebar.is-result .tsd-pl-card--p2 {
+  grid-column: 4;
+}
 
 .tsd-scorebar.is-result .tsd-result-card {
   display: flex;
@@ -2958,9 +4246,14 @@ body.tsd-panel {
   grid-row: 1;
   min-width: 0;
   width: 100%;
-  min-height: clamp(120px, 15vh, 160px);
+  /* The answer text is data-driven and can run long. min-height holds the
+     design size for a short answer; max-height stops a long one from
+     stretching the whole scorebar row taller than the clock beside it --
+     the answer clamps to a few lines and scrolls instead. */
+  min-height: clamp(112px, 14vh, 150px);
+  max-height: min(203px, 28vh);
   margin-inline: auto;
-  padding: clamp(12px, 1.6vh, 18px) 20px;
+  padding: clamp(10px, 1.4vh, 16px) 18px;
   box-sizing: border-box;
 
   border-radius: 20px;
@@ -2971,27 +4264,44 @@ body.tsd-panel {
 
 .tsd-result-title {
   margin: 0;
-  font-size: clamp(13px, 1.1vw, 17px);
+  flex: none;
+  font-size: clamp(11px, .9vw, 14px);
   font-weight: 500;
+  letter-spacing: .02em;
   color: var(--tsd-bid-label);
 }
 
+/* The body is the only part allowed to give: it takes the leftover height
+   and scrolls, so the title and the winner line stay visible however long
+   the answer is. */
 .tsd-result-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(4px, .6vh, 10px);
+  justify-content: center;
+  gap: clamp(3px, .5vh, 8px);
   min-width: 0;
+  min-height: 0;
   width: 100%;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .tsd-result-answer {
   margin: 0;
-  font-size: clamp(16px, 1.6vw, 22px);
+  font-size: clamp(14px, 1.25vw, 18px);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.3;
   color: var(--tsd-text);
   overflow-wrap: anywhere;
+
+  /* Cap a long answer at four lines rather than letting it push the card
+     -- and with it the whole scorebar -- down the page. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
 }
 
 .tsd-result-winner {
@@ -3000,23 +4310,73 @@ body.tsd-panel {
   justify-content: center;
   gap: 8px;
   margin: 0;
-  font-size: clamp(14px, 1.25vw, 18px);
-  font-weight: 600;
+  flex: none;
+  /* was clamp(12px,1vw,15px). The winner's name is the payoff line of the
+     round and was reading smaller than the answer above it; sized up to
+     carry that weight. The card is height-capped and this line is
+     `flex:none`, so the growth comes out of the scrollable body rather
+     than stretching the card. */
+  font-size: clamp(14px, 1.25vw, 19px);
+  font-weight: 700;
+  /* 1.2 left the text block taller than its own glyphs, so the trophy --
+     centred against the LINE BOX -- sat visually high of the name. Setting
+     the line box to the text's own height makes flex centring line the two
+     up on the same optical centre. */
+  line-height: 1;
   color: var(--tsd-bid-gold);
 }
 
-.tsd-result-winner[hidden] { display: none; }
-.tsd-result-winner img { width: 1.4em; height: auto; flex: none; }
+.tsd-result-winner[hidden] {
+  display: none;
+}
+
+/* The trophy is sized in em so it tracks the name beside it. `block`
+   removes the inline baseline gap under the image, which was the last
+   thing nudging it off-centre against the text. */
+.tsd-result-winner img {
+  display: block;
+  width: 1.15em;
+  height: auto;
+  flex: none;
+}
 
 /* Stacked layout: the card takes the full width above the clock. */
 @media (max-width: 1100px) {
   .tsd-scorebar.is-result {
     grid-template-columns: 1fr 1fr;
   }
-  .tsd-scorebar.is-result .tsd-pl-card--p1   { grid-column: 1; grid-row: 1; }
-  .tsd-scorebar.is-result .tsd-pl-card--p2   { grid-column: 2; grid-row: 1; }
-  .tsd-scorebar.is-result .tsd-result-card   { grid-column: 1 / -1; grid-row: 2; }
-  .tsd-scorebar.is-result .tsd-bid-clock     { grid-column: 1 / -1; grid-row: 3; }
+
+  .tsd-scorebar.is-result .tsd-pl-card--p1 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .tsd-scorebar.is-result .tsd-pl-card--p2 {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .tsd-scorebar.is-result .tsd-result-card {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .tsd-scorebar.is-result .tsd-bid-clock {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  /* Full width here, so the answer has far more room per line -- the card
+     needs less height, not more. */
+  .tsd-scorebar.is-result .tsd-result-card {
+    min-height: 0;
+    max-height: none;
+    padding-block: 12px;
+  }
+
+  .tsd-result-answer {
+    -webkit-line-clamp: 3;
+  }
 }
 
 /* ---- dropped item inside a drop slot ------------------------------------
@@ -3039,14 +4399,17 @@ body.tsd-panel {
    background-clip must stay content-box here: switching it to padding-box
    makes the fill cover the padding and run flush against the dashed border,
    which is exactly the gap this rule exists to preserve.                */
-.tsd-play-area .containerC > .draggable,
-.tsd-play-area .containerC > .draggableC {
+.tsd-play-area .containerC>.draggable,
+.tsd-play-area .containerC>.draggableC {
   margin: 0;
-  border: 0;                       /* the slot draws the dashed edge */
-  padding: 4px 6px;                /* the gap to the slot's border */
+  border: 0;
+  /* the slot draws the dashed edge */
+  padding: 4px 6px;
+  /* the gap to the slot's border */
   border-radius: 8px;
   background: var(--tsd-dnd-item-bg) content-box;
-  background-clip: content-box;    /* keep the fill off the slot edge */
+  background-clip: content-box;
+  /* keep the fill off the slot edge */
 }
 
 /* GameC builds every category cell as TWO <p> elements (GameC.js:378):
@@ -3055,7 +4418,7 @@ body.tsd-panel {
    a dropped item, so neither may take the filled-bar treatment above -- that
    is only for .draggable / .draggableC, which is what GameC actually moves
    into the slot. The label is the heading for the bucket. */
-.tsd-play-area .containerC > p {
+.tsd-play-area .containerC>p {
   margin: 0;
   padding: 0;
   border: 0;
@@ -3065,4 +4428,661 @@ body.tsd-panel {
 }
 
 /* the empty spacer <p> would otherwise add a blank line above the label */
-.tsd-play-area .containerC > p:empty { display: none; }
+.tsd-play-area .containerC>p:empty {
+  display: none;
+}
+
+/* ==========================================================================
+   Short-screen compaction — "everything on one screen, no scrolling"
+
+   The layout above is sized from the Figma design, whose bands assume a
+   tall viewport. On a short screen (a 1366x768 or 1280x720 laptop, or any
+   window a user has made shorter) those bands add up to more than the
+   viewport and the play area is squeezed to nothing -- at 1024x640 the
+   scorebar alone claimed 447px of 640.
+
+   These queries trim the FURNITURE -- padding, gaps, avatar and type sizes
+   -- so the play area keeps a usable share. Nothing here changes what is
+   on screen, only how tightly it is packed; every element and every id
+   stays exactly where it was. js-ui/tsd-fit-screen.js then scales whatever
+   is still too big, so no scrollbar is ever needed.
+
+   Keyed on height, not width: this is a vertical-space problem, and a wide
+   but short window has it just as badly as a narrow one.
+   ========================================================================== */
+
+@media (max-height: 820px) {
+
+  .tsd-panel-page {
+    padding-top: clamp(6px, 0.8vh, 14px);
+    padding-bottom: clamp(6px, 0.8vh, 14px);
+  }
+
+  .tsd-panel-header {
+    margin-bottom: clamp(6px, 1vh, 16px);
+  }
+
+  .tsd-scorebar {
+    margin-bottom: clamp(8px, 1.2vh, 20px);
+  }
+
+  /* the design heights stop applying; content sets the height instead */
+  .tsd-bid-panel {
+    min-height: 0;
+    padding: clamp(8px, 1.4vh, 16px);
+  }
+
+  .tsd-bid-clock {
+    min-height: 0;
+    padding: clamp(8px, 1.4vh, 18px) 20px;
+  }
+
+  .tsd-pl-card {
+    padding-block: clamp(8px, 1.4vh, 18px);
+  }
+
+  /* GameC's two drag panels are the tallest thing on the screen */
+  .tsd-play-area .container,
+  .tsd-play-area .containerC {
+    min-height: 0;
+  }
+
+  /* The Pre-Game Notice is sized from fixed Figma tokens (36px rim, 50px
+     heading gap, 67px button) and its body text comes from the renderer as
+     <font size="5">. Together that made it the one panel too tall to fit a
+     768px screen even at the scaler's minimum, so it was being clipped.
+     Trim the generous spacing; the wording is untouched. */
+  .tsd-play-area .tsd-pregame {
+    --tsd-pg-pad: clamp(10px, 1.6vh, 22px);
+    --tsd-pg-head-gap: clamp(10px, 2vh, 28px);
+    --tsd-pg-inner-pad: clamp(12px, 2vh, 24px);
+    --tsd-pg-btn-h: clamp(38px, 6vh, 54px);
+    margin: clamp(4px, 1vh, 14px) auto;
+  }
+}
+
+/* Very short: trim the decorative elements too. */
+@media (max-height: 700px) {
+
+  .tsd-panel-header {
+    margin-bottom: 6px;
+  }
+
+  .tsd-scorebar {
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+
+  .tsd-bid-panel {
+    padding: 8px;
+  }
+
+  .tsd-bid-clock {
+    padding: 8px 14px;
+    gap: 8px;
+  }
+
+  /* the avatar circle is the single biggest non-essential block in the
+     player card; the name and score matter, the portrait does not. */
+  .tsd-pl-avatar {
+    display: none;
+  }
+
+  .tsd-bid-title {
+    margin-bottom: 4px;
+  }
+
+  /* squeeze the notice further -- these are the last easy pixels */
+  .tsd-play-area .tsd-pregame {
+    --tsd-pg-pad: 8px;
+    --tsd-pg-head-gap: 8px;
+    --tsd-pg-inner-pad: 10px;
+    --tsd-pg-btn-h: 36px;
+    margin: 4px auto;
+  }
+}
+
+/* ==========================================================================
+   Game Q — question column + image / answer grid
+
+   GameQ.insertTable() emits <table border='2' id='tabl' width='100%'> with
+   two cells: #gameQquestionInsertPt (the question buttons) on the left and
+   #gameQansInserPt (the image, or the answer grid) on the right. The
+   generic #tabl rules above already recast that table as a flex row, so
+   this section only has to style what is INSIDE the two cells.
+
+   Two things made it look unthemed:
+     - the buttons are bare <input type="button"> with no rule in this
+       sheet, so they rendered as OS chrome on the dark gradient;
+     - setUpGameSpace() writes bare <tr><td> into a <div>, which the parser
+       discards, leaving the buttons as loose inline-blocks that wrapped
+       into a ragged left-aligned block instead of a column.
+   ========================================================================== */
+
+/* The pair is centred as a unit and the two halves are sized to their
+   content rather than a hard 50/50 split -- the image is a fixed-size
+   asset, so an even split left the question column stranded at the far
+   left with a wide gap in the middle. */
+.tsd-play-area #gamePlayArea:has(#gameQquestionInsertPt) #tabl>tbody>tr {
+  justify-content: center;
+  align-items: center;
+  /* not stretch: centre the two halves */
+  gap: clamp(16px, 3vw, 48px);
+}
+
+.tsd-play-area #gamePlayArea #tabl>tbody>tr>td:has(#gameQquestionInsertPt),
+.tsd-play-area #gamePlayArea #tabl>tbody>tr>td:has(#gameQansInserPt) {
+  flex: 0 1 auto;
+  /* shrink-wrap, don't claim half each */
+  width: auto;
+  justify-content: center;
+}
+
+/* ---- the question column ------------------------------------------------
+   The discarded <tr>/<td> leave the buttons as bare inline children, so the
+   container itself becomes the column. */
+.tsd-play-area #gamePlayArea #gameQquestionInsertPt {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  /* one uniform button width */
+  gap: clamp(6px, 1vh, 12px);
+  width: 100%;
+  max-width: 460px;
+}
+
+/* ---- the answer grid ----------------------------------------------------
+   deleteQbox() writes <table border='5' width='500px'> for the grid
+   variant; the border attribute paints the white outline and the fixed
+   width fights the flex row. */
+.tsd-play-area #gamePlayArea #gameQansInserPt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1vh, 12px);
+  width: 100%;
+}
+
+.tsd-play-area #gamePlayArea #gameQansInserPt table {
+  border: 0 !important;
+  border-collapse: separate;
+  border-spacing: clamp(4px, .7vh, 8px);
+  width: auto !important;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.tsd-play-area #gamePlayArea #gameQansInserPt td {
+  border: 0 !important;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* ---- the image ----------------------------------------------------------
+   getImageFile() emits a bare <img> with no class. Sized and centred only --
+   deliberately left unframed, see the note on the rule below. */
+.tsd-play-area #gamePlayArea #gameQansInserPt img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  /* flat, for the same reason as the Game L map below: these assets are
+     hard-edged rectangles that already carry their own frame, so added
+     chrome clips their corners and doubles up the border */
+  border: 0;
+  border-radius: 0;
+}
+
+/* ---- both button families ----------------------------------------------
+   .butQ = the question buttons, .butAns = the answer-grid buttons. They
+   share the box-grid tile treatment used by .but above so every game type
+   reads as one system. */
+.tsd-play-area #gamePlayArea .butQ,
+.tsd-play-area #gamePlayArea .butAns {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 100%;
+  min-height: var(--tsd-bx-btn-min-h);
+  padding: var(--tsd-bx-btn-pad-y) var(--tsd-bx-btn-pad-x);
+  border-radius: var(--tsd-bx-btn-radius);
+  background: var(--tsd-bx-btn-bg) !important;
+  border: 1px solid rgba(255, 255, 255, .10);
+
+  font-family: var(--tsd-dnd-font);
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--tsd-bx-btn-ink);
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+
+  cursor: pointer;
+  transition: background .14s var(--tsd-ease), transform .14s var(--tsd-ease);
+}
+
+/* the question buttons carry full sentences -- left-align so a wrapped
+   second line starts under the first rather than centring raggedly */
+.tsd-play-area #gamePlayArea .butQ {
+  text-align: left;
+  padding-inline: clamp(12px, 1.2vw, 18px);
+}
+
+.tsd-play-area #gamePlayArea .butAns {
+  width: var(--tsd-bx-btn-w);
+  max-width: 100%;
+}
+
+.tsd-play-area #gamePlayArea .butQ:hover:not(:disabled),
+.tsd-play-area #gamePlayArea .butAns:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .24) !important;
+  border-color: rgba(255, 255, 255, .22);
+}
+
+.tsd-play-area #gamePlayArea .butQ:active:not(:disabled),
+.tsd-play-area #gamePlayArea .butAns:active:not(:disabled) {
+  transform: scale(.97);
+}
+
+.tsd-play-area #gamePlayArea .butQ:focus-visible,
+.tsd-play-area #gamePlayArea .butAns:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 2px;
+}
+
+/* ---- question-button states --------------------------------------------
+   The renderer marks state by writing style.backgroundColor inline, which
+   beats a normal rule -- but the inline text can be matched on, exactly as
+   the .but selected rules above do.
+
+     invertQuestionBox() -> black      (asked, now locked)
+     resetQBox()         -> #80ff00    (available again)
+     flashQBox()         -> yellow     (the one in play)                  */
+
+/* asked / locked */
+.tsd-play-area #gamePlayArea .butQ[style*="black"] {
+  background: rgba(255, 255, 255, .06) !important;
+  border-color: rgba(255, 255, 255, .08);
+  color: var(--tsd-text-muted);
+  cursor: default;
+}
+
+/* available -- the raw #80ff00 lime is the single loudest colour on the
+   screen; map it back to the standard tile */
+.tsd-play-area #gamePlayArea .butQ[style*="128, 255, 0"],
+.tsd-play-area #gamePlayArea .butQ[style*="80ff00"] {
+  background: var(--tsd-bx-btn-bg) !important;
+  color: var(--tsd-bx-btn-ink) !important;
+}
+
+/* in play */
+.tsd-play-area #gamePlayArea .butQ[style*="yellow"] {
+  background: var(--tsd-bx-selected) !important;
+  border-color: rgba(255, 255, 255, .35);
+  color: var(--tsd-text) !important;
+  font-weight: 600;
+}
+
+.tsd-play-area #gamePlayArea .butQ:disabled {
+  cursor: default;
+  transform: none;
+}
+
+/* ---- Game Q responsive -------------------------------------------------- */
+
+@media (max-width: 900px) {
+
+  /* stack the question column above the image once they no longer fit
+     side by side */
+  .tsd-play-area #gamePlayArea:has(#gameQquestionInsertPt) #tabl>tbody>tr {
+    flex-direction: column;
+  }
+
+  .tsd-play-area #gamePlayArea #gameQquestionInsertPt {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .tsd-play-area #gamePlayArea .butQ,
+  .tsd-play-area #gamePlayArea .butAns {
+    transition: none;
+  }
+
+  .tsd-play-area #gamePlayArea .butQ:active,
+  .tsd-play-area #gamePlayArea .butAns:active {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   Game L — click a location on the map
+
+   GameL.getData() emits <img id="map" class="gameLOverlay"> and binds a
+   click handler that reads event.offsetX/offsetY, so the whole image is one
+   big target: the player is picking a POINT, not pressing a button. Nothing
+   in the default rendering says that -- the arrow cursor reads as "this is
+   a picture" -- so the affordance has to come from the cursor.
+
+   The legacy sheet had `#map { cursor: crosshair }`; it was lost in the
+   move to this stylesheet. Restored here, with the hover treatment that
+   makes the target feel live.
+   ========================================================================== */
+
+.tsd-play-area #gamePlayArea #map,
+.tsd-play-area #gamePlayArea .gameLOverlay {
+  /* the aiming affordance: a crosshair says "place a point here", which is
+     literally what the click handler does with offsetX/offsetY */
+  cursor: crosshair;
+
+  /* the tokens below are position:absolute and are appended as siblings of
+     the map inside #gamePlayArea, so their offsets resolve against the
+     nearest positioned ancestor. Keep the map itself `relative` as the
+     legacy sheet had it. */
+  position: relative;
+
+  display: block;
+  margin-inline: auto;
+
+  /* No radius, no border, no shadow. The map asset is a hard-edged
+     rectangle that already carries its own white frame, so a rounded
+     container just clipped its corners and a second border sat a pixel
+     outside the first. The artwork is its own frame -- let it be flat. */
+  border: 0;
+  border-radius: 0;
+
+  transition: filter .18s var(--tsd-ease);
+}
+
+/* Hovering still has to say "this whole picture is the target", but without
+   adding chrome around it -- lift the artwork itself instead of framing it. */
+.tsd-play-area #gamePlayArea #map:hover,
+.tsd-play-area #gamePlayArea .gameLOverlay:hover {
+  filter: brightness(1.06);
+}
+
+/* keyboard/AT parity with the hover state */
+.tsd-play-area #gamePlayArea #map:focus-visible,
+.tsd-play-area #gamePlayArea .gameLOverlay:focus-visible {
+  outline: 2px solid var(--tsd-text);
+  outline-offset: 3px;
+}
+
+/* ---- the markers --------------------------------------------------------
+   addDots() appends #blackCrossHair, #redDot and #blueDot as siblings of
+   the map, then positions them with
+     el.style = `left: ...px; top: ...px; z-index: 50;`
+   That assignment REPLACES the whole style attribute, so `position` can
+   only come from CSS -- the legacy `.token { position: absolute }` rule.
+   Without it the offsets are inert and the markers stack in normal flow
+   below the map instead of landing on the clicked point. */
+.tsd-play-area #gamePlayArea .token,
+.tsd-play-area #gamePlayArea #blackCrossHair,
+.tsd-play-area #gamePlayArea .gameLDot,
+.tsd-play-area #gamePlayArea #redDot,
+.tsd-play-area #gamePlayArea #blueDot {
+  position: absolute;
+  /* the markers are overlays, not targets -- let the click reach the map
+     underneath so a second guess near an existing dot still registers */
+  pointer-events: none;
+  /* these are flat JPG/GIF tokens on a dark ground; the generic media
+     rules elsewhere in this sheet must not reframe them */
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  max-height: none;
+  max-width: none;
+
+  /* GameL.placeToken() centres each token on its point by subtracting half
+     its size -- 32 for the 64x64 crosshair, 16 for the 32x32 dots. Those
+     offsets are only correct if the token renders at that size, so the
+     generic `width:auto` fit rule above (which exists to shrink the MAP)
+     must not reach the tokens. Held at their natural size explicitly. */
+  width: auto;
+  height: auto;
+}
+
+/* Sizes come from each asset's own size code (see getImageSize): the
+   crosshair LTokenM.BB is 64x64 and the dots RedDot/BlueDot.AA are 32x32.
+   GameL.placeToken()'s half-size offsets are paired to these values. */
+.tsd-play-area #gamePlayArea #blackCrossHair {
+  width: 64px;
+  height: 64px;
+}
+
+.tsd-play-area #gamePlayArea #redDot,
+.tsd-play-area #gamePlayArea #blueDot {
+  width: 32px;
+  height: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .tsd-play-area #gamePlayArea #map,
+  .tsd-play-area #gamePlayArea .gameLOverlay {
+    transition: none;
+  }
+}
+
+/* ---- marker containing block -------------------------------------------
+   The markers are position:absolute siblings of the map, so their left/top
+   resolve against the nearest positioned ancestor -- #gamePlayArea, which
+   is position:relative and spans the full band width. The map inside it is
+   centred (margin-inline:auto + text-align:center), so #gamePlayArea's left
+   edge sits well to the LEFT of the map's left edge, and every marker was
+   offset outward by exactly that slack: the crosshair and the red/blue dots
+   landed in the empty ground beside the map instead of on it.
+
+   Shrinking #gamePlayArea to its content on a GameL round makes its left
+   edge coincide with the map's, which is the coordinate origin picHit()
+   and positionBlackCrossHair() are both written against. The band itself
+   stays centred, so the map does not move -- only the box the offsets are
+   measured from does.
+
+   Scoped with :has(#map) so this applies to the map round alone and every
+   other game type keeps the full-width play area it lays out against. */
+.tsd-play-area>#gamePlayArea:has(> #map):not(:has(.tsd-pregame)):not(.has-pregame) {
+  /* Shrink-to-fit so the box hugs the map rather than spanning the band.
+     `max-content` rather than `fit-content`: #gamePlayArea also holds the
+     pregame notice and any lead-in images, and fit-content would size the
+     box to the WIDEST of those, reintroducing slack on the map's left.
+     The children are all shrink-to-fit themselves, so max-content settles
+     on the map's own width here. */
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
+
+  /* The markers resolve their offsets against this box, so it has to be the
+     positioned ancestor -- inherited from TSDstyle.css, restated here so the
+     dependency is visible at the point that relies on it. */
+  position: relative;
+}
+
+/* The map must start at the box's own origin for the offsets to line up, so
+   nothing may indent it. The generic centring rules above give centred
+   content auto margins; on this round the box IS the map's width, so those
+   margins must resolve to zero rather than re-centring the map inside it. */
+.tsd-play-area>#gamePlayArea:has(> #map)>#map {
+  margin-inline: 0;
+}
+
+/* ---- relocated round verdict -------------------------------------------
+   js-ui/tsd-result-card.js moves the multi-sentence end-of-round verdict
+   (types L / D / N) out of the narrow clock column and into the wide result
+   card. Two rules support that move.
+
+   1. The copy left behind in the clock column is hidden, so the clock card
+      keeps the 203px design height instead of stretching to fit a dozen
+      wrapped lines. Only the relocated case is hidden -- short status
+      notices ("Now it's Helen's turn.") still show there as before. */
+.tsd-bid-clock #centerDisplay.is-relocated {
+  display: none;
+}
+
+/* 2. The verdict is prose, not a one-word answer, so the display size the
+      card uses for "Virginia" is far too large for four sentences. Drop it
+      to a readable body size, unclamp the line count (the body already
+      scrolls, and the card is height-capped, so a long verdict is reachable
+      without pushing the scorebar taller) and let it read left-to-right at
+      its natural rhythm rather than as a centred headline. */
+.tsd-result-card.is-verdict .tsd-result-answer {
+  font-size: clamp(12px, .95vw, 15px);
+  font-weight: 500;
+  line-height: 1.45;
+  -webkit-line-clamp: none;
+  display: block;
+  overflow: visible;
+}
+
+/* Uppercasing is what made the verdict shout in the clock column; the card
+   shows it as ordinary sentence-case prose. */
+.tsd-result-card.is-verdict .tsd-result-answer,
+.tsd-result-card.is-verdict .tsd-result-title {
+  text-transform: none;
+}
+
+/* ---- collapse the insert points a round does not use -------------------
+   The play area holds six sibling containers and each round fills only
+   some of them. GameC renders into #gamePlayArea, so #ansBar,
+   #gameInsrtPt, #imageInsertPt, #insrtPtA and #insrtPtB are all still in
+   the flow above it -- empty, but not weightless: #ansBar is a <p> and
+   keeps the UA's default 1em top and bottom margin, and each empty <div>
+   still takes part in the band's spacing.
+
+   Stacked up, that is the band of dead space between the question and the
+   board. :empty collapses only the ones with nothing in them, so a round
+   that DOES use an insert point is untouched -- the moment a renderer
+   writes into it, the element stops matching and returns to normal flow. */
+.tsd-play-area>#ansBar:empty,
+.tsd-play-area>#gameInsrtPt:empty,
+.tsd-play-area>#imageInsertPt:empty,
+.tsd-play-area>#gamePlayArea:empty,
+.tsd-play-area>#insrtPtA:empty,
+.tsd-play-area>#insrtPtB:empty {
+  display: none;
+}
+
+/* #ansBar is a <p>: even when a round DOES write into it, the UA margin
+   adds ~16px above and below that nothing in the design asks for. */
+.tsd-play-area>#ansBar {
+  margin: 0;
+}
+
+/* ---- drop cells: centre the label in the box ---------------------------
+   The <td> already carries `vertical-align: middle`, but that centres the
+   LINE BOX, and .containerC sets `line-height: 38px` -- so the line box was
+   effectively the full height of the cell and there was nothing left to
+   centre. Any cell taller than 38px (a two-line label such as
+   "N. Carolina-Tennessee", or a row stretched by its neighbour) therefore
+   sat its text hard against the top.
+
+   Making the cell a flex box centres the content on the cell's real height
+   in both axes, and a normal line-height lets a two-line label wrap without
+   the 38px leading pushing it out of the box. */
+.tsd-play-area #gamePlayArea #right td.containerC {
+  display: flex;
+  /* GameC.js puts TWO <p> in each cell -- an empty insert point that
+     receives the dropped item, then the category label. They must stay
+     stacked, so the column direction is required here: a flex ROW would
+     sit a dropped park beside its state instead of above it. */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.25;
+  /* restores the height the 38px line-height used to supply, so an empty
+     slot still matches a filled source item */
+  min-height: clamp(34px, 5vh, 50px);
+}
+
+/* The cells are flex items now, so the row has to lay them out itself:
+   `table-layout: fixed` and `border-spacing` both stop applying the moment
+   the <td>s stop being table cells. The row becomes a flex container, an
+   even `flex: 1 1 0` restores the equal-width columns that table-layout
+   gave, and `gap` restores the spacing border-spacing was providing --
+   matched to the same value so the board's rhythm is unchanged.
+
+   align-items:stretch keeps the cells in a row the same height, so a
+   two-line label does not leave its neighbour short. */
+.tsd-play-area #gamePlayArea #right table {
+  border-spacing: 0 !important;
+}
+
+.tsd-play-area #gamePlayArea #right tbody {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, .7vh, 10px);
+}
+
+.tsd-play-area #gamePlayArea #right tr {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(4px, .7vh, 10px);
+}
+
+.tsd-play-area #gamePlayArea #right td.containerC {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* A dropped item inside a cell must not re-impose the old leading. */
+.tsd-play-area #gamePlayArea #right td.containerC .draggableC,
+.tsd-play-area #gamePlayArea #right td.containerC .draggable {
+  line-height: 1.25;
+}
+
+/* The first <p> in each cell is the drop insert point. While it is empty it
+   should take no room at all, or every empty slot carries a phantom line
+   above its label and the text sits low rather than centred. It reappears
+   the moment an item is dropped into it. */
+.tsd-play-area #gamePlayArea #right td.containerC>p:empty {
+  display: none;
+}
+
+/* The cell's <p> children are full-width so a dropped item and the label
+   both centre on the cell rather than on their own text width. */
+.tsd-play-area #gamePlayArea #right td.containerC>p {
+  width: 100%;
+  margin: 0;
+}
+/* ---- the drop panel fills its new height -------------------------------
+   #left spreads its rows down the panel (align-content: space-between
+   above), but #right holds a single <table>, which sizes to its rows and
+   left the taller panel with an empty tail below the last state.
+
+   The panel is already a flex column, so letting the table grow and its
+   rows share that height keeps the two sides visually balanced -- the drop
+   cells become bigger targets rather than a short block floating at the
+   top of a tall box. */
+.tsd-play-area #right > table { flex: 1 1 auto; }
+
+.tsd-play-area #gamePlayArea #right tbody { flex: 1 1 auto; }
+
+/* Each row takes an even share of the panel's height. The cells inside are
+   already centred (see td.containerC), so a taller row centres its label
+   rather than stranding it at the top. */
+.tsd-play-area #gamePlayArea #right tr { flex: 1 1 0; }
+
+/* ---- touch target size for the bid numbers -----------------------------
+   The 30x30 square is the Figma design size and is fine for a mouse, but it
+   is below the 44x44 minimum target size (WCAG 2.1 SC 2.5.5) and the bid
+   numbers are the game's primary interaction.
+
+   Scoped to coarse pointers so the desktop design is untouched: only a
+   touch screen grows the squares. The track width and the button share one
+   value, so the grid keeps wrapping by itself exactly as it does above --
+   auto-fit simply fits fewer, larger squares per line. */
+@media (pointer: coarse) {
+
+  .tsd-bid-panel .bidButs td {
+    grid-template-columns: repeat(auto-fit, 44px);
+  }
+
+  .tsd-bid-panel .but2Player {
+    font-size: 16px;
+  }
+}

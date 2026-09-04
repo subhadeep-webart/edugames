@@ -64,6 +64,11 @@
     </div>
   </header>
 
+  <!-- The middle of the page. On narrow screens this is the band that
+       scrolls, so the header and the confirm button stay pinned and the page
+       itself never grows a scrollbar. On desktop it is a plain wrapper. -->
+  <div class="tsd-setup-scroll">
+
   <!-- ====================== players ====================== -->
   <div class="tsd-arena" id="playerArena">
 
@@ -71,53 +76,35 @@
     <div class="tsd-player tsd-player--p1">
       <div class="tsd-player-head">
         <p class="tsd-player-label">Player 1</p>
+      </div>
 
-        <div class="tsd-player-banner">
-          <span class="tsd-setup-avatar" id="avatar0">
-            <span class="tsd-avatar-empty">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
-                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-            </span>
-          </span>
+      <div class="tsd-player-fields">
 
-          <button class="tsd-change-photo" type="button" data-photo-for="0">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M10 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM2.5 20a7.5 7.5 0 0 1 11.9-6.06"
-                    stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              <path d="m17.2 16.1 4.1-4.1 2.1 2.1-4.1 4.1-2.6.5.5-2.6Z"
-                    stroke="currentColor" stroke-width="1.6"
-                    stroke-linejoin="round"/>
-            </svg>
-            <span>Change Profile Image</span>
-          </button>
+        <div class="tsd-field">
+          <label class="tsd-field-label" for="p0">Name</label>
+          <input class="tsd-control" type="text" id="p0" value="Peter"
+                 placeholder="Enter Name" autocomplete="off">
         </div>
-      </div>
 
-      <div class="tsd-field">
-        <label class="tsd-field-label" for="p0">Name</label>
-        <input class="tsd-control" type="text" id="p0" value="Peter"
-               placeholder="Enter Name" autocomplete="off">
-      </div>
+        <div class="tsd-field">
+          <label class="tsd-field-label" id="s0-label" for="s0">Your Time</label>
+          <span class="tsd-select-wrap">
+            <select class="tsd-control" id="s0" name="Grade">
+              <option value="1">Not Much</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option selected value="10">A Lot</option>
+            </select>
+          </span>
+        </div>
 
-      <div class="tsd-field">
-        <label class="tsd-field-label" id="s0-label" for="s0">Your Time</label>
-        <span class="tsd-select-wrap">
-          <select class="tsd-control" id="s0" name="Grade">
-            <option value="1">Not Much</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option selected value="10">A lot</option>
-          </select>
-        </span>
-      </div>
+      </div><!-- /.tsd-player-fields -->
     </div>
 
     <!-- ---------- VS ---------- -->
@@ -131,53 +118,35 @@
     <div class="tsd-player tsd-player--p2" id="secondPlayer">
       <div class="tsd-player-head">
         <p class="tsd-player-label">Player 2</p>
+      </div>
 
-        <div class="tsd-player-banner">
-          <span class="tsd-setup-avatar" id="avatar1">
-            <span class="tsd-avatar-empty">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
-                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-            </span>
-          </span>
+      <div class="tsd-player-fields">
 
-          <button class="tsd-change-photo" type="button" data-photo-for="1">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M10 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM2.5 20a7.5 7.5 0 0 1 11.9-6.06"
-                    stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              <path d="m17.2 16.1 4.1-4.1 2.1 2.1-4.1 4.1-2.6.5.5-2.6Z"
-                    stroke="currentColor" stroke-width="1.6"
-                    stroke-linejoin="round"/>
-            </svg>
-            <span>Change Profile Image</span>
-          </button>
+        <div class="tsd-field">
+          <label class="tsd-field-label" for="p1">Name</label>
+          <input class="tsd-control" type="text" id="p1" value="Helen"
+                 placeholder="Enter Name" autocomplete="off">
         </div>
-      </div>
 
-      <div class="tsd-field">
-        <label class="tsd-field-label" for="p1">Name</label>
-        <input class="tsd-control" type="text" id="p1" value="Helen"
-               placeholder="Enter Name" autocomplete="off">
-      </div>
+        <div class="tsd-field">
+          <label class="tsd-field-label" id="s1-label" for="s1">Your Time</label>
+          <span class="tsd-select-wrap">
+            <select class="tsd-control" id="s1" name="Grade">
+              <option value="1">Not Much</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option selected value="10">A Lot</option>
+            </select>
+          </span>
+        </div>
 
-      <div class="tsd-field">
-        <label class="tsd-field-label" id="s1-label" for="s1">Your Time</label>
-        <span class="tsd-select-wrap">
-          <select class="tsd-control" id="s1" name="Grade">
-            <option value="1">Not Much</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option selected value="10">A Lot</option>
-          </select>
-        </span>
-      </div>
+      </div><!-- /.tsd-player-fields -->
     </div>
 
   </div>
@@ -321,7 +290,8 @@
     </div>
 
     <div class="tsd-infobox-wrap" id="infoInsertPt">
-      <textarea id="infoBox" rows="30" cols="100"></textarea>
+      <textarea id="infoBox" rows="30" cols="100"
+                aria-label="Set information"></textarea>
     </div>
   </div>
 
@@ -333,6 +303,8 @@
       <span>Confirm &amp; Start Game</span>
     </button>
   </div>
+
+  </div><!-- /.tsd-setup-scroll -->
 
 </div>
 
@@ -570,45 +542,11 @@
   }
 
   /* ---------- profile images ----------
-     The picked image is shown in the ring and kept in localStorage under
-     playerPhoto0 / playerPhoto1, so GameOver can show the same face. It is
-     still not sent to the server - the registration payload has no field
-     for it - so this is local to the browser. */
-  document.querySelectorAll("[data-photo-for]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var slot  = btn.getAttribute("data-photo-for");
-      var ring  = document.getElementById("avatar" + slot);
-      var input = document.createElement("input");
-
-      input.type   = "file";
-      input.accept = "image/*";
-
-      input.addEventListener("change", function () {
-        var file = input.files && input.files[0];
-        if (!file || !ring) { return; }
-
-        var reader = new FileReader();
-        reader.onload = function (e) {
-          ring.innerHTML = "";
-          var img = document.createElement("img");
-          img.src = e.target.result;
-          img.alt = "";
-          ring.appendChild(img);
-
-          /* Keep it for GameOver. A data URL can be large, and the quota is
-             per-origin, so a failure here must not break the upload. */
-          try {
-            localStorage.setItem("playerPhoto" + slot, e.target.result);
-          } catch (err) {
-            console.log("could not store player photo: " + err);
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-
-      input.click();
-    });
-  });
+     The avatar ring and "Change Profile Image" button were removed from the
+     setup screen at the client's request, so there is nothing to bind here.
+     GameOver still reads localStorage playerPhoto0 / playerPhoto1 and falls
+     back to its placeholder when they are absent. Restore the markup (the
+     avatar span + [data-photo-for] button) and this block to bring it back. */
 
   /* ---------- reveal the info box once Set Info has run ---------- */
   var infoWrap = document.getElementById("infoInsertPt");

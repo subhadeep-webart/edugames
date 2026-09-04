@@ -1414,6 +1414,23 @@ function getImageSize(szCode){//{console.log("getImageSize = " +  szCode);
 
 	//(24 keys)�['AA.Qen00004', 'AA.Qen00027', 'AA.Qen00076', 'AA.Qen00009', '', 'AA.Qen00003', 'AA.Uen01219', 'AA.Len00002', 'AA.Men00021', 'AA.Pen00006', 'AA.Oen00001', 'AA.Pen00016', 'AA.Een00002', 'AA.Een00010', 'AA.Uen00045', 'AA.Oen00005', 'AA.Ben00001', 'AA.Ben00478', 'AA.Aen00003', 'AA.Cen00004', 'AA.Den00002', 'AA.Ien00005', 'AA.Nen00001', 'AA.Qen00002']
 
+//Returns the <img> markup for a player's answer marker on the Game D / N
+//number line.  Presentation only -- it builds a tag, it decides nothing.
+//
+//The markers used to come from the ResLibry as Blue/RedUpArrow.AA.jpg.  JPEG
+//has no alpha channel, so each arrow arrived inside an opaque WHITE box that
+//sat as a white square on the dark panel, and no CSS could clear it without
+//also destroying the arrow's colour.  These are the same arrows redrawn as
+//local transparent PNGs in the theme's player colours.
+//
+//pNbr is the player index, NOT a colour: blue = player 0 = left, red =
+//player 1 = right, which is the mapping the rest of the game relies on.
+function getUpArrowImage(pNbr, id, cls){
+	const file = (pNbr == 0) ? "images/BlueUpArrow.AA.png"
+	                         : "images/RedUpArrow.AA.png";
+	return "<img src='" + file + "' id='" + id + "' class='" + cls + "' alt='' />";
+}
+
 //This only works for image files.  There seems to ba a safeguard on browsers to prevent local text file input
 //It returns an array of 4 parts: image, HTML insert, width and height
 //function getImageFile(fileData,id,other){//@@@@

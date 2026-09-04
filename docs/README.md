@@ -27,6 +27,7 @@ human developers and AI coding assistants (Claude, Copilot, Cursor, etc.).
 | [10-known-issues.md](10-known-issues.md) | Landmines, bugs and gotchas found while surveying |
 | [11-new-ui-design-tokens.md](11-new-ui-design-tokens.md) | Design tokens, splash / start / overview / setup screens |
 | [12-game-types-reference.md](12-game-types-reference.md) | **Per-letter renderer reference** — what each Game* class draws |
+| [13-test-report-bugs.md](13-test-report-bugs.md) | **Test report** — categorised bug list from browser testing the running app |
 
 ## Quick orientation
 

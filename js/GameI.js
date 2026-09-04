@@ -246,6 +246,23 @@ class GameI extends Game{
 		imageInsertPt.width=this.imageWidth;
 		imageInsertPt.innerHTML = imageInsertPt.innerHTML + imageFile[0];
 
+		// The stage magnification has to suit the picture. A single global
+		// zoom was tuned for the small question images (some are only 128px
+		// across and unreadable at 1:1), but the same factor enlarges an
+		// already-large map like the Washington street plan to ~1370px, so
+		// the fixed-pixel cover panels swamp the artwork and bury its street
+		// labels. Aim for a consistent on-screen size instead: magnify small
+		// pictures a lot, large ones barely at all.
+		const TARGET_W = 620;   // the width the stage would like to occupy
+		const MAX_ZOOM = 3.3;   // unchanged for the smallest pictures
+		if (this.imageWidth > 0) {
+			let z = TARGET_W / this.imageWidth;
+			if (z > MAX_ZOOM) z = MAX_ZOOM;
+			if (z < 1) z = 1;   // never render a picture below natural size
+			imageInsertPt.style.setProperty("--tsd-gi-stage-zoom", z);
+			console.log("stage zoom for " + this.imageWidth + "px image = " + z);
+		}
+
  		console.log("$$$$$$$$$$$ this.imageWidth " + this.imageWidth);
 
 	}// 		  console.log("gameI butHit() " + butID);
