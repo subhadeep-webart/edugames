@@ -3572,6 +3572,11 @@ body.tsd-panel {
 .tsd-play-area .tsd-pregame {
   position: relative;
   width: 100%;
+  /* The rim padding (--tsd-pg-pad) must sit INSIDE the 100% width, not add
+     to it. Without this the card is 100% + 2x pad wide and spills past the
+     play area -- measured 407px inside a 390px viewport on a phone. The
+     ::after rim is positioned with `inset`, so it is unaffected. */
+  box-sizing: border-box;
   max-width: var(--tsd-pg-width);
   margin: clamp(10px, 2vw, 26px) auto;
   /* centred */
@@ -5084,5 +5089,239 @@ body.tsd-panel {
 
   .tsd-bid-panel .but2Player {
     font-size: 16px;
+  }
+}
+
+/* ==========================================================================
+   MOBILE LAYER — phones and short landscape screens.
+
+   Why this exists
+   ---------------
+   Everything above implements the client's desktop contract: the whole game
+   fits the viewport at once and the page never scrolls. That contract works
+   because a desktop screen is wide -- the scorebar lays out as one row
+   (card | bid | clock | bid | card) about 200px tall, leaving the play area
+   the rest.
+
+   On a phone that row cannot stay a row. The 1100px breakpoint above stacks
+   it into three bands, and measured on real devices the scorebar then costs
+   463-557px of an 844px screen. After the header and question bar there was
+   70-123px left for the actual game, which needed ~290px -- so
+   tsd-fit-screen.js bottomed out at its 0.45 floor and the question was
+   rendered at under half size AND still clipped. In landscape (844x390) the
+   play area measured 0px: the game was entirely off-screen. With
+   overflow:hidden on the body there was no way to reach any of it.
+
+   So on a phone, "fit it all on one screen" is not achievable -- there is
+   no scale at which two bid pads, two score cards, a clock and a question
+   board are all usable on a 390px-wide screen. Forcing it produces the
+   unreadable 0.45 render above.
+
+   The fix
+   -------
+   Below 720px (and on short landscape screens) the page stops being a
+   fixed one-screen panel and becomes an ordinary scrolling document:
+
+     - body scrolls vertically instead of clipping
+     - the flex column relaxes: bands take their natural height
+     - the play area gets a real min-height so game content renders at
+       full size instead of being squeezed into leftovers
+     - --tsd-fit-scale is pinned to 1 so tsd-fit-screen.js cannot shrink
+       content that the user can now simply scroll to
+
+   Nothing here changes game logic, ids, or desktop layout: every rule is
+   inside a max-width / max-height media query.
+   ========================================================================== */
+
+@media (max-width: 720px) {
+
+  /* The gradient lives on <body> with background-attachment:fixed, which
+     paints exactly ONE viewport's worth. That is invisible while the page
+     cannot scroll, but now that it can, everything below the fold fell back
+     to the canvas -- a white band under the content. Painting the same
+     gradient on <html> gives the canvas its colour for the full scroll
+     height. (overview.html, the one page that already scrolls, does the
+     same -- see docs/11-new-ui-design-tokens.md.) */
+     This sheet is only ever linked from GamePanel.html, so styling the bare
+     `html` element here cannot reach another page -- no :has() needed, which
+     also keeps it working in the older browsers this audience uses. */
+  html {
+    background: var(--tsd-bg-gradient);
+    background-attachment: fixed;
+  }
+
+  /* The page scrolls now. height becomes a MINIMUM so a short round still
+     fills the screen (no bare gradient under the content) while a tall one
+     is free to run past the fold and be scrolled to.
+
+     overflow-x stays hidden: sideways scroll is always a bug, and the
+     desktop rules already guarantee no horizontal overflow. */
+  body.tsd-panel {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* momentum scrolling on iOS Safari */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Same change for the flex column: it may now grow past the viewport.
+     height:100% here would re-impose the one-screen constraint on the
+     children and undo the rule above. */
+  .tsd-panel-page {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    /* room for the scroll to end clear of the device's home indicator */
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  /* The play area is flex:1 1 auto + height:0 on desktop, which gives it
+     "whatever is left" -- the mechanism that starved it to 70px. On a
+     scrolling page there is no leftover to compute, so give it a real
+     content-derived height with a floor generous enough for a question
+     board to render legibly. It can still grow past that. */
+  .tsd-play-area {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 60vh;
+    /* The desktop rules scale content down to fit this band. Here the band
+       grows to the content instead, so nothing needs clipping. */
+    overflow: visible;
+  }
+
+  /* Pin the JS fit-scaler off. tsd-fit-screen.js writes --tsd-fit-scale on
+     the element (inline, so it beats a plain rule) whenever content is
+     taller than the band -- which on a phone is most of the time. The user
+     can scroll now, so shrinking to 0.45 is exactly the wrong response.
+     !important is deliberate and is the documented way to beat a runtime
+     inline style (see docs/08-ui-update-guide.md); the JS is untouched. */
+  .tsd-play-area>#ansBar,
+  .tsd-play-area>#gameInsrtPt,
+  .tsd-play-area>#imageInsertPt,
+  .tsd-play-area>#gamePlayArea,
+  .tsd-play-area>#insrtPtA,
+  .tsd-play-area>#insrtPtB {
+    transform: none !important;
+  }
+
+  /* The pre-game notice is an absolutely-positioned overlay pinned to the
+     band (inset:0). With the band now taller than the screen the notice
+     would be centred in a 60vh+ box and its start button could sit below
+     the fold. Return it to the normal flow so it reads as a card and
+     scrolls with everything else. */
+  .tsd-play-area>#gamePlayArea:has(.tsd-pregame),
+  .tsd-play-area>#gamePlayArea.has-pregame {
+    position: static;
+    transform: none !important;
+  }
+
+  /* The scorebar's three stacked bands are the single biggest consumer of
+     vertical space. Tighten the rhythm between them: on desktop this margin
+     buys air under the clock card, but stacked on a phone it is dead space
+     between the bid pads and the question. */
+  .tsd-scorebar {
+    margin-bottom: clamp(12px, 3vw, 20px);
+    gap: 10px;
+  }
+
+  /* The design min-heights (160px bid panel, 203px clock) are sized for a
+     desktop row. Stacked, they reserve height the content does not need --
+     a 7-button bid pad does not need 160px. Let them size to content. */
+  .tsd-bid-panel {
+    min-height: 0;
+    max-width: none;
+    padding-block: 10px;
+  }
+
+  .tsd-bid-clock {
+    min-height: 0;
+    max-width: none;
+    padding: 14px 16px;
+    gap: 8px;
+  }
+
+  /* The two bid pads sit side by side (grid row 2, set at 1100px above).
+     At 375px that is ~170px each, which with 44px touch targets fits two
+     columns per pad -- so a 7-bid round became four tall rows and the pad
+     grew past 300px. Centring the auto-fit track lets the buttons flow as
+     wide as the pad allows and keeps the block short. */
+  .tsd-bid-panel .bidButs td {
+    justify-content: center;
+  }
+
+  /* Question text: the desktop clamp bottoms out at 16px, which is fine,
+     but the bar itself is centred with a wide gap. Tighten it. */
+  .tsd-question-bar {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+}
+
+/* ---- short landscape ---------------------------------------------------
+   844x390 is a phone on its side: wide enough (844px) to miss the 720px
+   breakpoint above, but only 390px tall -- and that is the case that
+   measured a 0px play area. Key off height rather than width so it is
+   caught regardless of how wide the device is, and require a coarse
+   pointer so a small desktop window keeps the fitted desktop behaviour the
+   client signed off on. */
+@media (max-height: 500px) and (pointer: coarse) {
+
+  /* full-height gradient once the page scrolls -- see the note above */
+  html {
+    background: var(--tsd-bg-gradient);
+    background-attachment: fixed;
+  }
+
+  body.tsd-panel {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tsd-panel-page {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .tsd-play-area {
+    flex: 0 0 auto;
+    height: auto;
+    /* vh is small here by definition, so a vh floor would be useless --
+       use a px floor big enough for a question board. */
+    min-height: 340px;
+    overflow: visible;
+  }
+
+  .tsd-play-area>#ansBar,
+  .tsd-play-area>#gameInsrtPt,
+  .tsd-play-area>#imageInsertPt,
+  .tsd-play-area>#gamePlayArea,
+  .tsd-play-area>#insrtPtA,
+  .tsd-play-area>#insrtPtB {
+    transform: none !important;
+  }
+
+  .tsd-play-area>#gamePlayArea:has(.tsd-pregame),
+  .tsd-play-area>#gamePlayArea.has-pregame {
+    position: static;
+    transform: none !important;
+  }
+
+  /* Landscape has width to spare, so the design min-heights are the only
+     thing making the bands tall. Drop them. */
+  .tsd-bid-panel,
+  .tsd-bid-clock {
+    min-height: 0;
+  }
+
+  .tsd-scorebar {
+    margin-bottom: 12px;
   }
 }

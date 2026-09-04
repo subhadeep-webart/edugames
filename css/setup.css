@@ -943,16 +943,47 @@ select.tsd-control option {
 }
 
 @media (max-width: 620px) {
+  /* The title used to drop to its own row here (grid-row 2), which turned
+     the header into a two-line banner: 120px, 14% of a 390px-wide phone,
+     spent on a decorative label while 425px of the form sat below the fold.
+
+     Keep the single row instead -- logo | title | toggle -- and buy the fit
+     by shrinking the title rather than by stacking it. The header band goes
+     from ~120px to ~64px and the form gets the difference. */
   .tsd-setup-header {
-    grid-template-columns: auto 1fr;
-    row-gap: 12px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    row-gap: 0;
+    /* the desktop band is clamp(64px, 11vh, 124px); 11vh of a tall phone is
+       what made it 120px. A phone header does not need that much. */
+    min-height: 0;
+    padding-bottom: 8px;
   }
 
   .tsd-setup-title {
-    grid-column: 1 / -1;
-    grid-row: 2;
+    /* stays in the middle cell of the single row */
+    grid-column: 2;
+    grid-row: 1;
     justify-self: center;
+    /* was clamp(21px, 4.2vh, 42px) -- 4.2vh is 35px on an 844px-tall phone,
+       which is what forced the second row. */
+    font-size: clamp(15px, 4.4vw, 22px);
+    /* it is the only thing that can yield if the toggle needs the width */
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* --tsd-title-glow is a 30px white blur at .9, tuned for the 42px
+       desktop title. Around 22px letters that blur is wider than the glyphs
+       themselves, so instead of a halo it pools into a pale rectangle behind
+       the word. The type is already white on a dark ground and needs no help
+       standing out at this size, so drop the glow rather than shrink it. */
+    text-shadow: none;
   }
+
+  /* the sparkles are pure decoration and the first thing to go when the row
+     is tight -- dropping them buys the title its two flanking gaps back */
+  .tsd-setup-title .tsd-spark-mark { display: none; }
+
+  .tsd-setup-logo img { width: 32px; height: auto; }
 
   .tsd-setup-tools { justify-self: end; }
 

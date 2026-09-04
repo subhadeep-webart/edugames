@@ -470,3 +470,77 @@ All motion is disabled under `@media (prefers-reduced-motion: reduce)`.
 - `.tsd-btn--ghost` — transparent, `--tsd-btn-border` outline
 
 Icons go in an `<img class="tsd-btn-icon">`; they are whitened automatically.
+
+---
+
+## Mobile: the game panel scrolls (phones only)
+
+> Added after client feedback that the game was unusable on a phone.
+> **Desktop behaviour is unchanged** — see the guarantee above, which still
+> holds at every desktop size.
+
+### The problem
+
+The no-scrollbar contract assumes a wide screen. On desktop `.tsd-scorebar`
+is one row — card | bid | clock | bid | card — about 200 px tall, so
+`.tsd-play-area` gets the rest.
+
+A phone cannot keep that row. The `max-width: 1100px` query stacks it into
+three bands, and measured on a real device the scorebar then costs
+**463–557 px of an 844 px screen**. After the header and question bar this
+left **70–123 px** for the game, which needed ~290 px. So
+`js-ui/tsd-fit-screen.js` bottomed out at its `MIN_SCALE` of **0.45** and the
+question rendered at under half size *and* was still clipped.
+
+Landscape (844×390) was worse: `.tsd-play-area` measured **0 px**. The game
+was entirely off-screen, and `overflow: hidden` meant it could not be
+reached at all.
+
+There is no scale at which two bid pads, two score cards, a clock and a
+question board are usable together on a 390 px-wide screen. Forcing them to
+fit is what produced the unreadable 0.45 render.
+
+### The fix
+
+Below **720 px wide**, and on **short landscape screens**
+(`max-height: 500px and (pointer: coarse)`), the panel stops being a fixed
+one-screen layout and becomes an ordinary scrolling document:
+
+| | Desktop | Phone |
+|---|---|---|
+| `body` | `height:100dvh; overflow:hidden` | `min-height:100dvh; overflow-y:auto` |
+| `.tsd-play-area` | `flex:1 1 auto; height:0` (leftover space) | `flex:0 0 auto; min-height:60vh` (grows to content) |
+| `--tsd-fit-scale` | set by the JS fit-scaler | pinned off with `transform:none !important` |
+| Pre-game notice | `position:absolute` overlay | `position:static`, in flow |
+
+The `!important` is deliberate: `tsd-fit-screen.js` writes the scale as an
+inline style, and beating an inline style is exactly what
+[08-ui-update-guide.md](08-ui-update-guide.md) reserves it for. **The JS is
+not modified** — it still runs and still governs desktop.
+
+Two supporting changes:
+
+- **`html` gets the gradient** inside the mobile queries.
+  `background-attachment: fixed` on `<body>` paints only one viewport's
+  worth, which was invisible while the page could not scroll but left a
+  white band below the fold once it could. `overview.html` — the other page
+  that scrolls — already does this.
+- **`.tsd-pregame` gets `box-sizing: border-box`.** It is `width:100%` with
+  36 px of rim padding, so it was 100 % + 72 px wide and spilled out of the
+  play area (measured 407 px inside a 390 px viewport). This one applies at
+  all widths; it was simply never visible while the notice was a clipped
+  overlay.
+
+### Verified
+
+Driven through the real setup → game flow against `node dev-server.js`
+(live CGI), Chromium:
+
+- **All 57 rounds in the test set** — game types B, C, D, E, I, L, M, N, O,
+  P, Q, U — at 375×667 and 390×844: **no horizontal overflow, no JS
+  errors**, content at full scale (`--tsd-fit-scale: 1`).
+- Landscape 844×390: play area **0 px → 340–551 px**, scrollable.
+- Bidding still works by touch in both orientations (`centerDisplay` reads
+  "Peter BID 3", `is-bid` applied).
+- Desktop 1920×1080, 1440×900, 1366×768, 1280×720, 1024×768, 820×1180:
+  `overflow:hidden`, no scroll, fit-scaler active — **unchanged**.
