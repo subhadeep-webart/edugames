@@ -101,7 +101,7 @@ class SelectionPanel{
       console.log("gameType=  " + gameType + " serNbr= " + serNbr + " onNet= " + onNet);
 
       if(onNet == true){
-         const url = 'https://www.edugames.com/cgi-bin/GetRoundsTSD.pl?' + serNbr;
+         const url = '/cgi-bin/GetRoundsTSD.pl?' + serNbr;
          console.log("Sp.url =" + url +"**");
           ////fetch('/edugames.com/cgi-bin/GetRounds.pl?' + serNbr)
 

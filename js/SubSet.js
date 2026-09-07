@@ -65,7 +65,7 @@ class SubSet{
 		//this.mapInst(instructions);
 
 		if (onNet) {
-			const url = 'https://www.edugames.com/cgi-bin/GetASetTSD.pl?' + subSetSerNbr;
+			const url = '/cgi-bin/GetASetTSD.pl?' + subSetSerNbr;
 			console.log("url = " + url);
 			await fetch(url)
 				.then(response => response.text())

@@ -1545,7 +1545,7 @@ function getTextFilePath(fileData){//@@@@ }B.AA.Bu.Ge.No.No.US.States.BL.csv
 	let filePath=""
 	if(onNet){
 		//filePath = "../../../edugames.com/DataBase/A65AA65A/ResLibry/" + buf;
-		filePath = "https://edugames.com/cgi-bin/GetTextFileTSD.pl?" + buf;
+		filePath = "/cgi-bin/GetTextFileTSD.pl?" + buf;
 	}else{
 		filePath = "../../HTDocs/public_html/edugames.com/DataBase/A65AA65A/ResLibry/" + buf;
 
@@ -1594,7 +1594,7 @@ function getTextFile(fileData){//@@@@ }B.AA.Bu.Ge.No.No.US.States.BL.csv
 	let filePath=""
 	if(onNet){
 		//filePath = "../../../edugames.com/DataBase/A65AA65A/ResLibry/" + buf;
-		filePath = "https://edugames.com/cgi-bin/GetTextFileTSD.pl?" + buf;
+		filePath = "/cgi-bin/GetTextFileTSD.pl?" + buf;
 	}else{
 		filePath = "../../HTDocs/public_html/edugames.com/DataBase/A65AA65A/ResLibry/" + buf;
 

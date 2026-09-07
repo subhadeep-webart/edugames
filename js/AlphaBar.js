@@ -96,6 +96,10 @@ class AlphaBar{
 		console.log("indexNbrs " + indexNbrs);
 		const xx = this.ansLstIndex[indexNbrs];
 		console.log("xx " + xx);
+		if (xx == undefined) {
+			console.error("Answer list not loaded - cannot build list for " + aLtr);
+			return [];
+		}
 
 		const thePointer = xx.split(' ');
 		const startPnt = Number(thePointer[1] - 2);
@@ -163,10 +167,22 @@ class AlphaBar{
 		const xx = this.ansLstIndex[indexNbrs];
 		console.log("xx= " + xx);
 
+		const alphaAnsLst = [];
+		if (xx == undefined) {
+			console.error("Answer list not loaded - cannot open drop down for " + ltr);
+			alphaAnsLst.push("Answer list unavailable");
+			for (var j = 0; j < alphaAnsLst.length; j++) {
+				var errOpt = document.createElement('option');
+				errOpt.value = alphaAnsLst[j];
+				errOpt.innerHTML = alphaAnsLst[j];
+				el.appendChild(errOpt);
+			}
+			return;
+		}
+
 		const thePointer = xx.split(' ');
 		const startPnt = Number(thePointer[1] - 2);
 		const numberOfItems = Number(thePointer[2]);
-		const alphaAnsLst = [];
 		if (numberOfItems > 0) {
 			const endPoint = (startPnt + numberOfItems);
 			const theLtr = this.ansLst[startPnt].charAt(0);
@@ -363,11 +379,19 @@ class AlphaBar{
 		if(onNet){
 			console.log("  **||**  "  );
             fetch(theFilePath)
-            .then(response => response.text())
+            .then(response => {
+				if (!response.ok) {
+					throw new Error("HTTP " + response.status + " for " + theFilePath);
+				}
+				return response.text();
+			})
             .then(data => {
 				//console.log("*|*" + data +"*|*");
 				this.separateTheAnsLst(data);
-		    });
+		    })
+			.catch(err => {
+				console.error("downloadAnsLst failed - alpha drop downs will be empty: " + err.message);
+			});
 		}else{
 			data =cp.ansButtons.getData(cp.rndSerNbr);
 			console.log("data=   " + data );
