@@ -1,0 +1,1004 @@
+/* ==========================================================================
+   Trivia-SmackDown — Game Setup / onboarding (index.html)
+
+   Layout only. All colour/metric tokens live in css/tokens.css, which MUST be
+   linked before this file.
+
+   IMPORTANT: this page re-skins the LIVE registration form. Every element id
+   (p0/z0/g0/s0, p1/z1/g1/s1, bidTime, setSerNbr, secondPlayer, infoBox) is
+   preserved — only presentation changes here.
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  height: 100%;
+  background: var(--tsd-bg-gradient);
+  background-attachment: fixed;
+}
+
+/* The client's requirement: the whole setup screen fits one viewport with no
+   scrollbar. The page is a flex column pinned to the viewport height and every
+   band below sizes off vh, so nothing can push the document taller. */
+body.tsd-setup {
+  margin: 0;
+  height: 100vh;
+  height: 100dvh;
+  background: transparent;
+  color: var(--tsd-text);
+  font-family: var(--tsd-font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ambient corner blooms */
+body.tsd-setup::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 42% 42% at 100% 0%,
+      rgba(180, 60, 200, .20) 0%, rgba(180, 60, 200, 0) 70%),
+    radial-gradient(ellipse 45% 45% at 0% 100%,
+      rgba(60, 90, 200, .16) 0%, rgba(60, 90, 200, 0) 70%);
+}
+
+/* One shared content width for the arena, the options card and the confirm
+   bar, so the three bands line up as a single column under the header. */
+.tsd-setup-page { --tsd-band: 1200px; }
+
+.tsd-setup-page {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.8vh, 40px);
+
+  width: 100%;
+  max-width: var(--tsd-container);
+  height: 100%;
+  margin: 0 auto;
+  padding: clamp(10px, 2vh, 26px) var(--tsd-gutter) clamp(12px, 2.4vh, 30px);
+}
+
+/* The wrapper around the middle bands. On desktop it is transparent to the
+   layout — a flex column with the same gap that grows to fill the leftover
+   height; @media (max-width: 900px) below turns it into the scroll band. */
+.tsd-setup-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Extra separation between the player form and the set selector, on top of
+   the page gap. Applied to this one seam rather than widening the shared
+   gap, which would also push the header and the confirm button apart. */
+.tsd-setup-scroll > .tsd-options { margin-top: clamp(6px, 1.6vh, 22px); }
+
+/* The arena sizes to its content. The cards hold a label and two fields, so
+   stretching them to fill a tall screen just leaves the inputs floating in a
+   slab of flat colour — the height has to stay proportionate to what is in
+   them. The generous internal padding below does the work of filling the
+   screen instead, and `justify-content` centres the whole group.
+   min-height:0 still lets it shrink on a short screen, which is what keeps
+   the page free of a scrollbar. */
+.tsd-setup-scroll > .tsd-arena {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+/* The group is centred in the band. `safe center` matters here: on a narrow
+   screen this band scrolls, and a plain `center` would overflow it equally at
+   both ends, putting the top of the first card above the scrollable area
+   where it can never be reached. `safe` falls back to flex-start in that
+   case.
+
+   The padding trims the slack the centring can distribute, so on a tall
+   screen the group stays near the header instead of drifting to the middle
+   of a very deep band. */
+.tsd-setup-scroll {
+  justify-content: safe center;
+  padding-bottom: clamp(0px, 6vh, 90px);
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.tsd-setup-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: clamp(10px, 1.5vw, 22px);
+  flex: 0 0 auto;
+  /* the same column as the bands below, so the divider lines up with them */
+  width: 100%;
+  max-width: var(--tsd-band);
+  margin-inline: auto;
+  /* a taller band, so the title sits in its own space rather than crowding
+     the top edge of the screen */
+  min-height: clamp(64px, 11vh, 124px);
+  padding-bottom: clamp(6px, 1.2vh, 16px);
+  border-bottom: var(--tsd-border-hairline);
+}
+
+.tsd-setup-logo { justify-self: start; }
+
+.tsd-setup-logo img {
+  display: block;
+  width: auto;
+  height: clamp(34px, 6vh, 62px);
+}
+
+/* ---- Title with sparkles ---------------------------------------------- */
+
+.tsd-setup-title {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(8px, 1vw, 16px);
+  margin: 0;
+
+  font-size: clamp(21px, 4.2vh, 42px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--tsd-text);
+  text-shadow: var(--tsd-title-glow);
+}
+
+.tsd-setup-title .tsd-spark-mark {
+  flex: 0 0 auto;
+  width: clamp(12px, 1.4vw, 21px);
+  height: auto;
+  color: var(--tsd-star-blue);
+}
+
+.tsd-setup-title .tsd-spark-mark:first-child { color: var(--tsd-accent-pink); }
+
+/* ---- Header right cluster ---------------------------------------------- */
+
+.tsd-setup-tools {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1vw, 14px);
+}
+
+/* single-player toggle */
+.tsd-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(9px, 1vw, 16px);
+  height: clamp(42px, 5.6vh, 56px);
+  padding: 0 clamp(6px, .6vw, 9px) 0 clamp(16px, 1.5vw, 24px);
+
+  border: var(--tsd-border-hairline);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .03);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(13px, 1.8vh, 18px);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .2s var(--tsd-ease),
+              background-color .2s var(--tsd-ease);
+}
+
+.tsd-toggle:hover { background: rgba(255, 255, 255, .07); }
+
+.tsd-toggle:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* the switch itself */
+.tsd-toggle-track {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(42px, 3.6vw, 54px);
+  height: clamp(22px, 1.9vw, 28px);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .12);
+  transition: background-color .25s var(--tsd-ease);
+}
+
+.tsd-toggle-thumb {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: calc(clamp(22px, 1.9vw, 28px) - 6px);
+  height: calc(clamp(22px, 1.9vw, 28px) - 6px);
+  border-radius: 50%;
+  background: var(--tsd-accent-pink);
+  transform: translateY(-50%);
+  transition: left .25s var(--tsd-ease), background-color .25s var(--tsd-ease);
+}
+
+.tsd-toggle.is-on .tsd-toggle-track { background: rgba(253, 12, 117, .35); }
+
+.tsd-toggle.is-on .tsd-toggle-thumb {
+  left: calc(100% - clamp(22px, 1.9vw, 28px) + 3px);
+}
+
+/* gear button */
+.tsd-gear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(38px, 3.2vw, 48px);
+  height: clamp(38px, 3.2vw, 48px);
+  padding: 0;
+
+  border: var(--tsd-border-hairline);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .03);
+  color: var(--tsd-text-muted);
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s var(--tsd-ease),
+              transform .2s var(--tsd-ease),
+              color .2s var(--tsd-ease);
+}
+
+.tsd-gear svg {
+  width: clamp(17px, 1.5vw, 22px);
+  height: auto;
+}
+
+.tsd-gear:hover,
+.tsd-gear:focus-visible {
+  background: rgba(255, 255, 255, .1);
+  color: var(--tsd-text);
+  transform: rotate(35deg);
+}
+
+.tsd-gear:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Player arena
+
+   The avatar ring and "Change Profile Image" button were removed at the
+   client's request. With them gone the banner had nothing left to hold, so
+   each player is now a single coloured card carrying the label and the two
+   fields — the blue-left / red-right identity is kept on the card itself.
+   ========================================================================== */
+
+.tsd-arena {
+  max-width: var(--tsd-band);
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: clamp(12px, 2vw, 34px);
+}
+
+.tsd-player {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  /* the card's proportions come from this padding rather than from being
+     stretched, so it stays sized to the label + two fields it holds */
+  padding: clamp(20px, 3.6vh, 46px) clamp(22px, 2.8vw, 44px);
+  border: var(--tsd-border-hairline);
+  border-radius: 16px;
+}
+
+/* The fields stay together as one group. When single-player mode hides the
+   second card the remaining one keeps the same internal rhythm, and if the
+   arena is ever given spare height the group centres in it rather than the
+   fields drifting apart from one another. */
+.tsd-player .tsd-player-head { flex: 0 0 auto; }
+
+.tsd-player-fields {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.tsd-player--p1 { background: var(--tsd-p1-gradient); }
+.tsd-player--p2 { background: var(--tsd-p2-gradient); }
+
+/* ---- label ------------------------------------------------------------- */
+
+.tsd-player-head {
+  margin-bottom: clamp(8px, 1.4vh, 18px);
+}
+
+.tsd-player-label {
+  margin: 0;
+  font-size: clamp(15px, 2.3vh, 23px);
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tsd-player-label);
+}
+
+/* The P2 heading used to mirror to the right, but only the heading did --
+   the Name and Your Time fields beneath it stay left-aligned in both cards.
+   A single right-aligned line above a left-aligned stack read as a
+   misalignment rather than as symmetry, so both headings now sit left and
+   the two cards match. */
+
+/* ==========================================================================
+   VS divider column
+   ========================================================================== */
+
+.tsd-vs-col {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1vw, 16px);
+}
+
+.tsd-vs-col .tsd-vs-rule { order: -1; }
+
+.tsd-vs-col img {
+  display: block;
+  width: auto;
+  height: clamp(46px, 9vh, 96px);
+  flex: 0 0 auto;
+}
+
+/* The fading rules above and below the VS mark. They run to the card edges,
+   so the divider reads as one continuous line through the middle. */
+.tsd-vs-rule {
+  flex: 1 1 auto;
+  width: 1px;
+  min-height: 0;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0)   0%,
+    rgba(255, 255, 255, .55) 100%);
+}
+
+.tsd-vs-col::after {
+  content: "";
+  flex: 1 1 auto;
+  width: 1px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .55) 0%,
+    rgba(255, 255, 255, 0)   100%);
+}
+
+/* ==========================================================================
+   Fields
+   ========================================================================== */
+
+.tsd-field { margin-bottom: clamp(12px, 2.2vh, 28px); }
+
+.tsd-player .tsd-field:last-child { margin-bottom: 0; }
+
+.tsd-field-label {
+  display: block;
+  margin: 0 0 clamp(5px, .9vh, 12px);
+  font-size: clamp(12px, 1.6vh, 17px);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+}
+
+/* shared control skin — inputs and selects */
+.tsd-control {
+  display: block;
+  width: 100%;
+  height: clamp(42px, 6vh, 62px);
+  padding: 0 clamp(14px, 1.3vw, 22px);
+
+  border: var(--tsd-field-border-w) solid var(--tsd-field-border);
+  border-radius: 10px;
+  background: var(--tsd-field-bg);
+  box-shadow: var(--tsd-field-glow);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(15px, 1.9vh, 20px);
+
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color .2s var(--tsd-ease),
+              box-shadow .2s var(--tsd-ease);
+}
+
+.tsd-control::placeholder { color: rgba(255, 255, 255, .38); }
+
+.tsd-control:hover { border-color: rgba(255, 255, 255, .45); }
+
+.tsd-control:focus {
+  border-color: var(--tsd-blue);
+  box-shadow: var(--tsd-field-glow), 0 0 0 3px rgba(6, 131, 252, .22);
+}
+
+/* selects get a pink caret drawn in the corner */
+.tsd-select-wrap {
+  position: relative;
+  display: block;
+}
+
+.tsd-select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: clamp(14px, 1.3vw, 22px);
+  width: 0;
+  height: 0;
+  margin-top: -2px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid var(--tsd-accent-pink);
+  pointer-events: none;
+}
+
+select.tsd-control {
+  padding-right: clamp(36px, 3.4vw, 52px);
+  cursor: pointer;
+}
+
+/* the dark dropdown list itself */
+select.tsd-control option {
+  background: var(--tsd-field-bg);
+  color: var(--tsd-text);
+}
+
+/* ---- custom dropdown (JS-enhanced) -------------------------------------
+   The real <select> stays in the DOM with the same id/value contract used
+   by the game logic; js/setup-dropdown.js hides it visually and drives this
+   listbox instead. If JS fails to load, the native <select> above still
+   works unstyled — this block only applies once .is-enhanced is added. */
+
+.tsd-select-wrap.is-enhanced select.tsd-control {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tsd-select-trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: clamp(42px, 6vh, 62px);
+  padding: 0 clamp(36px, 3.4vw, 52px) 0 clamp(14px, 1.3vw, 22px);
+
+  border: var(--tsd-field-border-w) solid var(--tsd-field-border);
+  border-radius: 10px;
+  background: var(--tsd-field-bg);
+  box-shadow: var(--tsd-field-glow);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(15px, 1.9vh, 20px);
+  text-align: left;
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .2s var(--tsd-ease),
+              box-shadow .2s var(--tsd-ease);
+}
+
+.tsd-select-trigger:hover { border-color: rgba(255, 255, 255, .45); }
+
+.tsd-select-wrap.is-open .tsd-select-trigger,
+.tsd-select-trigger:focus-visible {
+  border-color: var(--tsd-blue);
+  box-shadow: var(--tsd-field-glow), 0 0 0 3px rgba(6, 131, 252, .22);
+  outline: none;
+}
+
+.tsd-select-listbox {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: min(280px, 44vh);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  border: var(--tsd-field-border-w) solid rgba(255, 255, 255, .18);
+  border-radius: 12px;
+  background: #171240;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45), var(--tsd-field-glow);
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: clamp(6px, .6vw, 10px);
+  padding-inline: clamp(6px, .6vw, 10px);
+  /* scrollable, but no visible scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  opacity: 0;
+  transform: translateY(-6px);
+  visibility: hidden;
+  pointer-events: none;
+  /* Collapsed to zero height while closed. It is absolutely positioned, so it
+     never affects the surrounding layout — but a closed listbox near the foot
+     of the page still counts toward the document's scroll extent, which is
+     enough on its own to put a scrollbar back on a short laptop. */
+  max-height: 0;
+  transition: opacity .16s var(--tsd-ease),
+              transform .16s var(--tsd-ease),
+              visibility 0s linear .16s,
+              max-height 0s linear .16s;
+}
+
+.tsd-select-wrap.is-open .tsd-select-listbox {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  max-height: min(280px, 44vh);
+  transition: opacity .16s var(--tsd-ease),
+              transform .16s var(--tsd-ease),
+              visibility 0s linear 0s,
+              max-height 0s linear 0s;
+}
+
+/* Opened upward when there is no room below — js/setup-dropdown.js adds
+   .is-drop-up. The transform start-point flips too, so the list still animates
+   out of the trigger rather than into it. */
+.tsd-select-wrap.is-drop-up .tsd-select-listbox {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: translateY(6px);
+}
+
+.tsd-select-wrap.is-drop-up.is-open .tsd-select-listbox {
+  transform: translateY(0);
+}
+
+/* scroll fade cues — sticky children of the listbox so they track real
+   content height and scroll position with no JS-measured coordinates.
+   Each has zero footprint in the flex flow (negative margin cancels its own
+   height) so it never adds scroll length or extra gap; `position: sticky`
+   then pins it to the listbox's top/bottom edge while scrolling.
+   Shown only while the list can actually scroll that way. */
+.tsd-select-scroll-fade {
+  position: sticky;
+  left: calc(-1 * clamp(6px, .6vw, 10px));
+  right: calc(-1 * clamp(6px, .6vw, 10px));
+  height: 28px;
+  flex: 0 0 auto;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s var(--tsd-ease);
+  z-index: 1;
+}
+
+.tsd-select-scroll-fade--top {
+  top: calc(-1 * clamp(6px, .6vw, 10px));
+  margin-bottom: -28px;
+  background: linear-gradient(180deg, #171240 0%, rgba(23, 18, 64, 0) 100%);
+}
+
+.tsd-select-scroll-fade--bottom {
+  bottom: calc(-1 * clamp(6px, .6vw, 10px));
+  margin-top: -28px;
+  background: linear-gradient(0deg, #171240 0%, rgba(23, 18, 64, 0) 100%);
+}
+
+.tsd-select-wrap.can-scroll-up .tsd-select-scroll-fade--top,
+.tsd-select-wrap.can-scroll-down .tsd-select-scroll-fade--bottom {
+  opacity: 1;
+}
+
+.tsd-select-option {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: clamp(38px, 5vh, 52px);
+  padding: 0 clamp(12px, 1.1vw, 18px);
+  border-radius: 8px;
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(15px, 1.9vh, 20px);
+  white-space: nowrap;
+
+  cursor: pointer;
+  transition: background-color .12s var(--tsd-ease);
+}
+
+.tsd-select-option:hover,
+.tsd-select-option.is-active {
+  background: rgba(6, 131, 252, .22);
+}
+
+.tsd-select-option.is-selected {
+  background: var(--tsd-blue);
+  color: #fff;
+  font-weight: 600;
+}
+
+.tsd-select-option.is-selected:hover,
+.tsd-select-option.is-selected.is-active {
+  background: var(--tsd-blue);
+}
+
+/* no visible scrollbar on the listbox (WebKit/Blink) — still scrollable via
+   wheel/touch/keyboard, just without a UI track/thumb */
+.tsd-select-listbox::-webkit-scrollbar { display: none; }
+
+/* ==========================================================================
+   Options card (bid time + set)
+   ========================================================================== */
+
+.tsd-options {
+  max-width: var(--tsd-band);
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  border: var(--tsd-border-hairline);
+  border-radius: 16px;
+  background: var(--tsd-panel-bg);
+  padding: clamp(18px, 3.2vh, 40px) clamp(22px, 2.8vw, 44px);
+  flex: 0 0 auto;
+}
+
+.tsd-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(10px, 1.6vh, 30px) clamp(14px, 2vw, 34px);
+  align-items: start;
+}
+
+.tsd-options .tsd-field { margin-bottom: 0; }
+
+.tsd-hint {
+  margin: clamp(6px, 1vh, 13px) 0 0;
+  font-size: clamp(11px, 1.5vh, 16px);
+  color: var(--tsd-body-text);
+}
+
+/* ==========================================================================
+   Advanced panel (zip / grade / handicap / set info)
+   These fields feed getData() and MUST stay in the DOM.
+   ========================================================================== */
+
+.tsd-advanced {
+  display: none;
+  border: var(--tsd-border-hairline);
+  border-radius: 16px;
+  background: var(--tsd-panel-bg);
+  padding: clamp(18px, 2.2vw, 30px);
+}
+
+/* Hidden by default. If it is ever re-enabled it becomes the flexible band:
+   it takes the leftover height and scrolls inside itself, so the page as a
+   whole still never scrolls. */
+.tsd-advanced.is-open {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tsd-advanced.is-open::-webkit-scrollbar { display: none; }
+
+.tsd-advanced-title {
+  margin: 0 0 clamp(12px, 1.4vw, 20px);
+  font-size: clamp(14px, 1.2vw, 19px);
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+}
+
+.tsd-advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: clamp(12px, 1.4vw, 22px);
+}
+
+.tsd-advanced .tsd-field { margin-bottom: 0; }
+
+.tsd-advanced-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 1vw, 14px);
+  margin-top: clamp(14px, 1.6vw, 22px);
+}
+
+.tsd-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(38px, 3.2vw, 46px);
+  padding: 0 clamp(16px, 1.5vw, 24px);
+
+  border: var(--tsd-border-hairline);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .04);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(12px, 1vw, 15px);
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s var(--tsd-ease);
+}
+
+.tsd-mini-btn:hover { background: rgba(255, 255, 255, .1); }
+
+/* the set-info textarea keeps its id but is restyled */
+#infoBox {
+  display: block;
+  width: 100%;
+  min-height: 220px;
+  margin-top: clamp(12px, 1.4vw, 20px);
+  padding: clamp(12px, 1.2vw, 18px);
+
+  border: var(--tsd-field-border-w) solid var(--tsd-field-border);
+  border-radius: 10px;
+  background: var(--tsd-field-bg);
+
+  color: var(--tsd-text);
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.tsd-infobox-wrap { display: none; }
+.tsd-infobox-wrap.is-open { display: block; }
+
+/* ==========================================================================
+   Confirm bar
+   ========================================================================== */
+
+.tsd-confirm-bar {
+  display: flex;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: var(--tsd-band);
+  margin-inline: auto;
+  /* a touch more air than the gap between the cards, so the primary action
+     reads as separate from the form without drifting off on its own */
+  margin-top: clamp(4px, 1.4vh, 18px);
+}
+
+.tsd-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.1vw, 18px);
+
+  min-width: 0;
+  height: clamp(46px, 7.2vh, 70px);
+  padding: 0 clamp(26px, 2.6vw, 46px);
+
+  border: 0;
+  border-radius: 12px;
+  background: var(--tsd-primary-gradient);
+  box-shadow: 0 10px 30px rgba(6, 131, 252, .4);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(15px, 2.3vh, 23px);
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .22s var(--tsd-ease),
+              box-shadow .22s var(--tsd-ease);
+}
+
+.tsd-confirm-btn img {
+  flex: 0 0 auto;
+  width: auto;
+  height: clamp(19px, 2.9vh, 31px);
+}
+
+.tsd-confirm-btn:hover,
+.tsd-confirm-btn:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(6, 131, 252, .55);
+}
+
+.tsd-confirm-btn:active { transform: translateY(-1px); }
+
+.tsd-confirm-btn:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* sheen sweep */
+.tsd-confirm-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    rgba(255, 255, 255, 0)   35%,
+    rgba(255, 255, 255, .28) 50%,
+    rgba(255, 255, 255, 0)   65%);
+  background-size: 220% 100%;
+  background-position: 140% 0;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  transition: background-position .6s var(--tsd-ease);
+}
+
+.tsd-confirm-btn:hover::after { background-position: -40% 0; }
+
+/* ==========================================================================
+   Single-player mode — player 2 hidden
+   The live code sets display/visibility on #secondPlayer directly; this class
+   collapses the arena to one column to match.
+   ========================================================================== */
+
+.tsd-arena.is-single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 620px;
+  margin-inline: auto;
+}
+
+.tsd-arena.is-single .tsd-vs-col { display: none; }
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .tsd-arena {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Stacked, the arena is taller than the band. Without this the flex parent
+     shrinks the box below its content and the second player card renders
+     straight over the options card. The selector has to match the
+     `.tsd-setup-scroll > .tsd-arena` rule above on specificity, or that one
+     wins here and the overlap comes back. */
+  .tsd-setup-scroll > .tsd-arena {
+    flex: 0 0 auto;
+  }
+
+  .tsd-vs-col {
+    flex-direction: row;
+    justify-content: center;
+    margin: clamp(4px, 1vh, 12px) 0;
+  }
+
+  .tsd-vs-col img { height: clamp(40px, 7vh, 74px); }
+
+  .tsd-vs-rule,
+  .tsd-vs-col::after { display: none; }
+}
+
+/* Very short viewports (a landscape phone, or a heavily reduced window):
+   tighten the vertical rhythm so the confirm button stays on screen. */
+@media (max-height: 620px) {
+  .tsd-setup-page { gap: clamp(6px, 1.2vh, 14px); }
+}
+
+/* ==========================================================================
+   Narrow screens — phones and portrait tablets
+
+   Stacked, the two player cards plus the options card genuinely need more
+   height than a phone has, and shrinking the controls any further would put
+   them below a comfortable tap target. So the header and the confirm button
+   stay pinned as fixed bands and the middle scrolls between them: the page
+   itself still never grows a scrollbar, and the primary action is always in
+   view without reaching for one.
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .tsd-setup-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: inherit;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* scrollable, but no visible scrollbar — matches the dropdown listbox */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tsd-setup-scroll::-webkit-scrollbar { display: none; }
+
+  /* The band scrolls here, so there is no spare height to centre into. The
+     auto margins above would collapse the cards into one another instead. */
+  .tsd-setup-scroll > .tsd-arena,
+  .tsd-setup-scroll > .tsd-confirm-bar { margin-top: 0; margin-bottom: 0; }
+
+  .tsd-confirm-bar { padding-top: clamp(4px, 1.4vh, 18px); }
+}
+
+@media (max-width: 620px) {
+  /* The title used to drop to its own row here (grid-row 2), which turned
+     the header into a two-line banner: 120px, 14% of a 390px-wide phone,
+     spent on a decorative label while 425px of the form sat below the fold.
+
+     Keep the single row instead -- logo | title | toggle -- and buy the fit
+     by shrinking the title rather than by stacking it. The header band goes
+     from ~120px to ~64px and the form gets the difference. */
+  .tsd-setup-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    row-gap: 0;
+    /* the desktop band is clamp(64px, 11vh, 124px); 11vh of a tall phone is
+       what made it 120px. A phone header does not need that much. */
+    min-height: 0;
+    padding-bottom: 8px;
+  }
+
+  .tsd-setup-title {
+    /* stays in the middle cell of the single row */
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    /* was clamp(21px, 4.2vh, 42px) -- 4.2vh is 35px on an 844px-tall phone,
+       which is what forced the second row. */
+    font-size: clamp(15px, 4.4vw, 22px);
+    /* it is the only thing that can yield if the toggle needs the width */
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* --tsd-title-glow is a 30px white blur at .9, tuned for the 42px
+       desktop title. Around 22px letters that blur is wider than the glyphs
+       themselves, so instead of a halo it pools into a pale rectangle behind
+       the word. The type is already white on a dark ground and needs no help
+       standing out at this size, so drop the glow rather than shrink it. */
+    text-shadow: none;
+  }
+
+  /* the sparkles are pure decoration and the first thing to go when the row
+     is tight -- dropping them buys the title its two flanking gaps back */
+  .tsd-setup-title .tsd-spark-mark { display: none; }
+
+  .tsd-setup-logo img { width: 32px; height: auto; }
+
+  .tsd-setup-tools { justify-self: end; }
+
+  .tsd-confirm-btn { width: 100%; min-width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-gear,
+  .tsd-toggle,
+  .tsd-toggle-track,
+  .tsd-toggle-thumb,
+  .tsd-control,
+  .tsd-confirm-btn,
+  .tsd-confirm-btn::after { transition: none; }
+
+  .tsd-gear:hover { transform: none; }
+  .tsd-confirm-btn:hover { transform: none; }
+}

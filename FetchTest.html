@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Fri, 08 Nov 2024 22:55:17 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <title></title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+  <!--   <input type="button" value="TSD Test" onclick="getData('https://trivia-smackdown.com/cgi-bin/GetRoundsTSD.pl?AA.Aen00001')">
+  <input type="button" value="EDG Test" onclick="getData('https://www.edugames.com/cgi-bin/TestText.txt')">
+      <input type="button" value="Same Folder Test" onclick="getFromSameFolder()" > <input type="text" id="SFtextbox" style="width: 600px;"  value="TestNov8a.pl ">
+     
+     -->    
+
+    <br>
+  
+      <br>    <br>  
+<input type="button" value="useThisURL"  onclick="getFromTxtBox()"> 
+<input type="button" value="fetchTextFile"  onclick="fetchTextFile()">
+<!--<input type="text" id="txtBox" name="thURL"<input type="text" id="textbox" style="width: 600px;"  value="https://edugames.com/cgi-bin/GetRoundsTSD.pl?AA.Aen00001">  -->
+
+<input type="text" id="txtBox" name="thURL"<input type="text" 
+id="textbox" style="width: 600px;"  value="/An/Ge/No/No/US/CiStMo/CiStMo.AL.csv"> 
+
+
+ <!--  <input type="submit" name="submit" id="theVoterTally" value="submit"> -->
+
+ <br><input type="button" value="getFromEdUgames"  onclick="getFromEdUGames()">
+      
+  </body>
+
+  
+<script>
+
+ 	//mode:'no-cors' 	
+  
+function getFromTxtBox(){ console.log("getData ");
+	
+  const theURL = document.getElementById("txtBox").value;
+  getData(theURL)
+
+} 
+
+function fetchTextFile( ) {
+      const thePath =   theURL = document.getElementById("txtBox").value; 
+      console.log(" thePath=  " + thePath);
+      const url = 'https://edugames.com/cgi-bin/GetTextFileTSD.pl?' + thePath  
+     
+      fetch(url)
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok ' + response.statusText);
+              }
+              return response.text();
+              console.log(" response.text=  " +response.text());             
+          })
+          .then(data => {
+              document.getElementById('content').innerText = data;
+          })
+          .catch(error => {
+              console.error('There was a problem with the fetch operation:', error);
+          });
+}
+
+
+
+
+
+async function getFromEdUGames(aURL){console.log("getFromEdUGamesXX " );	
+  const url = "https://edugames.com/cgi-bin/GetRoundsTSD.pl?AA.Aen00001";
+  try {
+    const response = await fetch(aURL);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log(json);
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+
+
+function getFromEdUGames(){
+    console.log("getFromEdUGamesZZ");
+    
+    const url = 'https://www.edugames.com/cgi-bin/GetRoundsTSD.pl?AA.Aen00001';
+    console.log("url=  " + url);
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            console.log("fetch -  -" + data + "-  -");
+            this.startRound(data);
+        })
+        .catch(error => console.log('Error fetching data:', error));
+}
+
+
+
+
+
+function getFromSameFolder(){   
+
+  const theURL = document.getElementById("SFtextbox").value 
+   
+  console.log("getFromSameFolder = "  + theURL);	
+
+    fetch (theURL, {
+    
+    })
+    .then(response => response.text())
+    .then(data => {
+          console.log("fetch *+*" + data +"*+*");
+          parseData(data)
+   })
+   .catch(error => console.log('Error fetching data:', error));
+   return;
+
+} 
+   
+  
+function getData(url){console.log("getData url = "  + url);	
+
+  fetch (url, {
+    mode: 'no-cors'
+    })
+    .then(response => response.text())
+    .then(data => {
+          console.log("fetch --" + data +"--");
+          parseData(data)
+   })
+   .catch(error => console.log('Error fetching data:', error));
+   return;
+}	
+
+function parseData(text){
+
+    const n  = text.indexOf("&")
+    const nn = text.indexOf("^^^")
+    console.log("n = " + n); 
+    console.log("nn = " + nn);    
+    const  data = text.substring(n+1,nn-1);
+    console.log("data = " + data);    
+
+}
+
+
+
+  
+  
+  
+</script>
+
+ 
+  
+</html>

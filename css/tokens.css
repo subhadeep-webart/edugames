@@ -1,0 +1,311 @@
+/* ==========================================================================
+   Trivia-SmackDown — Shared design tokens
+   Every colour, gradient and metric the new UI uses, declared once.
+
+   Link this BEFORE any screen stylesheet:
+     <link rel="stylesheet" href="css/tokens.css">
+     <link rel="stylesheet" href="css/start.css">
+
+   Never hard-code a hex value in a screen stylesheet — add it here instead.
+   ========================================================================== */
+
+:root {
+  /* ---- Brand background gradient ------------------------------------- */
+  --tsd-bg-top:          #16124A;
+  --tsd-bg-bottom:       #0A082D;
+  --tsd-bg-gradient:     linear-gradient(180deg,
+                           var(--tsd-bg-top)    0%,
+                           var(--tsd-bg-bottom) 100%);
+
+  /* ---- Accent gradient (progress bar, highlights) -------------------- */
+  --tsd-accent-pink:     #FD0C75;
+  --tsd-accent-orange:   #FD5A3B;
+  --tsd-accent-yellow:   #FBD248;
+  --tsd-accent-gradient: linear-gradient(90deg,
+                           var(--tsd-accent-pink)   0%,
+                           var(--tsd-accent-orange) 50%,
+                           var(--tsd-accent-yellow) 100%);
+
+  /* ---- Primary action gradient (Start Game button) ------------------- */
+  --tsd-blue:            #0683FC;
+  --tsd-purple:          #570496;
+  /* Stops span the full width so the blend is continuous edge-to-edge.
+     The design's original 3.68% / 126.39% stops left a flat blue band on the
+     left and a flat purple band on the right instead of one smooth sweep. */
+  --tsd-primary-gradient: linear-gradient(94.54deg,
+                            var(--tsd-blue)   0%,
+                            var(--tsd-purple) 100%);
+
+  /* ---- Modal / dialog ------------------------------------------------- */
+  --tsd-modal-blue:      #43A3FC;
+  --tsd-modal-ink:       #121016;
+  --tsd-modal-red:       #FC4343;
+  --tsd-modal-gradient:  linear-gradient(309.21deg,
+                           var(--tsd-modal-blue) -104.31%,
+                           var(--tsd-modal-ink)    49.41%,
+                           var(--tsd-modal-red)   185.75%);
+  --tsd-modal-body-text: #8B9FB6;   /* dialog supporting copy */
+  /* white title glow — 0px 4px 30.2px #FFFFFFE5 (E5 = 229/255 ≈ .9).
+     Used by the modal title AND the Game Overview page title. */
+  --tsd-title-glow:      0 4px 30.2px rgba(255, 255, 255, .9);
+  --tsd-modal-glow:      var(--tsd-title-glow);   /* alias, kept for clarity */
+  --tsd-scrim:           rgba(6, 5, 20, .72);
+
+  /* ---- Surfaces (cards, panels, chips) -------------------------------- */
+  /* One neutral hairline for every structural edge: #FFFFFF40 */
+  --tsd-hairline:        rgba(255, 255, 255, .25);
+  --tsd-border-hairline: 1px solid var(--tsd-hairline);
+
+  /* A softer edge than --tsd-hairline: #FFFFFF33 (33 = 51/255 = .2).
+     The game panel's bid box uses this; the bid buttons inside it keep
+     the standard #FFFFFF40 hairline, so the two are deliberately not
+     the same value. */
+  --tsd-hairline-soft:   rgba(255, 255, 255, .2);
+
+  --tsd-card-bg:         rgba(30, 26, 78, .55);
+  --tsd-card-border:     var(--tsd-hairline);
+  --tsd-panel-bg:        rgba(52, 46, 105, .38);
+  --tsd-panel-border:    var(--tsd-hairline);
+  --tsd-chip-border:     var(--tsd-hairline);
+
+  /* ---- Game setup / onboarding ---------------------------------------- */
+  --tsd-p1-gradient:     linear-gradient(180deg,
+                           rgba(6, 131, 252, .25)  0%,
+                           rgba(4, 78, 150, .25)   79.51%);
+  --tsd-p2-gradient:     linear-gradient(180deg,
+                           rgba(232, 47, 47, .25)  0%,
+                           rgba(116, 21, 21, .25)  79.51%);
+
+  /* Scorebar player cards (GamePanel). The card is a flat translucent
+     white rather than the team gradient; the team colour shows in the
+     1.2px hairline border and in the two offset corner brackets. */
+  --tsd-pl-card-bg:      #FFFFFF17;
+  --tsd-pl-bracket-w:    1.2px;
+
+  /* Player-2 red. Distinct from --tsd-modal-red (#FC4343), which stays on
+     the dialogs and bid buttons. This is the same red the GameOver screen
+     already uses for player 2, and the base of --tsd-p2-gradient. */
+  --tsd-p2-red:          #E82F2F;
+
+  --tsd-player-label:    #FBB445;   /* "PLAYER 1" / "PLAYER 2" */
+
+  --tsd-field-bg:        #110E3E;
+  --tsd-field-border:    #657280;
+  --tsd-field-border-w:  1.5px;
+  --tsd-field-glow:      0 4px 43.7px rgba(150, 165, 226, .25);  /* #96A5E240 */
+
+  /* vertical rule between the two player columns */
+  --tsd-divider-gradient: linear-gradient(90deg,
+                            rgba(255, 255, 255, .75) 0%,
+                            rgba(255, 255, 255, 0)   100%);
+
+  /* ---- Bidding clock (game panel) ------------------------------------- */
+  --tsd-bid-clock-bg:    #08274B;   /* card background            */
+  --tsd-bid-gold:        #F9C800;   /* "BIDDING STARTED" + timer icon */
+  --tsd-bid-time:        #0D77F2;   /* the countdown digits       */
+  --tsd-bid-bar-from:    #0D77F2;
+  --tsd-bid-bar-to:      #81B2EB;
+  --tsd-bid-bar-gradient: linear-gradient(90deg,
+                            var(--tsd-bid-bar-from) 0%,
+                            var(--tsd-bid-bar-to) 100%);
+
+  /* ---- Drag & drop play area (game panel) ----------------------------- */
+  /* left panel (source items) — blue */
+  --tsd-dnd-panel-bg:     rgba(6, 131, 252, .10);   /* #0683FC1A */
+  --tsd-dnd-panel-border: rgba(6, 131, 252, .50);   /* #0683FC80 */
+  /* right panel (drop targets) — gold */
+  --tsd-dnd-target-bg:     rgba(249, 200, 0, .10);  /* #F9C8001A */
+  --tsd-dnd-target-border: rgba(249, 200, 0, .50);  /* #F9C80080 */
+  --tsd-dnd-slot-border:  rgba(255, 255, 255, .25); /* #FFFFFF40 */
+  --tsd-dnd-item-bg:      rgba(255, 255, 255, .15); /* #FFFFFF26 */
+  --tsd-dnd-item-text:    #9297B1;
+
+  /* ---- Typefaces -------------------------------------------------------
+     Declared in css/fonts.css, files in /fonts. Each stack keeps a system
+     fallback so the pages still read correctly before the files land. */
+  --tsd-font-body:    "Lufga", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --tsd-font-display: "Bebas Neue", "Lufga", "Segoe UI", system-ui, Arial, sans-serif;
+
+  /* older name for the body stack, kept so existing rules keep working */
+  --tsd-dnd-font: var(--tsd-font-body);
+
+  /* ---- Game-type accents ---------------------------------------------- */
+  --tsd-type-b:          #2E9BFF;   /* Game Type B — blue    */
+  --tsd-type-d:          #C93BFF;   /* Game Type D — magenta */
+  --tsd-type-i:          #FD1E6E;   /* Game Type I — pink    */
+
+  /* ---- Body copy on dark panels --------------------------------------- */
+  --tsd-body-text:       #B9BEDC;
+  --tsd-heading-text:    #E9ECFA;
+
+  /* "Place Your Bid" label on the game panel. Same #8B9FB6 as
+     --tsd-modal-body-text, aliased under its own name so the bid box does
+     not depend on a token named for dialog copy. */
+  --tsd-bid-label:       var(--tsd-modal-body-text);
+
+  /* ---- Sparkle / star colours ---------------------------------------- */
+  --tsd-star-yellow:     #FFD93B;   /* left  cluster */
+  --tsd-star-pink:       #FD0C75;   /* left  cluster */
+  --tsd-star-blue:       #0683FC;   /* right cluster */
+
+  /* ---- Zap bloom colours (splash screen) ----------------------------- */
+  --tsd-glow-left:       #D1CF3C;   /* left  bolt — yellow */
+  --tsd-glow-right:      #41F2F2;   /* right bolt — cyan   */
+  --tsd-blur-left:       349.8px;
+  --tsd-blur-right:      380.3px;
+
+  /* ---- Lines & strokes ------------------------------------------------ */
+  --tsd-border-color:    #455286;   /* progress bar */
+  --tsd-border-width:    2.5px;
+  --tsd-btn-border:      #0683FC;   /* secondary buttons */
+
+  /* ---- Text ----------------------------------------------------------- */
+  --tsd-text:            #FFFFFF;
+  --tsd-text-muted:      #B9C0DC;
+
+  /* ---- Layout --------------------------------------------------------- */
+  --tsd-container:       1420px;
+  --tsd-gutter:          15px;
+
+  /* ---- Motion --------------------------------------------------------- */
+  --tsd-ease:            cubic-bezier(.22, .61, .36, 1);
+
+  /* ---- Game B: image box grid ----------------------------------------- */
+  --tsd-gb-card-w:       152.34px;
+  --tsd-gb-card-h:       172.34px;
+  --tsd-gb-radius:       9.23px;
+  --tsd-gb-name-bg:      linear-gradient(93.2deg,
+                           #4C4766   2.65%,
+                           #2A2838 110.14%);
+  --tsd-gb-name-ink:     #FFF8F2;
+  --tsd-gb-name-font:    var(--tsd-dnd-font);   /* Lufga, see note above */
+  --tsd-gb-check:        16px;
+  --tsd-gb-check-border: 1.15px solid var(--tsd-accent-pink);
+  --tsd-gb-correct:      #2DE28F;
+
+  /* ---- Game D / N: number & date line sliders ------------------------- */
+  --tsd-sl-track-w:      940px; /* both sliders share this width */
+  --tsd-sl-track-h:      10px;
+  --tsd-sl-track-bg:     rgba(255, 255, 255, .12);   /* #FFFFFF1F */
+  --tsd-sl-fill:         #FD0C75;
+  --tsd-sl-thumb:        #F6A3C7;
+  --tsd-sl-thumb-size:   22px;
+  --tsd-sl-thumb-ring:   var(--tsd-sl-fill);
+
+  /* the ruler above the slider */
+  --tsd-sl-rule-line:    #0783FB;                    /* the horizontal axis */
+  --tsd-sl-rule-major:   #FD0C75;                    /* labelled ticks      */
+  --tsd-sl-rule-minor:   rgba(255, 255, 255, .5);    /* #FFFFFF80           */
+  --tsd-sl-rule-border:  1px solid rgba(255, 255, 255, .5);
+  --tsd-sl-rule-h:       42px;
+  --tsd-sl-label:        var(--tsd-text);
+
+  /* The answer marker (#blackDownArrow) is a solid black PNG silhouette, so
+     it can only be recoloured with a filter, not a colour property. It marks
+     the CORRECT answer, so it must not read as either player: blue and red
+     are the players and pink is the slider fill. White is the neutral
+     "truth" colour and carries the most contrast on the dark ground. The
+     drop-shadow lifts it off the ruler it overlaps. */
+  --tsd-sl-answer-arrow: brightness(0) invert(1)
+                         drop-shadow(0 1px 3px rgba(0, 0, 0, .7));
+  --tsd-sl-answer-arrow-w: 18px;
+
+  /* ---- Score reaction (js-ui/tsd-score-pulse.js) -----------------------
+     The flash and floating chip shown when a score changes.
+
+     NOT green/red, the usual gain/loss pair. Red is player 2 here
+     (--tsd-p2-red) and blue is player 1, so a red flash on player 1's card
+     would read as the wrong player rather than as a loss. Gold is already
+     the reward colour on this screen (--tsd-bid-gold, the bid clock coin),
+     so it carries "you gained" without colliding; a loss is drained to a
+     neutral grey instead, which reads as absence rather than as a team.
+
+     Direction is never signalled by colour alone -- the chip carries a
+     "+" or "-" and the number itself moves. */
+  --tsd-score-up:        #F9C800;
+  --tsd-score-up-glow:   rgba(249, 200, 0, .30);
+  --tsd-score-down:      #8B9FB6;
+  --tsd-score-down-glow: rgba(139, 159, 182, .22);
+
+  /* ---- Pre-game notice (Game D / L / N) -------------------------------- */
+  --tsd-pg-outer-bg:     rgba(255, 255, 255, .25);   /* #FFFFFF40 */
+  /* Scrim behind the notice: hides the round's board while the modal
+     notice is up, tinted to the page background so it reads as one
+     screen rather than a dimmed second one. */
+  --tsd-pg-scrim:        rgba(10, 8, 45, .88);
+  --tsd-pg-inner-bg:     #262040;
+  --tsd-pg-radius:       20px;   /* outer rim, per Figma */
+  --tsd-pg-inner-radius: 24px;   /* the dark card inside the rim */
+  --tsd-pg-pad:          36px;   /* rim thickness: 143.5 - 107.5 */
+  --tsd-pg-width:        1140px; /* the rules box */
+  --tsd-pg-inner-pad:    30px;   /* padding inside the rules box */
+  --tsd-pg-rules-w:      872px;  /* the bullet column; Figma has the
+                                    rules at ~82% of the card width */
+  --tsd-pg-head-gap:     50px;   /* heading -> first rule */
+
+  /* Start Round button — Figma: 293 x 67, radius 12 */
+  --tsd-pg-btn-w:        293px;
+  --tsd-pg-btn-h:        67px;
+  --tsd-pg-btn-pad:      34px;
+  --tsd-pg-icon:         19px;  /* the play triangle, 18.8 x 24.5 in Figma */
+  --tsd-pg-icon-gap:     20px;  /* triangle -> label, per Figma */
+
+  /* The play triangle from the Figma export, normalised to a 0 0 19 25 box.
+     Used as a mask so it takes the button's colour. */
+  --tsd-pg-play-icon:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18.8 24.5'%3E%3Cpath fill='%23fff' d='M18.8 11.5a3 3 0 0 1-.28 1.33 3 3 0 0 1-.89 1.1L4.87 23.87a3 3 0 0 1-1.55.61h-.3a3 3 0 0 1-1.33-.32 3 3 0 0 1-1.21-1.08A3 3 0 0 1 0 21.51V3a3 3 0 0 1 .44-1.55A3 3 0 0 1 1.59.4 3 3 0 0 1 3.15.05a3 3 0 0 1 1.53.49l12.78 8.51a3 3 0 0 1 .95 1.03 3 3 0 0 1 .39 1.42Z'/%3E%3C/svg%3E");
+  --tsd-pg-heading:      var(--tsd-text);            /* #FFFFFF */
+  --tsd-pg-body:         var(--tsd-modal-body-text); /* #8B9FB6 */
+  --tsd-pg-bullet:       var(--tsd-blue);            /* #0683FC */
+  --tsd-pg-bullet-size:  20px;
+
+  /* ---- Box-grid games (E, M, P, U) ------------------------------------ */
+  --tsd-bx-panel-bg:     rgba(255, 255, 255, .05);   /* #FFFFFF0D */
+  --tsd-bx-panel-border: 1px solid rgba(255, 255, 255, .25);  /* #FFFFFF40 */
+  --tsd-bx-panel-radius: 20px;
+
+  --tsd-bx-btn-bg:       rgba(255, 255, 255, .14);   /* #FFFFFF4D at .4 */
+  --tsd-bx-btn-radius:   8px;
+  /* Raised from 9px / 36px. The grid is a small object in a tall band, so
+     the tiles carried the round on their own and read as thin strips with
+     a lot of empty space around them. A taller tile gives each label room
+     to breathe and makes the panel a more substantial block on screen. */
+  --tsd-bx-btn-pad-y:    13px;
+  --tsd-bx-btn-pad-x:    12px;  /* the tile is a fixed width now, so
+                                   this only insets the label */
+  --tsd-bx-btn-w:        210px;  /* every cell is this wide, so the columns
+                                    line up. Figma's 109 is the minimum;
+                                    widened because the data holds compound
+                                    labels ("Las Cruces;New Mexico", "on the
+                                    Dead Man's Chest") that would otherwise
+                                    wrap to two lines and make the row taller
+                                    than its neighbours. */
+  --tsd-bx-btn-min-h:    46px;
+  --tsd-bx-btn-gap:      12px;
+  --tsd-bx-btn-ink:      #DCE1F5;
+
+  --tsd-bx-selected:     #0D77F2;
+
+  /* ---- Game I: progressive reveal (Focus / Grid / BlockOut) ------------ */
+  --tsd-gi-panel-bg:      #1B3A80;          /* the cover panels */
+  --tsd-gi-panel-bg2:     #163270;          /* gradient foot    */
+  /* #FFFFFF40 (40 = 64/255 = .251) */
+  --tsd-gi-panel-border:  1px solid rgba(255, 255, 255, .25);
+  --tsd-gi-panel-radius:  4px;
+  --tsd-gi-panel-ink:     var(--tsd-text);
+  --tsd-gi-stage-bg:      rgba(255, 255, 255, .05);
+  --tsd-gi-stage-border:  1px solid rgba(255, 255, 255, .25);
+  --tsd-gi-stage-radius:  16px;
+
+  /* Magnification for the GameI picture stage. Several question images are
+     only 128-256px across, which leaves the cover grid too small to read or
+     click. Overridden per-stage in gamepanel.css; this is the fallback. */
+  /* 3.3 renders AA.Ien00028's 128x160 gif at 422x528 -- shorter than the
+     530-wide/662-tall the design's width alone would give. The image is a
+     4:5 portrait and the scale must stay uniform (see gamepanel.css), so
+     width and height can only come down together. */
+  --tsd-gi-stage-zoom:    3.3;
+
+  /* ---- Utility: force any single-colour SVG to pure white ------------- */
+  --tsd-icon-white:      brightness(0) invert(1);
+}

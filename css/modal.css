@@ -1,0 +1,311 @@
+/* ==========================================================================
+   Trivia-SmackDown — Global confirm modal
+
+   Shared component. Link on any screen that needs a confirmation dialog:
+
+     <link rel="stylesheet" href="css/tokens.css">
+     <link rel="stylesheet" href="css/modal.css">
+     <script src="js-ui/tsd-modal.js"></script>
+
+   Requires css/tokens.css. See js-ui/tsd-modal.js for the API.
+   ========================================================================== */
+
+/* ==========================================================================
+   Overlay
+   ========================================================================== */
+
+.tsd-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tsd-gutter);
+
+  background: var(--tsd-scrim);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .25s var(--tsd-ease),
+              visibility .25s var(--tsd-ease);
+}
+
+.tsd-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==========================================================================
+   Dialog
+   ========================================================================== */
+
+.tsd-modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100dvh - (var(--tsd-gutter) * 2));
+  padding: clamp(26px, 4vw, 46px) clamp(20px, 3.4vw, 44px) clamp(24px, 3.4vw, 42px);
+
+  border-radius: 18px;
+  background: var(--tsd-modal-gradient);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .55),
+              0 0 0 1px rgba(255, 255, 255, .07) inset;
+
+  text-align: center;
+  overflow-y: auto;                 /* long copy scrolls inside, never the page */
+
+  transform: translateY(14px) scale(.94);
+  transition: transform .28s var(--tsd-ease);
+}
+
+.tsd-modal.is-open .tsd-modal-dialog {
+  transform: translateY(0) scale(1);
+}
+
+/* ---- Icon medallion --------------------------------------------------- */
+
+.tsd-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(64px, 8vw, 92px);
+  height: clamp(64px, 8vw, 92px);
+  margin: 0 auto clamp(16px, 2.4vw, 28px);
+
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .06);
+  box-shadow: 0 0 34px rgba(255, 255, 255, .16),
+              0 0 0 1px rgba(255, 255, 255, .08) inset;
+}
+
+.tsd-modal-icon svg {
+  display: block;
+  width: clamp(26px, 3vw, 36px);
+  height: auto;
+}
+
+/* ---- Copy -------------------------------------------------------------- */
+
+.tsd-modal-title {
+  margin: 0 0 clamp(10px, 1.4vw, 16px);
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+  text-shadow: var(--tsd-modal-glow);
+}
+
+.tsd-modal-text {
+  margin: 0 auto clamp(22px, 3vw, 34px);
+  max-width: 40ch;
+  font-size: clamp(14px, 1.25vw, 17px);
+  line-height: 1.55;
+  color: var(--tsd-modal-body-text);
+}
+
+/* ==========================================================================
+   Actions
+   ========================================================================== */
+
+.tsd-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.4vw, 18px);
+  flex-wrap: wrap;
+}
+
+.tsd-modal-actions .tsd-btn {
+  min-width: clamp(140px, 14vw, 200px);
+  height: clamp(46px, 5.2vw, 60px);
+}
+
+/* ==========================================================================
+   Button styles
+   Self-contained so the modal works on screens that do not load start.css.
+   ========================================================================== */
+
+.tsd-modal .tsd-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, .9vw, 14px);
+
+  padding: 0 clamp(18px, 2vw, 30px);
+  border-radius: 10px;
+  border: var(--tsd-border-width) solid transparent;
+  background: transparent;
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(14px, 1.15vw, 19px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .22s var(--tsd-ease),
+              box-shadow .22s var(--tsd-ease),
+              background-color .22s var(--tsd-ease);
+}
+
+.tsd-modal .tsd-btn:hover,
+.tsd-modal .tsd-btn:focus-visible { transform: translateY(-3px); }
+
+.tsd-modal .tsd-btn:active { transform: translateY(-1px); }
+
+.tsd-modal .tsd-btn:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* primary — filled gradient, no border (a transparent border would show the
+   dialog through as a rim and break the gradient at the edges) */
+.tsd-modal .tsd-btn--primary {
+  border: 0;
+  padding: var(--tsd-border-width) calc(clamp(18px, 2vw, 30px) + var(--tsd-border-width));
+  background: var(--tsd-primary-gradient);
+  box-shadow: 0 8px 24px rgba(6, 131, 252, .36);
+}
+
+.tsd-modal .tsd-btn--primary:hover,
+.tsd-modal .tsd-btn--primary:focus-visible {
+  box-shadow: 0 13px 32px rgba(6, 131, 252, .52);
+}
+
+/* ghost */
+.tsd-modal .tsd-btn--ghost {
+  border-color: var(--tsd-btn-border);
+  background-color: rgba(6, 131, 252, .06);
+}
+
+.tsd-modal .tsd-btn--ghost:hover,
+.tsd-modal .tsd-btn--ghost:focus-visible {
+  background-color: rgba(6, 131, 252, .18);
+  box-shadow: 0 10px 26px rgba(6, 131, 252, .26);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 560px) {
+  .tsd-modal-dialog { border-radius: 16px; }
+
+  .tsd-modal-actions {
+    flex-direction: column-reverse;  /* safe choice sits on top */
+    width: 100%;
+  }
+
+  .tsd-modal-actions .tsd-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* very short windows — keep the dialog inside the viewport */
+@media (max-height: 460px) {
+  .tsd-modal-icon {
+    width: clamp(46px, 12vh, 60px);
+    height: clamp(46px, 12vh, 60px);
+    margin-bottom: 10px;
+  }
+  .tsd-modal-title { font-size: clamp(19px, 5vh, 26px); }
+  .tsd-modal-text  { margin-bottom: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-modal,
+  .tsd-modal-dialog { transition-duration: .01ms; }
+
+  .tsd-modal .tsd-btn { transition: none; }
+
+  .tsd-modal .tsd-btn:hover,
+  .tsd-modal .tsd-btn:focus-visible { transform: none; }
+}
+
+/* ==========================================================================
+   Alert mode — TSDModal.alert()
+   A single dismiss button, used in place of window.alert() for help and
+   game messages.
+
+   This is a READING layout, not a confirmation. A confirmation is a short
+   question that wants a glyph, a centred shout of a title and two choices;
+   the help copy is several hundred words that just wants to be read. So the
+   medallion is dropped, the title is left-aligned at body scale, and the
+   text is not boxed inside its own inset panel.
+   ========================================================================== */
+
+/* no icon medallion — it adds nothing to a wall of text and pushes the
+   copy down the screen */
+.tsd-modal-dialog--alert .tsd-modal-icon { display: none; }
+
+.tsd-modal-dialog--alert {
+  max-width: 640px;
+  text-align: left;
+  padding: clamp(22px, 2.6vw, 34px) clamp(20px, 2.6vw, 36px)
+           clamp(18px, 2.2vw, 26px);
+}
+
+/* a heading, not a banner: left aligned, body-scale, no glow */
+.tsd-modal-dialog--alert .tsd-modal-title {
+  margin: 0 0 clamp(12px, 1.4vw, 18px);
+  padding-bottom: clamp(10px, 1.2vw, 14px);
+  border-bottom: 1px solid var(--tsd-hairline);
+
+  font-size: clamp(17px, 1.7vw, 22px);
+  letter-spacing: .06em;
+  text-align: left;
+  text-shadow: none;
+}
+
+/* The help copy (js/Help.js) is plain text laid out with real line breaks,
+   blank lines and indentation, so the breaks are preserved. It sits
+   directly on the dialog — no inset panel, no second border. */
+.tsd-modal-dialog--alert .tsd-modal-text {
+  max-width: none;
+  margin: 0 0 clamp(18px, 2.2vw, 26px);
+  padding: 0 clamp(4px, .6vw, 8px) 0 0;
+
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  /* long round explanations scroll inside the body rather than pushing the
+     dismiss button off the bottom of a short viewport */
+  max-height: min(56vh, 560px);
+  overflow-y: auto;
+
+  font-size: clamp(13px, 1.05vw, 15px);
+  line-height: 1.65;
+  color: var(--tsd-modal-body-text);
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .22) transparent;
+}
+
+.tsd-modal-dialog--alert .tsd-modal-text::-webkit-scrollbar { width: 6px; }
+.tsd-modal-dialog--alert .tsd-modal-text::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tsd-modal-dialog--alert .tsd-modal-text::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: rgba(255, 255, 255, .22);
+}
+
+/* one button, sitting at the end of the copy rather than centred under it */
+.tsd-modal-dialog--alert .tsd-modal-actions { justify-content: flex-end; }
+
+.tsd-modal-dialog--alert .tsd-modal-actions .tsd-btn {
+  min-width: clamp(110px, 10vw, 140px);
+  height: clamp(40px, 4.4vw, 48px);
+}

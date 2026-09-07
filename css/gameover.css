@@ -1,0 +1,873 @@
+/* ==========================================================================
+   Trivia-SmackDown — Game Over / results screen (GameOver.html)
+
+   Layout only. All colour/metric tokens live in css/tokens.css, which MUST be
+   linked before this file.
+
+   IMPORTANT: this page re-skins the LIVE end-of-game screen. Every element id
+   the scripts touch is preserved verbatim:
+     #winInserPt   winner sentence  (written by getAndProcessGameData)
+     #insrtPtA     results table    (written by insrtRndByRnd)
+     #sliderLike, #sliderContent    read by submitEval()
+     textarea[name="Comment"]       read by submitEval()
+   Only presentation changes here.
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  min-height: 100%;
+  background: var(--tsd-bg-gradient);
+  background-attachment: fixed;
+}
+
+body.tsd-over {
+  margin: 0;
+  min-height: 100vh;
+  background: transparent;
+  color: var(--tsd-text);
+  font-family: var(--tsd-font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Halftone dot fields — top-left and top-right
+
+   The corner artwork is a field of dots that sweeps through the brand
+   gradient while dissolving toward the centre of the page.
+
+   The brand sweep is the element background; the dot lattice is applied as a
+   MASK. That way the gradient colours the dots, rather than a flat dot layer
+   covering the gradient. A second mask layer fades the field outward, and the
+   two are combined with mask-composite: intersect.
+   ========================================================================== */
+
+.tsd-over-dots {
+  position: fixed;
+  top: 0;
+  z-index: 0;
+  width:  clamp(240px, 26vw, 470px);
+  height: clamp(300px, 34vw, 640px);
+  pointer-events: none;
+  opacity: .85;
+
+  background: linear-gradient(147.79deg,
+                #0683FC  0.37%,
+                #DBD854 36.67%,
+                #FBE53B 55.73%,
+                #FD0C75 80.69%);
+
+  -webkit-mask-size: 17px 17px, 100% 100%;
+          mask-size: 17px 17px, 100% 100%;
+  -webkit-mask-repeat: repeat, no-repeat;
+          mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+          mask-composite: intersect;
+}
+
+.tsd-over-dots--l {
+  left: 0;
+  -webkit-mask-image:
+    radial-gradient(circle at center, #000 1.6px, transparent 1.9px),
+    radial-gradient(ellipse 100% 85% at 0% 12%, #000 12%, transparent 78%);
+          mask-image:
+    radial-gradient(circle at center, #000 1.6px, transparent 1.9px),
+    radial-gradient(ellipse 100% 85% at 0% 12%, #000 12%, transparent 78%);
+}
+
+.tsd-over-dots--r {
+  right: 0;
+  -webkit-mask-image:
+    radial-gradient(circle at center, #000 1.6px, transparent 1.9px),
+    radial-gradient(ellipse 100% 85% at 100% 12%, #000 12%, transparent 78%);
+          mask-image:
+    radial-gradient(circle at center, #000 1.6px, transparent 1.9px),
+    radial-gradient(ellipse 100% 85% at 100% 12%, #000 12%, transparent 78%);
+}
+
+/* ==========================================================================
+   Page shell
+   ========================================================================== */
+
+.tsd-over-page {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--tsd-container);
+  margin: 0 auto;
+  padding: clamp(18px, 2.4vw, 38px) var(--tsd-gutter) clamp(40px, 5vw, 80px);
+}
+
+/* ---- masthead ---------------------------------------------------------- */
+
+.tsd-over-head {
+  text-align: center;
+  margin-bottom: clamp(20px, 2.6vw, 40px);
+}
+
+.tsd-over-logo {
+  display: block;
+  width: clamp(84px, 8vw, 124px);
+  height: auto;
+  margin: 0 auto clamp(8px, 1vw, 16px);
+}
+
+.tsd-over-title {
+  margin: 0;
+  font-size: clamp(34px, 4.4vw, 68px);
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  text-shadow: var(--tsd-title-glow);
+}
+
+/* ==========================================================================
+   Result card — the bordered panel holding both players and the winner
+
+   The edge is a 1.3px gradient stroke (blue → red, matching blue-left /
+   red-right). A gradient cannot be assigned to border-color, so this uses the
+   two-background border-box technique: the padding-box paints the translucent
+   fill, the border-box paints the gradient stroke.
+   ========================================================================== */
+
+.tsd-over-result {
+  position: relative;
+  border: 1.3px solid transparent;
+  border-radius: 22px;
+  padding: clamp(20px, 2.6vw, 44px) clamp(16px, 2.4vw, 48px);
+  margin-bottom: clamp(26px, 3.4vw, 58px);
+
+  /* The padding-box layer must be OPAQUE, otherwise the border-box gradient
+     shows straight through it and floods the whole card with blue→red. So the
+     card fill is the page background colour first, with the design's
+     translucent #FFFFFF12 wash stacked on top of it. */
+  background:
+    linear-gradient(rgba(255, 255, 255, .07),
+                    rgba(255, 255, 255, .07)) padding-box,
+    linear-gradient(#1B1652, #1B1652) padding-box,
+    linear-gradient(80deg, #0683FC 14.64%, #E82F2F 105.87%) border-box;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(14px, 2.2vw, 40px);
+}
+
+/* ---- player column ----------------------------------------------------- */
+
+.tsd-over-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1vw, 14px);
+  min-width: 0;
+}
+
+.tsd-over-avatar {
+  flex: none;
+  width:  clamp(88px, 9.6vw, 152px);
+  height: clamp(88px, 9.6vw, 152px);
+  border-radius: 50%;
+  overflow: hidden;
+  background: #1A1748;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* blue = player 0 = left, red = player 1 = right */
+.tsd-over-player--p1 .tsd-over-avatar { border: 3px solid var(--tsd-blue); }
+.tsd-over-player--p2 .tsd-over-avatar { border: 3px solid #E82F2F; }
+
+.tsd-over-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Placeholder glyph, shown when the player picked no photo. Same generic
+   person icon as setup.html and GamePanel.html rather than a gendered
+   male/female illustration, so it makes no assumption about the player. */
+.tsd-over-avatar .tsd-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(255, 255, 255, .35);
+}
+
+.tsd-over-avatar .tsd-avatar-empty svg {
+  width: 46%;
+  height: auto;
+}
+
+.tsd-over-name {
+  margin: 0;
+  font-size: clamp(15px, 1.5vw, 24px);
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* ---- total-point box --------------------------------------------------- */
+
+.tsd-over-total {
+  width: 100%;
+  max-width: 260px;
+  border: 1.2px solid var(--tsd-hairline);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .07);   /* #FFFFFF12 */
+  padding: clamp(10px, 1.2vw, 20px) clamp(8px, 1vw, 16px);
+  text-align: center;
+}
+
+.tsd-over-total-label {
+  margin: 0 0 4px;
+  font-size: clamp(12px, 1.05vw, 18px);
+  color: var(--tsd-text-muted);
+}
+
+.tsd-over-total-val {
+  margin: 0;
+  font-size: clamp(24px, 2.6vw, 40px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.tsd-over-player--p1 .tsd-over-total-val { color: var(--tsd-blue); }
+.tsd-over-player--p2 .tsd-over-total-val { color: #E82F2F; }
+
+/* ---- centre column ----------------------------------------------------- */
+
+.tsd-over-centre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1vw, 16px);
+  min-width: 0;
+  text-align: center;
+}
+
+/* The whole "Winner" tag -- trophy icon and label both -- is hidden at every
+   width. The winner's name and the sentence beneath it carry the block on
+   their own. Left in the markup rather than deleted so the badge can be
+   brought back by removing this rule. */
+.tsd-over-winner-tag { display: none; }
+
+.tsd-over-winner-name {
+  margin: 0;
+  font-size: clamp(24px, 3.1vw, 50px);
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-shadow: var(--tsd-title-glow);
+}
+
+/* the sentence the game scripts write — muted so the name leads */
+#winInserPt {
+  margin: 0;
+  max-width: 44ch;
+  font-size: clamp(13px, 1.15vw, 19px);
+  line-height: 1.5;
+  color: var(--tsd-body-text);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.tsd-over-but {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 999px;
+  padding: clamp(11px, 1.15vw, 17px) clamp(26px, 2.8vw, 52px);
+  font: inherit;
+  font-size: clamp(13px, 1.1vw, 17px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+  cursor: pointer;
+  overflow: hidden;
+  transition: box-shadow .25s var(--tsd-ease),
+              transform  .25s var(--tsd-ease);
+}
+
+.tsd-over-but img {
+  width: clamp(16px, 1.5vw, 22px);
+  height: auto;
+  filter: var(--tsd-icon-white);
+  pointer-events: none;
+}
+
+.tsd-over-but--primary {
+  background: var(--tsd-primary-gradient);
+  box-shadow: 0 8px 26px rgba(6, 131, 252, .38);
+}
+
+.tsd-over-but--primary:hover,
+.tsd-over-but--primary:focus-visible {
+  box-shadow: 0 14px 36px rgba(6, 131, 252, .55);
+  transform: translateY(-1px);
+}
+
+.tsd-over-but--ghost {
+  background: rgba(255, 255, 255, .07);
+  border: 1.2px solid var(--tsd-hairline);
+}
+
+.tsd-over-but--ghost:hover,
+.tsd-over-but--ghost:focus-visible {
+  background: rgba(255, 255, 255, .13);
+  transform: translateY(-1px);
+}
+
+.tsd-over-but:focus-visible {
+  outline: 2px solid var(--tsd-blue);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Feedback panel — sliders + comment
+   ========================================================================== */
+
+.tsd-over-panel {
+  border: 1.2px solid var(--tsd-hairline);
+  border-radius: 22px;
+  background: var(--tsd-panel-bg);
+  padding: clamp(20px, 2.4vw, 40px) clamp(16px, 2.2vw, 42px);
+  margin-bottom: clamp(26px, 3.4vw, 58px);
+}
+
+.tsd-over-panel-title {
+  margin: 0 0 clamp(14px, 1.8vw, 26px);
+  text-align: center;
+  font-size: clamp(19px, 2.1vw, 34px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-shadow: var(--tsd-title-glow);
+}
+
+.tsd-over-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: clamp(16px, 2vw, 34px);
+}
+
+.tsd-over-field-label {
+  display: block;
+  margin: 0 0 10px;
+  font-size: clamp(12px, 1.05vw, 17px);
+  font-weight: 600;
+  color: var(--tsd-heading-text);
+}
+
+/* the two ends of a slider ("Liked it" … "Hated it") */
+.tsd-over-scale {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(11px, .92vw, 14px);
+  color: var(--tsd-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- range input ------------------------------------------------------- */
+
+.tsd-over-scale input[type="range"] {
+  -webkit-appearance: none;
+          appearance: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tsd-accent-gradient);
+  outline: none;
+  cursor: pointer;
+}
+
+.tsd-over-scale input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+          appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3px solid var(--tsd-blue);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .45);
+  cursor: pointer;
+}
+
+.tsd-over-scale input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3px solid var(--tsd-blue);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .45);
+  cursor: pointer;
+}
+
+.tsd-over-scale input[type="range"]:focus-visible {
+  outline: 2px solid var(--tsd-blue);
+  outline-offset: 4px;
+}
+
+/* ---- comment ----------------------------------------------------------- */
+
+.tsd-over-comment { grid-column: 1 / -1; }
+
+.tsd-over-comment textarea {
+  display: block;
+  width: 100%;
+  min-height: 118px;
+  resize: vertical;
+  border: var(--tsd-field-border-w) solid var(--tsd-field-border);
+  border-radius: 14px;
+  background: var(--tsd-field-bg);
+  color: var(--tsd-text);
+  font: inherit;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.5;
+  padding: 14px 16px;
+}
+
+.tsd-over-comment textarea::placeholder { color: rgba(255, 255, 255, .35); }
+
+.tsd-over-comment textarea:focus {
+  outline: none;
+  border-color: var(--tsd-blue);
+  box-shadow: var(--tsd-field-glow);
+}
+
+.tsd-over-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(10px, 1.2vw, 18px);
+  margin-top: clamp(18px, 2.2vw, 34px);
+}
+
+/* ==========================================================================
+   Round-by-round results
+
+   #insrtPtA is filled by insrtRndByRnd() in GameOver.html. The selectors below
+   are written against the classes that function emits.
+   ========================================================================== */
+
+.tsd-over-results {
+  border: 1.2px solid var(--tsd-hairline);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .03);
+  padding: clamp(20px, 2.4vw, 42px) 0 clamp(6px, 1vw, 16px);
+  overflow: hidden;
+}
+
+.tsd-over-results-title {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: clamp(19px, 2.2vw, 36px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-shadow: var(--tsd-title-glow);
+}
+
+.tsd-over-results-note {
+  margin: 0 auto clamp(16px, 2vw, 30px);
+  max-width: 86ch;
+  padding: 0 16px;
+  text-align: center;
+  font-size: clamp(12px, 1.05vw, 17px);
+  color: var(--tsd-body-text);
+}
+
+/* the table can outgrow narrow screens — let it scroll inside its own box
+   rather than forcing the whole page to scroll sideways */
+.tsd-over-tablewrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tsd-over-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  color: var(--tsd-text);
+}
+
+.tsd-over-table th {
+  background: rgba(217, 217, 217, .15);   /* #D9D9D926 */
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: .04em;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 16px 18px;
+  /* NOT nowrap. The last two headers are "<name>'s Points / Total / Got
+     From <name>" and already carry a <br> asking to break; nowrap
+     overrode it, forcing each onto one long line, pushing the table far
+     past its min-width and leaving the final header sliced mid-word at
+     the edge of the scroll box. A cut-off word reads as broken rather
+     than as "there is more this way".
+
+     Allowing the wrap the markup already asks for keeps every header
+     fully legible. The three short headers are unaffected -- they fit on
+     one line regardless. */
+  white-space: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+
+.tsd-over-table th:first-child { text-align: left; }
+
+/* the two player columns carry the longest labels; give them a floor so
+   the wrap lands on the <br> rather than fragmenting every word, and a
+   ceiling so one long name cannot claim the whole row */
+.tsd-over-table th:nth-child(4),
+.tsd-over-table th:nth-child(5) {
+  min-width: 150px;
+  max-width: 220px;
+}
+
+.tsd-over-table td {
+  padding: clamp(14px, 1.5vw, 22px) 18px;
+  text-align: center;
+  font-size: clamp(13px, 1.1vw, 17px);
+  border-top: 1px solid rgba(255, 255, 255, .10);
+  vertical-align: middle;
+}
+
+/* the challenge/question column reads as a label — left aligned */
+.tsd-over-table td:first-child {
+  text-align: left;
+  min-width: 220px;
+}
+
+.tsd-over-table tbody tr:hover { background: rgba(255, 255, 255, .04); }
+
+/* winner cell — trophy sits inline before the name */
+.tsd-over-winner-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tsd-over-winner-cell img {
+  width: clamp(18px, 1.6vw, 24px);
+  height: auto;
+  flex: none;
+}
+
+/* the closing "Set totals" row carries the summary — give it weight */
+.tsd-over-table tr.tsd-over-row--totals td {
+  font-weight: 700;
+  background: rgba(255, 255, 255, .06);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  /* stack the card: winner block first, players side by side beneath */
+  .tsd-over-result { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Five columns is a lot for a tablet, so trim the generous desktop
+     padding and let the table fit the width instead of relying on the
+     wrapper's sideways scroll -- easy to miss, and what made the last
+     header look truncated rather than scrollable. */
+  .tsd-over-table { min-width: 0; }
+
+  .tsd-over-table th {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: .02em;
+    padding: 12px 8px;
+    /* the labels below are short enough to hold one or two tidy lines --
+       no word needs breaking apart */
+    overflow-wrap: normal;
+  }
+
+  .tsd-over-table td { padding: 12px 8px; }
+
+  .tsd-over-table td:first-child { min-width: 0; }
+
+  .tsd-over-table th:nth-child(4),
+  .tsd-over-table th:nth-child(5) {
+    min-width: 0;
+    max-width: none;
+  }
+
+  /* ---- shorter labels, not smaller ones ---------------------------------
+     Simply letting the full desktop wording wrap turned "Posted Points for
+     This Round" into a four-line stack, which is harder to scan than the
+     truncation it replaced -- the header band grew taller than the rows and
+     the labels went ragged.
+
+     The headers are far longer than the data they label (100, a name,
+     0/0), so the fix is fewer words rather than more lines. Swap in a
+     concise label at this width; the desktop wording is untouched above.
+
+     The player columns keep their real name -- it distinguishes the two
+     columns and comes from the round data, so it cannot be hard-coded
+     here. Only their static qualifier is shortened (below), and their
+     <br> still splits name from qualifier: a deliberate two-line label
+     rather than a wrap. */
+  .tsd-over-table th:nth-child(2) { font-size: 0; }
+
+  .tsd-over-table th:nth-child(2)::before {
+    content: "Points";
+    font-size: 12px;
+  }
+
+  /* "Total / Got From Helen" is the longest part of the player headers and
+     the least informative -- the column position already says whose it is.
+     Replace it with the bare "Total / From", so each player column reads as
+     a tidy two lines: the name, then the qualifier. */
+  .tsd-over-th-qual { font-size: 0; }
+
+  .tsd-over-th-qual::before {
+    content: "Total / From";
+    font-size: 11px;
+    font-weight: 400;
+    opacity: .75;
+  }
+
+  .tsd-over-centre {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    margin-bottom: clamp(6px, 1.6vw, 18px);
+  }
+}
+
+/* ==========================================================================
+   Phones
+
+   The desktop card is three columns of roughly equal weight. Dropped to one
+   column on a phone that reads as three identical stacked blocks with a lot
+   of empty air: a small winner line, then two near-identical player cards,
+   neither of which looks like it won anything.
+
+   So the phone gets a different arrangement of the SAME elements:
+
+     - the winner block becomes the hero -- bigger name, a gold-rimmed
+       trophy medallion, the sentence beneath it;
+     - the two players sit SIDE BY SIDE below it as a scoreboard rather than
+       stacked, with a "VS" divider between them, so the result reads as a
+       head-to-head at a glance;
+     - the score is the loudest thing in each player column;
+     - the play button is full width and sticks to the bottom of the card so
+       it is always in thumb reach.
+
+   Nothing is added or removed from the markup -- this is the same grid,
+   re-flowed.
+   ========================================================================== */
+
+@media (max-width: 560px) {
+
+  .tsd-over-page {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  /* the corner dot fields were big enough to compete with the card */
+  .tsd-over-dots {
+    width: 52vw;
+    height: 30vh;
+    opacity: .45;
+  }
+
+  /* ---- masthead: smaller, tighter ------------------------------------- */
+
+  .tsd-over-head { margin-bottom: 16px; }
+
+  .tsd-over-logo {
+    width: 74px;
+    margin-bottom: 6px;
+  }
+
+  .tsd-over-title {
+    font-size: clamp(28px, 9vw, 40px);
+    letter-spacing: .1em;
+  }
+
+  /* ---- the card: winner hero on top, two players beneath --------------- */
+
+  .tsd-over-result {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      "hero hero hero"
+      "p1   vs   p2";
+    align-items: start;
+    gap: 18px 10px;
+    padding: 22px 14px 20px;
+    border-radius: 20px;
+    margin-bottom: 22px;
+  }
+
+  .tsd-over-centre      { grid-area: hero; }
+  .tsd-over-player--p1  { grid-area: p1; }
+  .tsd-over-player--p2  { grid-area: p2; }
+
+  /* the "VS" divider between the two players. Decorative, so it is drawn
+     from CSS rather than added to the markup. */
+  .tsd-over-result::after {
+    content: "VS";
+    grid-area: vs;
+    align-self: center;
+    font-size: 13px;
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: .08em;
+    color: rgba(255, 255, 255, .5);
+    padding-top: 34px;   /* sits level with the avatars, not the names */
+  }
+
+  /* ---- winner hero ----------------------------------------------------- */
+
+  .tsd-over-centre {
+    gap: 10px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+  }
+
+  .tsd-over-winner-name {
+    font-size: clamp(26px, 8.5vw, 38px);
+    line-height: 1.05;
+  }
+
+  #winInserPt {
+    font-size: 13px;
+    line-height: 1.45;
+    max-width: 34ch;
+  }
+
+  /* ---- players as a two-up scoreboard ---------------------------------- */
+
+  .tsd-over-player { gap: 8px; }
+
+  .tsd-over-avatar {
+    width: 74px;
+    height: 74px;
+    border-width: 2.5px;
+  }
+
+  .tsd-over-name {
+    font-size: 13px;
+    letter-spacing: .06em;
+  }
+
+  /* the score is the point of this block -- let it carry the size, and drop
+     the boxed frame that made two small cards fight the hero above */
+  .tsd-over-total {
+    border: 0;
+    background: none;
+    padding: 0;
+    max-width: none;
+  }
+
+  .tsd-over-total-label {
+    margin-bottom: 2px;
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    opacity: .7;
+  }
+
+  .tsd-over-total-val {
+    font-size: clamp(30px, 11vw, 46px);
+    line-height: 1;
+  }
+
+  .tsd-over-player--p1 .tsd-over-total-val {
+    text-shadow: 0 0 24px rgba(6, 131, 252, .55);
+  }
+
+  .tsd-over-player--p2 .tsd-over-total-val {
+    text-shadow: 0 0 24px rgba(232, 47, 47, .55);
+  }
+
+  /* ---- primary action -------------------------------------------------- */
+
+  /* pulled out of the hero column and laid across the foot of the card, so
+     it is a full-width thumb target rather than a pill in the middle */
+  .tsd-over-centre .tsd-over-but--primary {
+    width: 100%;
+    margin-top: 4px;
+    padding: 15px 20px;
+    font-size: 13px;
+  }
+
+  .tsd-over-actions { flex-direction: column; }
+  .tsd-over-actions .tsd-over-but { width: 100%; }
+
+  /* ---- round-by-round -------------------------------------------------- */
+
+  .tsd-over-results {
+    border-radius: 18px;
+    padding-top: 20px;
+  }
+
+  .tsd-over-results-title { font-size: 18px; }
+
+  .tsd-over-results-note {
+    font-size: 11.5px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+  }
+
+  .tsd-over-table th {
+    font-size: 10.5px;
+    line-height: 14px;
+    padding: 10px 6px;
+  }
+
+  .tsd-over-th-qual::before { font-size: 9.5px; }
+
+  .tsd-over-table td {
+    font-size: 11.5px;
+    padding: 11px 6px;
+  }
+
+  .tsd-over-winner-cell { gap: 5px; }
+  .tsd-over-winner-cell img { width: 14px; }
+}
+
+/* Very narrow phones (iPhone SE and similar): two player columns plus a VS
+   divider stop fitting once the score reaches three digits, so drop the
+   divider and let the columns take the full width. */
+@media (max-width: 360px) {
+  .tsd-over-result {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "hero hero"
+      "p1   p2";
+    gap: 16px 8px;
+  }
+
+  .tsd-over-result::after { display: none; }
+
+  .tsd-over-avatar { width: 64px; height: 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-over-but { transition: none; }
+  .tsd-over-but:hover { transform: none; }
+}

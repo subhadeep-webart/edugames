@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Mon, 21 Apr 2025 00:46:01 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title></title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  <title>Game Over</title></head>
+<style>
+ .minLnHeight:{
+  line-height:20px;
+
+ }
+
+</style>
+  
+  <body>
+  --
+  <div align=center>
+  <img src="images/TSD_Logo100By100.jpg " loading="lazy" width="99" height="100" alt="Trivia SmackdownLogo" text-align="center" title="Trivia SmackDown Logo" /></div>
+  <div align=center><h1>Game Over</h1></div>
+  <input type="button" value="insrtData" onClick="insrtData()">
+  <input type="button" value="insrtRndByRnd" onClick="insrtRndByRnd()">  
+  
+  <b>::::<font size="4"><div id="winInserPt"></div></font></b><p><p>
+  <P><P><P><P>
+  
+<font size=2 color="#000000" face="Arial">
+<div><table width="100%" border="4" cellpadding="2" bordercolor="#000080" cellspacing="2" bgcolor="#ffffff">
+<tr valign="top">
+<td><font size=2 color="#000000" face="Arial">
+<div><b>Name</b></div>
+</font>
+</td>
+<td><font size=2 color="#000000" face="Arial">
+<div class="minLnHeight">Total<br>Points</div>
+</font>
+</td>
+<td><font size=2 color="#000000" face="Arial">
+<div>Won by Player</div>
+</font>
+</td>
+<td><font size=2 color="#000000" face="Arial">
+<div>Got from Other Player</div>
+</font>
+</td>
+</tr>
+  <tr valign="top">
+  <td id="name0">Joe<br /></td><td id="tot0">234<br /></td><td id="won0">200<br /></td><td id="fromOther0">134<br /></td>
+</tr>
+  <td id="name1">Sue<br /></td><td id="tot1">134<br /></td><td id="won01">100<br /></td><tdid="fromOther1">34<br /></td>
+</table>
+</div>
+</font><p><p><p>
+
+<div class="slider">
+How did you like the game? Liked It > <input type="range" min="1" max="10" value="1" class="slider" id="sliderLike" > Hated it
+</div>
+<div class="slider">
+The Content was: Too Easy > <input type="range" min="1" max="10" value="1" class="slider" id="sliderContent" height="100px"> Too Hard
+</div>
+Comment:<textarea name="Comment" value="" rows="4" cols="80">
+Type Comments Here
+</textarea>
+
+ </br> </br> </br> </br> </br>
+
+
+<div id="insrtPtA">ABC</div>
+<script>
+/*
+PRA1_1835;Peter;91;0;The winner of Set PRA1_1835 is Peter with a score of 91 and the looser is Helen with a score of 0,
+0;Peter;94566;10;5|1;Helen;94066;11;5,
+undefined;100;Peter;0;0;0;0,
+Which seven presidents are Democrats?;100;Peter;12;8;0;0,
+What are the last three states to join the union?;100;Peter;91;8;0;0,
+What are the last three states to join the union?;100;Peter;91;8;0;0
+
+*/
+
+name0 = "NAME0";
+name1 = "NAME01";
+
+function getAndProcessGameData(){ console.log("getAndProcessGameData() "); //const data =  localStorage.getItem("regData");
+   const gameResults = localStorage.getItem("gameResults")
+   console.log("gameResults= " + gameResults);
+   const arr = gameResults.split(",");
+
+   const  [setserNbr,winner,score0,score1,winText] = arr.shift().split(";");
+   
+   console.log("winText= " + winText);
+   
+   document.getElementById("winInserPt").innerText = winText;
+        
+   const [p0,p1] = arr.shift().split("|");
+   console.log("p0= "   +p0 )
+   console.log("p1= "   +p1 )   
+   const [,name0,zip0,gd0,sp0] = p0.split(";");
+   const [,name1,zip1,gd1,sp1] = p1.split(";");
+   
+
+   if(name1 == name0) winner = "There is a tie between " +  name0  + " and " + name1 ; 
+     
+   
+   const nbrOfRounds = arr.length;
+   console.log("nbrOfRounds= " + nbrOfRounds);
+   
+   
+   insrtRndByRnd(name0,name1,arr); 
+  
+}
+
+
+const name0InsrtPt = document.getElementById("name0");
+const name1InsrtPt = document.getElementById("name1");
+const tot0 = document.getElementById("tot0");
+const tot1 = document.getElementById("tot1");
+const fromOther0 = document.getElementById("fromOther0");
+const fromOther1 = document.getElementById("fromOther1"); 
+
+console.log("textContent " + name0.textContent);
+
+function insrtRndByRnd(name0,name1,dataArr){ console.log("insrtRndByRnd() ");
+     //dataArr.push("Which seven presidents are Democrats?;100;Peter;51;33;31;8");    
+     //dataArr.push("Which seven presidents are Democrats?;100;Peter;51;33;31;8");
+     //dataArr.push("Which seven presidents are Democrats?;100;Peter;51;33;31;8"); 
+     //dataArr.push("which word is misspelledwhich word is misspelledwhich word is misspelled;100;Joe;5;35;0;40;8");     
+         
+     console.log("dataArr[0] " + dataArr[0]);
+     const lineArr = dataArr[0].split(";")
+     console.log("-- " +  lineArr[0] + "   " + lineArr[3]);
+     const insrtPtA = document.getElementById("insrtPtA");
+     //const name0 = "Joe";
+     //const name1 = "Sue";
+          
+     let buf = `<div align=center><h1>Round by Round Results</h1></div><p>
+<div style=" text-align: left; text-indent: 0px; padding: 0px 0px 0px 0px; margin: 0px 0px 0px 0px;">
+<table width="100%" border="1" cellpadding="2" cellspacing="2" style="border-color: #000000; border-style: solid; background-color: #ffffff;">
+<tr valign="top"><td line-height=" 0.8";><font size="6"><b>The Challenge</b></span></p></td>
+<td ><div>Points</br>for This</br>Round</div></span></p></td></td>
+<td ><div>Round</br>Winner</span></p></td>
+<td ><div><b><font size="6">${name0}'s Points</font></b></br>Total / Got From ${name1}</div></span></p></td>
+<td ><div><b><font size="6">${name1}'s Points</font></b></br>Total / Got From ${name0}</div></span></p></td>
+<tr valign="top">`
+
+//Peter;5;Helen;5,Which seven presidents are Democrats?;100;Peter;6;51;33;31;8
+    
+     for (let i = 0;i < 3; i++){
+         const [question,pts,winner,p0,p0fmp1,p1,p1fmp0] = dataArr[i].split(";")
+           
+         buf += `<td>${question}</td>
+         <td>${pts}</td>
+         <td>${winner}</td>
+         <td>${p0} / ${p0fmp1}</td>
+         <td>${p1} / ${p1fmp0}</td>
+         </tr>`
+     }
+     console.log("-- " + buf + "--");
+      buf +=  `</table></div> `        
+     insrtPtA.innerHTML = buf;
+     
+}
+
+function insrtData(){ console.log("insrtData() ");//
+    const data = "0;Peter;94566;10;5|1;Helen;94066;11;5";
+    const [p0,p1] = data.split("|");
+    console.log("p0 " + p0);
+    const [,name0,zip0,grd0,spd0] = p0.split(";");
+    const [,name1,zip1,grd1,spd1] = p1.split(";");        
+}
+
+function goToStartPage() {
+        console.log("goToStartPage() ");
+        const insrtPt = document.getElementById("endGameInsrtPt");
+        const name0 = "Joe"
+        const name1 = "Susan"
+        const score0Plus = 50;
+        const score0Neg = 25;
+        const score1Plus = 30;
+        const score1Neg = 35
+        let buf = `
+        --
+  <div align=center>
+  <img src="images/TSD_Logo100By100.jpg " loading="lazy" width="99" height="100" alt="Trivia SmackdownLogo" text-align="center" title="Trivia SmackDown Logo" /></div>
+  <div align=center><h1>Game Over</h1></div>
+  <b>The winner of this Set is:<font size="6">${name0} </font></b><p><p>
+  <P><P><P><P>
+
+<font size=2 color="#000000" face="Arial">
+<div><table width="100%" border="4" cellpadding="2" bordercolor="#000080" cellspacing="2" bgcolor="#ffffff">
+<tr valign="top">
+<td><font size=2 color="#000000" face="Arial">
+<div><b>Name</b></div>
+</font>
+</td>
+<td><font size=2 color="#000000" face="Arial">
+<div>Total Points</div>
+</font>
+</td>
+<td><font size=2 color="#000000" face="Arial">
+<div>From Player </div>
+</font>
+</td>
+<td><font size=2 color="#000000" face="Arial">
+<div>From Apponent</div>
+</font>
+</td>
+</tr>
+  <tr valign="top">
+  <td>${name0}<br /></td><td>${score0Plus}<br /></td><td>200<br /></td><td>134<br /></td>
+</tr>
+  <td>${name1}<br /></td><td>${score0Neg}<br /></td><td>100<br /></td><td>34<br /></td>
+</table>
+</div>
+</font><p><p><p>
+
+<div class="slider">
+How did you like the game? > Liked It <input type="range" min="1" max="10" value="1" class="slider" id="sliderLike"> Hated it
+</div><p><p>
+<div class="slider">
+The Content was: >  Too Easy <input type="range" min="1" max="10" value="1" class="slider" id="sliderContent" height="100px"> Too Hard
+</div><p><p>
+Comment:<textarea name="Comment" value="" rows="4" cols="80">
+Type Comments here
+</textarea><p><p>
+<input type="button" value="Play another Set" onClick="goToStartPage()">
+---
+<input type="button" value="End Game" onClick="endGame()">
+
+  <div align=center><h1>Round by Round Results</h1></div>
+<p>
+
+<div style=" text-align: left; text-indent: 0px; padding: 0px 0px 0px 0px; margin: 0px 0px 0px 0px; line-height: 0.5;"><table width="100%" border="1" cellpadding="2" cellspacing="2" style="border-color: #000000; border-style: solid; background-color: #ffffff;">
+<tr>
+  <td >The Challenge or Question</span></p></td>
+  <td >Number of <br><br>Items to<br><br>Move or click</span></p></td>
+  <td >Number of <br><br>Attempts</span></p></td>
+  <td >Number of <br><br>items left</span></p></td>
+  <td >Points <br><br>${name0}</td>
+  <td >Points <br><br>${name1}</td>
+</tr>
+
+ `
+        //bottom of html
+
+        const nbrOfItems = 10;
+        const nbrOfTryes = 4;
+        const nbrCorrect = 3;
+        const theQuestion = "Complete the Quotes from Poems and Books"
+
+        for (let i = 0; i < 3; i++) {
+            buf += `
+   <tr><td>${theQuestion}<br /></td><td>${nbrOfItems}</td><td>${nbrOfTryes}</td><td>${nbrCorrect}</td><td >${score0Plus}</td><td ">${score1Plus}</td></tr>
+  `
+        }
+
+
+        buf += `
+</table>
+</div>
+<p><p><p><p>
+
+--
+    `
+
+        insrtPt.innerHTML = buf;
+    }
+
+getAndProcessGameData();
+
+</script>

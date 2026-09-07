@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Thu, 31 Oct 2024 20:46:54 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title>Catagory Selection</title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+<input type="button" value="Get Selected Tree" onclick="getSelTree()">
+<input type="button" value="List Checked Items" onclick="listItems()">
+<input type="button" value="GetSelRnds" onclick="getSelRnds()">
+<input type="button" value="Clear List" onclick="clearList()">
+<input type="button" value="Clear Tree" onclick="clearTree()">
+
+On Net?<input type='checkbox' id='isOnNet' name='onNet'>
+<!--
+<br><br>
+<select name="Type Selection Tree" id= "typeTreeLst" align="left" size="9">
+  <option value="ACSCode">ACSCodes</option>
+  <option value="EdCode">EdCodes</option>
+  <option value="TrivCode">TrivCodes</option>
+  <option value="GeoCode">GeoCodes</option>
+  <option value="KeyWord">KeyWords</option>
+  <option value="Type">Type</option>
+  <option value="Author">Author</option>
+  <option value="Date">Date</option>
+  <option value="Res">Resource</option>
+</select>
+  -->
+
+<div id="insrtPtA"></div>
+
+<div>*************</div>
+<div id="insrtPtB"></div>
+<input type="button" value="Clear List" onclick="clearList()"><input type="button" value="Play Selected Rounds" onclick="getSelRnds()"><BR>
+<select name="Round selection List" id="rndSelLst" align="left" multiple size="10">
+<option>*******************************************************************************************************************************</option>
+</select>
+
+ 
+</body>
+ 
+<script>
+function clearTree(){console.log("clearTree()")
+     const tree = document.getElementById("tree")
+     tree.innerHTML =   "" ;
+}
+
+
+function clearList(){console.log("clearList()")
+     const rndSelLst = document.getElementById("rndSelLst")
+     while (rndSelLst.options.length > 0) {
+        selectBox.remove(0);
+    }  
+}
+
+//http://edugames.com/cgi-bin/SubmitSetToServer.pl?PRA1,blue,,TestSet/,Set;5;9.2;500;TestSet/;2024Nov2,AvgGrade=9.2+Points=500+TotalRounds=
+//5+SubSets=0+SubSetRnds=0+WebPages=0+Instructions=0+Commands=0+Comments=0+,ThGaTe;;;;,gPRA1_75+,,Fu2,Rnd;AA.Ben00001;1;9;100;0;US+Presidents;
+//Which+seven+presidents+are+Democrats?;,
+//Rnd;AA.Ben00002;1;9;100;0;US/State+Names;What+four+states+are+named+after+kings?;,Rnd;AA.Ben00003;1;8;100;0;Countries/US/States;What+are+the+last+two+states+to+join+the+union?;,Rnd;AA.Ben00004;1;8;100;0;Countries/US/States;What+are+the+last+three+states+to+join+the+union?;,Rnd;AA.Ben00005;1;12;100;0;Science/Astronomy/Solar+System;Which+symbol+is+the+The+Planet+Earth?;,
+
+function getSelRnds(){console.log("getSelRnds()")
+    const rndSelLst = document.getElementById("rndSelLst");
+    const selectedValues = [];
+    let count = 0;
+    for (const option of rndSelLst.options){
+       if (option.selected) {
+          const sel = option.text;
+          if(sel.length > 2){
+            const selR = sel.replaceAll(",",";") 
+            selectedValues.push(selR);
+            if(++count > 6)break;
+            console.log("--" + selR + "--")
+          }  
+       }    
+    }
+    let setBuf = "TestSet/,Set;5;9.2;500;TestSet/;2024Nov2,AvgGrade=9.2+Points=500+TotalRounds=5+SubSets=0+SubSetRnds=0+WebPages=0+Instructions=0+Commands=0+Comments=0+,ThGaTe;;;;,gPRA1_75+,,Fu2,"
+    for (let i = 0; i < selectedValues.length; i++) {
+        setBuf+= selectedValues[i] + ",";
+    }
+    console.log("setBuf " + setBuf );
+    
+}
+    
+function getSelTree(){console.log("getSelTree()")//http://edugames.com/LDAP/ACSCode/treeS.txt
+    const insrtPtA = document.getElementById("insrtPtA") ;
+    //const typeTreeLst = document.getElementById("typeTreeLst") ;     
+    //const treeSel = typeTreeLst.value;
+    //console.log("treeSel= "  + treeSel )
+    //const url = '/edugames.com/LDAP/' + treeSel + '/treeR.txt';
+    const url = '/edugames.com/LDAP/ACSCodes/treeR.txt';    
+    console.log("url= "  + url )
+    fetch(url)     
+      .then(response => response.text())
+      .then(data => {
+      console.log("data= "  + data )    
+      const arr = data.split("\n");
+      insrtPtA.innerHTML =   insrtPtA.innerHTML + createTree(arr) ;
+    });
+
+}
+
+function listItems(){console.log("listItems()")
+    //if(document.getElementById("isOnNet").checked){
+    const rndSelLst = document.getElementById("rndSelLst");
+    const anItemX = document.createElement("option");
+    anItemX.value = "ABCDEFG"
+    rndSelLst.options.add(anItemX);                                                   
+    const insrtPtB = document.getElementById("insrtPtB") ;
+    const arr = [];
+    let list = document.querySelectorAll('.lineItem');
+        for (let i = 0; i < list.length; i++) {
+          if(list[i].checked){
+              const url = "/edugames.com/cgi-bin/GetRnds.pl?1.00,16.00,LDAP,ACSCode" + list[i].name + ",false,"
+              console.log("url= "  + url )             
+              fetch(url)     
+                .then(response => response.text())
+                .then(data => {
+                console.log("data= "  + data ) 
+                const arr =  data.split("\n");
+                console.log("data= --"  + arr[3].substring(0,5) + "--" )                
+                for (let j = 0; j < arr.length; j++) {
+                    console.log("data= --"  + arr[j].substring(0,2) + "--" )                
+                   if(arr[j].substring(0,2) == "AA"){               
+                      const anItem = document.createElement("option");
+
+                      anItem.value = arr[j].substring(0,11) ;                                                          
+                      anItem.text =  arr[j] ;             
+                      rndSelLst.options.add(anItem);
+                  }
+                }
+                //insrtPtB.innerHTML =   insrtPtB.innerHTML + data ;
+              });
+
+          }
+        }
+     //}
+}
+
+function createTree(textArr){console.log( "createTree " + textArr.length)
+      let newArr = [];    
+    for (let i = 0; i < textArr.length; i++) {
+        const x = textArr[i];
+        for (let j = 0; j < 10; j++) {     
+         if(x.charAt(j) != " "){
+            newArr.push(j  + textArr[i])
+            break;
+         } 
+       }
+    }
+    
+    
+  const abrevArr = [];
+  buf = "<span id='tree'><br>The List<br>" 
+  for (let i = 0; i < newArr.length-1; i++) { //  name="Water">Water</div></li>
+    
+     let x = newArr[i];
+     console.log(i + " x= " + x)        
+     const indentA = Number(x.charAt(0));
+     const xx = x.substring(indentA+1);
+     const abb = xx.substring(0,2);
+      console.log(indentA +  "  xx= --" + xx + "--" + "  abb= --" + abb + "--")    
+     let buf2 = "";
+     abrevArr[indentA]= abb;
+
+     for (let j = 0; j < indentA; j++) {
+         buf2+= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+     }
+     let bufAbrev = ""
+     for (let j = 0; j < indentA+1; j++) {
+         bufAbrev+= "/" + abrevArr[j];
+     }
+       console.log("bufAbrev= " + bufAbrev)
+     buf2+= "<input type='checkbox' class='lineItem' name='" + bufAbrev + "'>" + xx + "</div><br>\n"     
+     buf+= buf2;   
+ }
+  return "</span>" + buf;
+
+}          
+
+
+/* 
+function displayTree(){console.log("displayTree()")
+
+let buf = "";
+buf+='Arts & Entertainment\n';
+buf+='  Frank\n';
+buf+='  tom\n';
+buf+=' Books\n';
+buf+='  Characters\n';
+buf+='  Frank\n';
+buf+='  tom\n';
+buf+=' Childhood Literature\n';
+buf+='  Dick and Jane\n';
+buf+='   Dick\n';
+buf+='   Jane\n';
+buf+=' Comic Books\n';
+buf+='  SuperMan\n';
+buf+='  SpiderMan\n';
+buf+=' Entertainers\n';
+buf+='  Comedians\n';
+buf+='   CA\n';
+buf+='   CB\n';
+buf+='   CC\n';
+buf+='  Movie & TV Stars\n';
+buf+='   Bob Hope\n';
+buf+='   Jeff Goldberg\n';
+buf+='  Singers\n';
+
+buf = ` 
+Political
+  Assassination [2]
+  Birth [1]
+  Date of Rule [2]
+  Elections [4]
+  Legislation [1]
+ Scientific
+  Discovery [1]
+ War [1]
+  American Revolution [4]`
+
+
+
+
+    const arr =  buf.split("\n") ;
+
+    let newArr = [];    
+    for (let i = 0; i < arr.length; i++) {
+        const x = arr[i];
+        for (let j = 0; j < 10; j++) {     
+         if(x.charAt(j) != " "){
+            newArr.push(j  + arr[i])
+            break;
+         } 
+       }
+    }
+    
+    
+  const abrevArr = [];  //2  Frank 
+  buf = "" 
+  for (let i = 0; i < newArr.length-1; i++) { //  name="Water">Water</div></li>
+    
+     let x = newArr[i];
+     console.log(i + " x= " + x)        
+     const indentA = Number(x.charAt(0));
+     const xx = x.substring(indentA+1);
+     const abb = xx.substring(0,2);
+      console.log(indentA +  "  xx= --" + xx + "--" + "  abb= --" + abb + "--")    
+     let buf2 = "";
+     abrevArr[indentA]= abb;
+
+     for (let j = 0; j < indentA; j++) {
+         buf2+= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+     }
+     let bufAbrev = ""
+     for (let j = 0; j < indentA+1; j++) {
+         bufAbrev+= "/" + abrevArr[j];
+     }
+       console.log("bufAbrev= " + bufAbrev)
+     buf2+= "<input type='checkbox' class='lineItem' name='" + bufAbrev + "'>" + xx + "</div><br>\n"     
+     buf+= buf2;   
+ }
+ 
+    const insertPtA = document.getElementById("insrtPtA") ;
+    insertPtA.innerHTML =   insertPtA.innerHTML + buf;
+ //console.log("buf= " + buf)
+ console.log("newArr= " + newArr);
+ 
+} */
+
+
+</script>  
+  
+  
+  
+</html>

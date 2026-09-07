@@ -1,0 +1,305 @@
+/* ==========================================================================
+   Trivia-SmackDown — Splash / Loading screen
+
+   Layout only. All colour/metric tokens live in css/tokens.css, which MUST be
+   linked before this file.
+   ========================================================================== */
+
+/* ==========================================================================
+   Base — full viewport, never scrolls
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;                 /* gaming screen: no scrollbar, ever */
+}
+
+body.tsd-splash {
+  background: var(--tsd-bg-gradient);
+  color: var(--tsd-text);
+  font-family: var(--tsd-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Stage + container
+   ========================================================================== */
+
+.tsd-splash-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;                    /* fallback */
+  height: 100dvh;                   /* wins where supported (mobile chrome) */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tsd-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--tsd-container);
+  height: 100%;
+  padding: var(--tsd-gutter);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   Ambient background — vignette + drifting sparks
+   ========================================================================== */
+
+.tsd-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 45%,
+      rgba(93, 78, 190, .30) 0%,
+      rgba(93, 78, 190, 0)   70%),
+    radial-gradient(ellipse 90% 70% at 50% 120%,
+      rgba(10, 8, 45, .85) 0%,
+      rgba(10, 8, 45, 0)   65%);
+}
+
+.tsd-sparks {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.tsd-spark {
+  position: absolute;
+  bottom: -12px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--tsd-accent-yellow);
+  opacity: 0;
+  animation: tsd-rise linear infinite;
+}
+
+@keyframes tsd-rise {
+  0%   { transform: translateY(0)      scale(.6); opacity: 0;   }
+  12%  {                                          opacity: .85; }
+  80%  {                                          opacity: .35; }
+  100% { transform: translateY(-105vh) scale(1);  opacity: 0;   }
+}
+
+/* ==========================================================================
+   Hero row — left zap | logo | right zap
+   ========================================================================== */
+
+.tsd-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 5vw, 90px);
+  width: 100%;
+  flex: 0 1 auto;
+  min-height: 0;                    /* allows the row to shrink, no overflow */
+  margin-top: auto;                 /* hero sits centred, loader hugs the base */
+  margin-bottom: clamp(24px, 6vh, 70px);
+}
+
+.tsd-zap {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* the soft coloured bloom sitting behind each bolt */
+.tsd-zap::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 62%;
+  height: 42%;
+  border-radius: 50%;
+  background: var(--tsd-zap-glow);
+  backdrop-filter: blur(var(--tsd-zap-blur));
+  -webkit-backdrop-filter: blur(var(--tsd-zap-blur));
+  filter: blur(60px);
+  opacity: .55;
+  animation: tsd-pulse 4.5s ease-in-out infinite;
+}
+
+.tsd-zap--left  { --tsd-zap-glow: var(--tsd-glow-left);  --tsd-zap-blur: var(--tsd-blur-left);  }
+.tsd-zap--right { --tsd-zap-glow: var(--tsd-glow-right); --tsd-zap-blur: var(--tsd-blur-right); }
+
+.tsd-zap--right::before { animation-delay: -2.25s; }
+
+.tsd-zap img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: auto;
+  height: clamp(150px, 42vh, 430px);
+  max-width: 100%;
+  animation: tsd-float 6s ease-in-out infinite;
+}
+
+.tsd-zap--right img { animation-delay: -3s; }
+
+@keyframes tsd-float {
+  0%, 100% { transform: translateY(-8px); }
+  50%      { transform: translateY(8px);  }
+}
+
+@keyframes tsd-pulse {
+  0%, 100% { opacity: .40; transform: scale(1);    }
+  50%      { opacity: .70; transform: scale(1.12); }
+}
+
+/* ---- Centre logo ----------------------------------------------------- */
+
+.tsd-logo {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tsd-logo img {
+  display: block;
+  width: auto;
+  height: clamp(200px, 44vh, 520px);
+  max-width: 100%;
+  filter: drop-shadow(0 18px 45px rgba(253, 12, 117, .28));
+  animation: tsd-logo-in 1s var(--tsd-ease) both;
+}
+
+@keyframes tsd-logo-in {
+  from { opacity: 0; transform: scale(.88); }
+  to   { opacity: 1; transform: scale(1);   }
+}
+
+/* ==========================================================================
+   Loader
+   ========================================================================== */
+
+.tsd-loader {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto auto;              /* hugs the lower half of the stage */
+  padding-bottom: clamp(8px, 5vh, 60px);
+  text-align: center;
+  animation: tsd-fade-up .9s var(--tsd-ease) .25s both;
+}
+
+@keyframes tsd-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.tsd-loader-label {
+  margin: 0 0 clamp(10px, 1.6vh, 20px);
+  font-size: clamp(15px, 1.5vw, 22px);
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+}
+
+.tsd-progress {
+  position: relative;
+  width: 100%;
+  height: clamp(24px, 3.2vh, 38px);
+  padding: 3px;
+  border: var(--tsd-border-width) solid var(--tsd-border-color);
+  border-radius: 999px;
+  background: rgba(10, 8, 45, .55);
+  overflow: hidden;
+}
+
+.tsd-progress-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--tsd-accent-gradient);
+  box-shadow: 0 0 18px rgba(253, 90, 59, .55);
+  transition: width .25s linear;
+}
+
+/* travelling sheen across the bar */
+.tsd-progress::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0)   0%,
+    rgba(255, 255, 255, .30) 50%,
+    rgba(255, 255, 255, 0)   100%);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: tsd-sheen 1.8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes tsd-sheen {
+  from { background-position: -45% 0; }
+  to   { background-position: 145% 0; }
+}
+
+.tsd-progress-pct {
+  margin: clamp(8px, 1.4vh, 16px) 0 0;
+  font-size: clamp(13px, 1.2vw, 18px);
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--tsd-text-muted);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .tsd-hero     { gap: clamp(8px, 3vw, 30px); }
+  .tsd-zap img  { height: clamp(90px,  22vh, 200px); }
+  .tsd-logo img { height: clamp(150px, 34vh, 320px); }
+}
+
+@media (max-width: 560px) {
+  .tsd-hero         { flex-wrap: wrap; gap: 10px; }
+  .tsd-logo         { order: -1; flex-basis: 100%; }
+  .tsd-zap img      { height: clamp(80px,  16vh, 150px); }
+  .tsd-logo img     { height: clamp(140px, 28vh, 260px); }
+  .tsd-loader-label { letter-spacing: .12em; }
+}
+
+/* landscape phones / very short windows */
+@media (max-height: 520px) {
+  .tsd-zap img  { height: clamp(80px,  26vh, 160px); }
+  .tsd-logo img { height: clamp(110px, 38vh, 220px); }
+  .tsd-loader   { padding-bottom: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tsd-spark,
+  .tsd-zap img,
+  .tsd-zap::before,
+  .tsd-progress::after { animation: none; }
+
+  .tsd-logo img,
+  .tsd-loader { animation-duration: .01ms; }
+}

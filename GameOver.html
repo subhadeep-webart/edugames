@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+  <meta name="dcterms.created" content="Mon, 21 Apr 2025 00:46:01 GMT">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/gameover.css">
+
+  <title>Game Over</title>
+</head>
+
+<body class="tsd-over">
+
+  <!-- corner halftone fields (decorative) -->
+  <div class="tsd-over-dots tsd-over-dots--l" aria-hidden="true"></div>
+  <div class="tsd-over-dots tsd-over-dots--r" aria-hidden="true"></div>
+
+  <div class="tsd-over-page">
+
+    <!-- ====================== masthead ====================== -->
+    <header class="tsd-over-head">
+      <img class="tsd-over-logo" src="images/new-images/logo.png"
+           loading="lazy" alt="Trivia SmackDown">
+      <h1 class="tsd-over-title">Game Over</h1>
+    </header>
+
+    <!-- ====================== result card ======================
+         Blue = player 0 = left, Red = player 1 = right.
+         The player names, scores and the winner sentence are written by
+         getAndProcessGameData() below — the ids must not change. -->
+    <section class="tsd-over-result">
+
+      <!-- ---------- player 0 (blue / left) ---------- -->
+      <div class="tsd-over-player tsd-over-player--p1">
+        <span class="tsd-over-avatar" id="goAvatar0">
+          <span class="tsd-avatar-empty">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </span>
+        <p class="tsd-over-name" id="goName0">--</p>
+        <div class="tsd-over-total">
+          <p class="tsd-over-total-label">Total Point</p>
+          <p class="tsd-over-total-val" id="goScore0">0</p>
+        </div>
+      </div>
+
+      <!-- ---------- winner ---------- -->
+      <div class="tsd-over-centre">
+        <p class="tsd-over-winner-tag">
+          <img src="images/new-images/icons/trophy.svg" alt="">
+          <span>Winner</span>
+        </p>
+        <p class="tsd-over-winner-name" id="goWinnerName">--</p>
+
+        <!-- the sentence built by PlayerLineUp.gatherDataAndGoToGameOver() -->
+        <div id="winInserPt"></div>
+
+        <button class="tsd-over-but tsd-over-but--primary" type="button"
+                onClick="playAnotherGame()">
+          <img src="images/new-images/icons/play_button.svg" alt="">
+          Play Another Game
+        </button>
+      </div>
+
+      <!-- ---------- player 1 (red / right) ---------- -->
+      <div class="tsd-over-player tsd-over-player--p2">
+        <span class="tsd-over-avatar" id="goAvatar1">
+          <span class="tsd-avatar-empty">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM3.5 21a8.5 8.5 0 0 1 17 0"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </span>
+        <p class="tsd-over-name" id="goName1">--</p>
+        <div class="tsd-over-total">
+          <p class="tsd-over-total-label">Total Point</p>
+          <p class="tsd-over-total-val" id="goScore1">0</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ====================== evaluation ======================
+         HIDDEN. submitEval() (below) builds the ratings and comment into a
+         string and only console.log()s it - there is no fetch, no form
+         action and no cgi-bin endpoint to receive it, so nothing a player
+         submits here is stored anywhere.
+
+         Commented out rather than deleted: the markup is complete and can
+         be restored as-is once somewhere exists to send it. #sliderLike,
+         #sliderContent and textarea[name="Comment"] are read verbatim by
+         submitEval(), so those ids and the name attribute must not change.
+         See docs/10-known-issues.md.
+    <section class="tsd-over-panel">
+      <h2 class="tsd-over-panel-title">Rate This Set</h2>
+
+      <div class="tsd-over-fields">
+
+        <div>
+          <label class="tsd-over-field-label" for="sliderLike">
+            How did you like the Set?
+          </label>
+          <div class="tsd-over-scale">
+            <span>Liked it</span>
+            <input type="range" min="1" max="10" value="5" id="sliderLike">
+            <span>Hated it</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="tsd-over-field-label" for="sliderContent">
+            The Content was:
+          </label>
+          <div class="tsd-over-scale">
+            <span>Too Easy</span>
+            <input type="range" min="1" max="10" value="5" id="sliderContent">
+            <span>Too Hard</span>
+          </div>
+        </div>
+
+        <div class="tsd-over-comment">
+          <label class="tsd-over-field-label" for="goComment">Comment</label>
+          <textarea id="goComment" name="Comment" rows="4"
+                    placeholder="Type comments here"></textarea>
+        </div>
+
+      </div>
+
+      <div class="tsd-over-actions">
+        <button class="tsd-over-but tsd-over-but--ghost" type="button"
+                onClick="submitEval()">Submit Evaluation</button>
+      </div>
+    </section>
+    -->
+
+    <!-- ====================== round by round ======================
+         Filled by insrtRndByRnd(). -->
+    <div id="insrtPtA"></div>
+
+  </div>
+
+  <script>
+    /*
+    PRA1_1835;Peter;91;0;The winner of Set PRA1_1835 is Peter with a score of 91 and the looser is Helen with a score of 0,
+    0;Peter;94566;10;5|1;Helen;94066;11;5,
+    undefined;100;Peter;0;0;0;0,
+    Which seven presidents are Democrats?;100;Peter;12;8;0;0,
+    What are the last three states to join the union?;100;Peter;91;8;0;0,
+    What are the last three states to join the union?;100;Peter;91;8;0;0
+
+    */
+    let playerStartingStats = "";
+    let theSetSerNbr = "####";
+
+    function submitEval() {
+        console.log("submitEval() ")//singlePlayerMode
+        let buf = "";
+        buf += theSetSerNbr + "\n";
+        if (singlePlayerMode) {
+            buf += "SinglePlayerMode " + player[0].name + "\n";
+        } else {
+            buf += "TwoPlayerMode " + player[0].name + "," + player[1].name + "\n";
+        }
+        const likeValue = document.getElementById("sliderLike").value;
+        const contentValue = document.getElementById("sliderContent").value;
+        const commentValue = document.getElementsByName("Comment")[0].value;
+        buf += "likeValue= " + likeValue + "\n";
+        buf += "contentValue= " + contentValue + "\n";
+        buf += "commentValue= " + commentValue + "\n";
+        console.log(buf);
+
+    }
+
+    function playAnotherGame() {
+        console.log("playAnotherGame() ")
+        localStorage.setItem("playerStartingStats", playerStartingStats)//cp.setSerNbr
+        window.location.href = "setup.html";
+    }
+
+    //30|0;Peter;94566;12;10|1;Helen;94066;12;10,Set totals;100;Peter;0;0;0;0;0
+
+    function getAndProcessGameData() {
+        console.log("getAndProcessGameData() "); //const data =  localStorage.getItem("regData");
+        const gameResults = localStorage.getItem("gameResults")
+        console.log("gameResults= " + gameResults);
+        const arr = gameResults.split(",");
+        let buf = ""
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i] == undefined) break;
+            buf += i + "   " + arr[i] + "\n";
+        }
+        console.log("buf= \n" + buf)
+
+
+        const [setserNbr, winner, score0, score1, winText] = arr.shift().split(";");
+        theSetSerNbr = setserNbr;
+        console.log("winText= " + winText);
+
+        document.getElementById("winInserPt").innerText = winText;
+
+
+        playerStartingStats = arr.shift();
+
+        console.log("playerStartingStats= " + playerStartingStats);
+
+        const [cumSetPoints, p0, p1] = playerStartingStats.split("|");
+        console.log("p0= " + p0)
+        console.log("p1= " + p1)
+        const [, name0, zip0, gd0, sp0] = p0.split(";");
+        const [, name1, zip1, gd1, sp1] = p1.split(";");
+
+
+        if (name1 == name0) winner = "There is a tie between " + name0 + " and " + name1;
+
+        // ---- presentation only: mirror the existing values into the card ----
+        showResultCard(name0, name1, score0, score1, winner);
+
+        const nbrOfRounds = arr.length;
+        console.log("nbrOfRounds= " + nbrOfRounds);
+
+
+        insrtRndByRnd(name0, name1, arr);
+
+    }
+
+    /* Fills the names/scores/winner headline in the result card.
+       Purely display — every value handed in is already computed above. */
+    function showResultCard(name0, name1, score0, score1, winner) {
+        document.getElementById("goName0").innerText = name0;
+        document.getElementById("goName1").innerText = name1;
+        document.getElementById("goScore0").innerText = score0;
+        document.getElementById("goScore1").innerText = score1;
+
+        const headline = document.getElementById("goWinnerName");
+        if (score0 === score1) {
+            headline.innerText = "It's a Tie!";
+        } else {
+            headline.innerText = winner + " Win!";
+        }
+    }
+
+
+
+    /*
+
+    logPlay = 3,173,0,76,11
+    PlayerLineUp.js:133 buf
+    Player   Points WON   Points LOST  On this Round.
+    Blue         173              0
+    Red          76              11
+
+    buf
+    Player   Points WON   Points LOST  On this Round.
+    Blue         153              0
+    Red          6              6
+
+
+
+    gameResults=
+    PRA1_1835;Peter;129;33;The winner of Set PRA1_1835 is Peter with a score of 129 and the looser is Helen with a score of 33,
+    0;Peter;94566;10;5|1;Helen;94066;11;5,
+    Set totals;100;Peter;600;129;44;33;10,
+    Which seven presidents are Democrats?;100;Helen;18;0;33;2,
+    What are the last three states to join the union?;100;Peter;106;11;0;2,
+    What are the last three states to join the union?;100;Peter;0;11;0;2,
+    Place the National Parks by State.;100;Peter;5;11;0;2,Place the National Parks by State.;100;Peter;0;11;0;2
+
+    buf=
+0   PRA1_1837;Peter;190;176;The winner of Set SerNbr [PRA1_1837] is Peter with a score of 190 and the looser is Helen with a score of 176
+1   30|0;Peter;94566;12;10|1;Helen;94066;12;10
+2   Complete the Bible sayings.;100;Peter;6;0;0;0
+3   Pick out the four Arizona cities.;100;Peter;184;0;176;100
+4   Set totals;100;Peter;200;190;0;176;100
+
+
+    */
+
+    function insrtRndByRnd(name0, name1, dataArr) {
+        console.log("name0 = " + name0 + "  name1 = " + name1);
+        console.log("insrtRndByRnd() dataArr = " + dataArr);
+        console.log("dataArr[0] " + dataArr[0]);
+        const lineArr = dataArr[0].split(";")
+        console.log("-- " + lineArr[0] + "   " + lineArr[3]);
+        const insrtPtA = document.getElementById("insrtPtA");
+
+        let buf = `<section class="tsd-over-results">
+<h2 class="tsd-over-results-title">Round by Round Results</h2>
+<p class="tsd-over-results-note">Actual Points awarded may be greater due to Bonus Points and Wrong Answer points from opposing player</p>
+<div class="tsd-over-tablewrap">
+<table class="tsd-over-table">
+<thead>
+<tr>
+<th>The Challenge</th>
+<th>Posted Points for This Round</th>
+<th>Winner</th>
+<th>${name0}'s Points<br><span class="tsd-over-th-qual">Total / Got From ${name1}</span></th>
+<th>${name1}'s Points<br><span class="tsd-over-th-qual">Total / Got From ${name0}</span></th>
+</tr>
+</thead>
+<tbody>`
+
+        //Peter;5;Helen;5,Which seven presidents are Democrats?;100;Helen;6;51;33;31;8
+
+        for (let i = 0; i < dataArr.length; i++) {
+            console.log("dataArr[i] " + dataArr[i]);
+            const [question, pts, winner, x1, x2,] = dataArr[i].split(";")
+
+            // the closing "Set totals" line is a summary, not a round
+            const rowCls = (question == "Set totals") ? ' class="tsd-over-row--totals"' : "";
+
+            buf += `<tr${rowCls}>
+         <td>${question}</td>
+         <td>${pts}</td>
+         <td><span class="tsd-over-winner-cell"><img src="images/new-images/icons/trophy.svg" alt="">${winner}</span></td>
+         <td>${x1}</td>
+         <td>${x2}</td>
+         </tr>`
+        }
+        console.log("-- " + buf + "--"); console.log("-dataArr= " + dataArr);
+        buf += `</tbody></table></div></section>`
+        insrtPtA.innerHTML = buf;
+
+    }
+
+    function insrtData() {
+        console.log("insrtData() ");//
+        const data = "0;Peter;94566;10;5|1;Helen;94066;11;5";
+        const [p0, p1] = data.split("|");
+        console.log("p0 " + p0);
+        const [, name0, zip0, grd0, spd0] = p0.split(";");
+        const [, name1, zip1, grd1, spd1] = p1.split(";");
+    }
+
+    /* ---------- player photos ----------
+       setup.html stores whatever the player picked under playerPhoto0 /
+       playerPhoto1 (a data URL, browser-local only). Show it here if it is
+       there; otherwise the generic placeholder in the markup stands.
+
+       Presentation only - nothing is read from or written to game state. */
+    function showPlayerPhotos() {
+        for (var slot = 0; slot < 2; slot++) {
+            var ring = document.getElementById("goAvatar" + slot);
+            if (!ring) { continue; }
+
+            var src = null;
+            try {
+                src = localStorage.getItem("playerPhoto" + slot);
+            } catch (err) {
+                console.log("could not read player photo: " + err);
+            }
+            if (!src) { continue; }
+
+            ring.innerHTML = "";
+            var img = document.createElement("img");
+            img.src = src;
+            img.alt = "";
+            ring.appendChild(img);
+        }
+    }
+
+    showPlayerPhotos();
+    getAndProcessGameData();
+    /*
+    PRA1_1842;Peter;822;580;The winner of Set SerNbr [PRA1_1842] is Peter with a score of 822 and the looser is Helen with a score of 580,30|0;Peter;94566;12;10|1;Helen;94066;12;10,Which seven presidents are Democrats?;100;Helen;14;0;250;0,Pair the Homonyms;100;Peter;181;34;17;0,What is this American Monument?;100;Peter;134;34;0;0,Rank the following standard volume measurements with the largest on top.;100;Peter;121;34;0;0,Select the  Seven Dwarfs From this list.;100;Helen;40;34;213;33,Approximately where was the first Independence Day declared?;100;Peter;0;34;0;33,Place the National Parks by State.;100;Peter;0;34;0;33,Pick the one item is each horizontal row that is different from the others in the row.;100;Peter;155;34;0;33,How many moons does Mars have?;100;Peter;0;34;0;33,Equate the Author with the Work.;100;Peter;160;34;0;33,Answer these questions about the United States;100;Peter;17;34;0;33,Set totals;100;Peter;1100;822;340;480;231
+
+
+
+    */
+
+
+
+
+</script>
+</body>
+
+</html>

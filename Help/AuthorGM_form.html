@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Sun, 30 Jun 2024 15:06:33 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <title></title>
+    
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+    <h1><div align="center">Trivia-SmackDown Author/Game Master Request Form</div></h1>
+  </head>
+   <!-- action="mailto:PeterA@EdUGames.com" -->
+   <form action="mailto:PeteAntoniak@gmail.com"  method="post" enctype="text/plain">
+
+</form>
+  <body>
+  <h3>I am interested in becoming a:<br><br>     <input type="checkbox" name="Author" value="Author">Game Master
+       <input type="checkbox" name="Author" value="Author">
+      Author    
+     </h3>
+             <input type="button" onClick="sendMail()" onclick="sendMail" value="testsend">
+
+     
+     <h3>Name: <input id="name" type="text" name=""  value="Peter" width="600"></h3>
+     <h3>Email: <input id="email" type="text" name="" value="PeteA@Gmail.com"></h3>
+     <h3>Phone Number:  <input id="phoneNbr" type="text" name="phoneNbr" value="650 952 2375"></h3>
+     <h3>City: <input id="city" type="text" name="city" value="San Bruno"></h3>
+     <h3>State: <input id="state" type="text" name="state" value="CA"></h3>    
+     <br><br>
+     My Background/Qualifications: <br><textarea id="quals"  name="quals" rows="5" cols="80" id="quals">I have a PH'd in History</textarea><br><br>
+     Area of Interest:<br> <textarea id="interest" rows="5" cols="80" name="" value="">I am interested the  history of WWII,WWI and The civil war</textarea>
+     <br><br>
+     Anything else you might want to add:<br> <textarea id="anythingElse"  name="quals" rows="5" cols="80">Keep up, the good work.</textarea>
+     <br><br>
+      <input type="submit" value="Send Email" />
+
+     <br><br><br><br>
+  </body>
+</html>
+<script>
+ function sendMail() {console.log("sendMail  "  );
+     let buf = "Title=Request to be GM or Author," 
+     buf+= "|Name=" + document.getElementById("name").value;
+     buf+= "|Email=" + document.getElementById("email").value;
+     buf+= "|Phone Nbr=" + document.getElementById("phoneNbr").value;
+     buf+= "|City=" + document.getElementById("city").value;
+     buf+= "|State=" + document.getElementById("state").value;     
+     buf+= "|Quals=" + document.getElementById("quals").value;          
+     buf+= "|Interest=" + document.getElementById("interest").value;     
+     buf+= "|Anything Else=" + document.getElementById("anythingElse").value;
+     buf = buf.replace(/ /g, '+');
+     console.log("buf=  " + buf );
+     //const xx = fetch('https://edugames.com/cgi-bin/PostSetEval.pl?' + buf);
+     //console.log("xx=  " + xx );
+     fetch('edugames.com/cgi-bin/PostSetEval.pl?', {
+         mode: 'no-cors'
+     })
+     .then(response => console.log(response))
+     .catch(error => console.error(error));
+     
+          
+     
+}
+
+</script>  //https://edugames.com/cgi-bin/PostSetEval.pl?

@@ -1,0 +1,542 @@
+/* ==========================================================================
+   Trivia-SmackDown — Game Overview page
+
+   Layout only. All colour/metric tokens live in css/tokens.css, which MUST be
+   linked before this file.
+
+   NOTE: unlike the splash and start screens, this page DOES scroll — it is a
+   long-form reading page, not a fixed game screen.
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  /* the page gradient lives on <html> so it covers the FULL document height,
+     not just the first viewport — `min-height:100%` on <body> alone has no
+     resolved parent height to size against on a long page */
+  min-height: 100%;
+  background: var(--tsd-bg-gradient);
+  background-attachment: fixed;
+}
+
+body.tsd-overview {
+  margin: 0;
+  min-height: 100vh;
+  background: transparent;
+  color: var(--tsd-text);
+  font-family: var(--tsd-font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;               /* never scroll sideways */
+}
+
+/* ambient corner blooms, fixed so they do not scroll away */
+body.tsd-overview::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 40% 40% at 100% 0%,
+      rgba(180, 60, 200, .22) 0%, rgba(180, 60, 200, 0) 70%),
+    radial-gradient(ellipse 45% 45% at 0% 100%,
+      rgba(60, 90, 200, .18) 0%, rgba(60, 90, 200, 0) 70%);
+}
+
+.tsd-page {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--tsd-container);
+  margin: 0 auto;
+  padding: clamp(18px, 2.4vw, 34px) var(--tsd-gutter) clamp(40px, 6vw, 90px);
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.tsd-ov-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(14px, 2vw, 28px);
+  flex-wrap: wrap;
+  margin-bottom: clamp(20px, 3vw, 40px);
+}
+
+.tsd-ov-brand {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.2vw, 18px);
+  min-width: 0;
+}
+
+.tsd-ov-back {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  /* The icon scales down to ~29x34 on tablet/mobile, which is under the
+     44x44 minimum target size (WCAG 2.1 SC 2.5.5). Grow the hit area
+     without growing the artwork -- the img keeps its own clamp() size. */
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .2s var(--tsd-ease), filter .2s var(--tsd-ease);
+}
+
+.tsd-ov-back img {
+  display: block;
+  width: auto;
+  height: clamp(34px, 3.4vw, 51px);
+}
+
+.tsd-ov-back:hover,
+.tsd-ov-back:focus-visible {
+  transform: translateX(-3px);
+  filter: brightness(1.15);
+}
+
+.tsd-ov-back:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.tsd-ov-titles { min-width: 0; }
+
+.tsd-ov-title {
+  margin: 0;
+  font-size: clamp(22px, 2.6vw, 40px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--tsd-text);
+  /* 0px 4px 30.2px #FFFFFFE5 */
+  text-shadow: var(--tsd-title-glow);
+}
+
+.tsd-ov-sub {
+  margin: clamp(2px, .4vw, 8px) 0 0;
+  font-size: clamp(12px, 1.05vw, 17px);
+  color: var(--tsd-body-text);
+}
+
+/* ---- Header actions ---------------------------------------------------- */
+
+.tsd-ov-actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1vw, 16px);
+  flex-wrap: wrap;
+}
+
+/* round icon buttons */
+.tsd-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(38px, 3.2vw, 48px);
+  height: clamp(38px, 3.2vw, 48px);
+  padding: 0;
+
+  border: 1.5px solid var(--tsd-accent-pink);
+  border-radius: 50%;
+  background: rgba(253, 12, 117, .08);
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s var(--tsd-ease),
+              transform .2s var(--tsd-ease),
+              box-shadow .2s var(--tsd-ease);
+}
+
+.tsd-icon-btn img {
+  display: block;
+  width: auto;
+  height: clamp(16px, 1.4vw, 21px);
+}
+
+.tsd-icon-btn:hover,
+.tsd-icon-btn:focus-visible {
+  background: rgba(253, 12, 117, .22);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(253, 12, 117, .3);
+}
+
+.tsd-icon-btn:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* muted state for the volume toggle */
+.tsd-icon-btn.is-muted { opacity: .45; }
+
+/* pill buttons */
+.tsd-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(7px, .7vw, 12px);
+  height: clamp(38px, 3.2vw, 48px);
+  padding: 0 clamp(14px, 1.3vw, 22px);
+
+  border: var(--tsd-border-hairline);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .03);
+
+  color: var(--tsd-text);
+  font-family: inherit;
+  font-size: clamp(12px, 1vw, 16px);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .2s var(--tsd-ease),
+              border-color .2s var(--tsd-ease),
+              transform .2s var(--tsd-ease);
+}
+
+.tsd-pill img,
+.tsd-pill svg {
+  display: block;
+  width: auto;
+  height: clamp(15px, 1.3vw, 19px);
+  flex: 0 0 auto;
+}
+
+.tsd-pill:hover,
+.tsd-pill:focus-visible {
+  background: rgba(255, 255, 255, .09);
+  border-color: var(--tsd-accent-pink);
+  transform: translateY(-2px);
+}
+
+.tsd-pill:focus-visible {
+  outline: 2px solid var(--tsd-star-yellow);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Cards
+   ========================================================================== */
+
+.tsd-card {
+  border: 1px solid var(--tsd-card-border);
+  border-radius: 16px;
+  background: var(--tsd-card-bg);
+  padding: clamp(18px, 2.2vw, 34px);
+  margin-bottom: clamp(18px, 2.4vw, 34px);
+}
+
+/* ---- Intro card -------------------------------------------------------- */
+
+.tsd-intro {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 40px);
+  flex-wrap: wrap;
+}
+
+.tsd-intro-art {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tsd-intro-art img {
+  display: block;
+  width: auto;
+  height: clamp(120px, 14vw, 200px);
+  max-width: 100%;
+}
+
+.tsd-intro-body {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.tsd-intro-lead {
+  margin: 0;
+  font-size: clamp(16px, 1.55vw, 25px);
+  line-height: 1.35;
+  color: var(--tsd-heading-text);
+}
+
+.tsd-intro-lead strong {
+  font-weight: 700;
+  color: var(--tsd-text);
+}
+
+.tsd-intro-alt {
+  margin: clamp(6px, .7vw, 12px) 0 0;
+  font-size: clamp(14px, 1.35vw, 21px);
+  line-height: 1.35;
+  color: var(--tsd-type-b);
+}
+
+/* ---- Tip panel (Two Mice) ---------------------------------------------- */
+
+.tsd-tip {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.6vw, 26px);
+  margin-top: clamp(14px, 1.8vw, 26px);
+  padding: clamp(14px, 1.6vw, 26px);
+  width: 100%;
+
+  border: 1px solid var(--tsd-panel-border);
+  border-radius: 14px;
+  background: var(--tsd-panel-bg);
+}
+
+.tsd-tip-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(56px, 5.4vw, 84px);
+  height: clamp(56px, 5.4vw, 84px);
+  border: 1px solid var(--tsd-panel-border);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .04);
+}
+
+.tsd-tip-icon img {
+  display: block;
+  width: auto;
+  height: clamp(26px, 2.6vw, 42px);
+}
+
+.tsd-tip-body { min-width: 0; }
+
+.tsd-tip-title {
+  margin: 0 0 clamp(4px, .5vw, 9px);
+  font-size: clamp(15px, 1.35vw, 21px);
+  font-weight: 600;
+  color: var(--tsd-text);
+}
+
+.tsd-tip-text {
+  margin: 0;
+  font-size: clamp(13px, 1.15vw, 18px);
+  line-height: 1.5;
+  color: var(--tsd-body-text);
+}
+
+/* ==========================================================================
+   Game-type cards
+   ========================================================================== */
+
+.tsd-type {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(18px, 2.4vw, 40px);
+  /* stretch, not start — the left column needs the full row height so its
+     content can sit flush with the bottom of the rules panel */
+  align-items: stretch;
+}
+
+.tsd-type-left {
+  min-width: 0;
+  /* fill the row height and push the content down, so the artwork + blurb
+     sit flush with the bottom of the rules panel on the right */
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+}
+
+/* the heading stays at the top; everything after it is pushed to the bottom */
+.tsd-type-left .tsd-type-art { margin-top: auto; }
+
+/* ---- Heading with numbered badge --------------------------------------- */
+
+.tsd-type-head {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.1vw, 17px);
+  margin-bottom: clamp(14px, 1.8vw, 26px);
+}
+
+/* the hexagon badge is built in CSS — no image needed */
+.tsd-badge {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: clamp(34px, 2.9vw, 44px);
+  height: clamp(38px, 3.3vw, 50px);
+
+  /* regular hexagon, flat left/right edges, points top and bottom */
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: var(--tsd-badge-color, var(--tsd-type-b));
+
+  font-size: clamp(14px, 1.2vw, 19px);
+  font-weight: 700;
+  color: var(--tsd-text);
+  line-height: 1;
+}
+
+/* the badge sits on a subtly darker fill so the number reads clearly */
+.tsd-badge-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 3px);
+  height: calc(100% - 3px);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: #171343;
+}
+
+.tsd-type-titles { min-width: 0; }
+
+.tsd-type-name {
+  margin: 0;
+  font-size: clamp(16px, 1.5vw, 24px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--tsd-badge-color, var(--tsd-type-b));
+}
+
+.tsd-type-kind {
+  margin: clamp(1px, .2vw, 4px) 0 0;
+  font-size: clamp(13px, 1.2vw, 19px);
+  color: var(--tsd-heading-text);
+}
+
+/* ---- Artwork row ------------------------------------------------------- */
+
+.tsd-type-art {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.1vw, 18px);
+  flex-wrap: wrap;
+  margin-bottom: clamp(14px, 1.8vw, 24px);
+}
+
+.tsd-type-art img {
+  display: block;
+  width: auto;
+  height: clamp(90px, 10.5vw, 150px);
+  max-width: 100%;
+}
+
+/* the two player avatars are circular with a coloured ring */
+.tsd-avatar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(96px, 11.5vw, 168px);
+  height: clamp(96px, 11.5vw, 168px);
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .04);
+}
+
+/* The source SVG is a 236x236 canvas whose artwork is only a r=54.6 circle in
+   the middle (~46% of the canvas) — the rest is drop-shadow padding. Scaling
+   to ~216% makes the character fill the ring the way the design shows. */
+.tsd-avatar img {
+  width: 216%;
+  height: 216%;
+  max-width: none;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.tsd-avatar--p0 { border: 2px solid rgba(150, 165, 235, .5); }
+.tsd-avatar--p1 { border: 2px solid var(--tsd-accent-pink); }
+
+.tsd-type-art .tsd-vs {
+  height: clamp(52px, 6vw, 92px);
+}
+
+.tsd-type-blurb {
+  margin: 0;
+  font-size: clamp(13px, 1.15vw, 18px);
+  line-height: 1.55;
+  color: var(--tsd-body-text);
+}
+
+/* ---- Rules panel ------------------------------------------------------- */
+
+.tsd-type-rules {
+  min-width: 0;
+  padding: clamp(16px, 2vw, 32px);
+  border: 1px solid var(--tsd-panel-border);
+  border-radius: 14px;
+  background: var(--tsd-panel-bg);
+}
+
+.tsd-type-rules p {
+  margin: 0;
+  font-size: clamp(13px, 1.15vw, 18px);
+  line-height: 1.6;
+  color: var(--tsd-body-text);
+}
+
+.tsd-type-rules p + p { margin-top: 1em; }
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .tsd-type {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tsd-intro-art {
+    margin: 0 auto;
+  }
+
+  .tsd-intro-body { flex-basis: 100%; }
+}
+
+@media (max-width: 620px) {
+  .tsd-ov-header {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .tsd-ov-actions { width: 100%; }
+
+  .tsd-pill {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .tsd-tip {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .tsd-type-art { justify-content: center; }
+
+  .tsd-intro { text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  .tsd-ov-back,
+  .tsd-icon-btn,
+  .tsd-pill { transition: none; }
+
+  .tsd-ov-back:hover,
+  .tsd-icon-btn:hover,
+  .tsd-pill:hover { transform: none; }
+}

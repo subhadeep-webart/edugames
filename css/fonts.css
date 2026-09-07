@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Trivia-SmackDown — web fonts
+
+   Two faces carry the design:
+
+     Lufga       body copy, buttons, labels, scores
+     Bebas Neue  headings and display titles
+
+   Files live in /fonts. Lufga shipped as .otf only, so it is served that
+   way; Bebas Neue shipped with .woff2, which is smaller and is preferred.
+   (Converting the Lufga .otf files to .woff2 would cut roughly 60% off
+   their transfer size — worth doing before this goes live, but they work
+   as they are.)
+
+   Load this BEFORE tokens.css in every page:
+
+     <link rel="stylesheet" href="css/fonts.css">
+     <link rel="stylesheet" href="css/tokens.css">
+
+   `font-display: swap` shows the fallback immediately and swaps the real
+   face in when it arrives, rather than blanking the text while it loads.
+
+   Only the weights the design actually uses are declared. The family also
+   ships Thin/ExtraLight/Light/Black and a full italic set; add blocks for
+   those if a design ever calls for them.
+   ========================================================================== */
+
+/* ---- Lufga — body ------------------------------------------------------ */
+
+@font-face {
+  font-family: "Lufga";
+  src: url("../fonts/Lufga-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lufga";
+  src: url("../fonts/Lufga-Italic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lufga";
+  src: url("../fonts/Lufga-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lufga";
+  src: url("../fonts/Lufga-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lufga";
+  src: url("../fonts/Lufga-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lufga";
+  src: url("../fonts/Lufga-ExtraBold.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---- Bebas Neue — display ---------------------------------------------
+   Single weight. .woff2 first, .woff as the fallback for older browsers. */
+
+@font-face {
+  font-family: "Bebas Neue";
+  src: url("../fonts/BebasNeue-Regular.woff2") format("woff2"),
+       url("../fonts/BebasNeue-Regular.woff")  format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

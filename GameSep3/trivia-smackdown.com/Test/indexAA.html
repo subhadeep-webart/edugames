@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="generator" content="CoffeeCup HTML Editor (www.coffeecup.com)">
+    <meta name="dcterms.created" content="Mon, 04 Dec 2023 22:08:21 GMT">
+    <meta name="description" content="">
+    <meta name="keywords" content=""> 
+    <link rel="stylesheet" href="css/style.css" >
+  <!-- /public_html/edugames.com/JStest/EdUGamesJS /> -->         
+<style></style> 
+<p id="tempImageInsrtPt"> </p>   
+<title>EdUGames.com</title>
+<style> 
+#trvSmd{
+ font:Courier-New;
+ background-color:yellow;
+ text-align: center;
+ font-size: 60px;
+} 
+<!-- <div id="styleInsrtPt"></div> -->
+
+
+</style>
+   
+<head></head> 
+ <!-- <p id="trvSmd" >Trivia SmackDown</p> -->
+
+<body>
+
+  
+<div id='formA'>
+ <!-- <p>Please complete the below form and press the "Register" button. </p> --> 
+ <!-- <p>After registration select a Set and press the "Start Set" button. </p> -->   
+        
+    <font size=2 color='#000000' face='Arial'>
+    <div><table width='100%' border='1' cellpadding='2' bordercolor='#003366' cellspacing='2' bgcolor='#ccffff'>
+    <tr valign='top'>
+    <td>NamE:<input type='text' id='p1' name='' value='Peter'>Zip Code:
+    <input type='text' id='z1' name='' cols='12' value='94566'>
+    Highest School Grade Completed
+    <select id='g1' name='Grade' align='top'>
+      <option value='1'>1</option>
+      <option value='2'>2</option>
+      <option value='3'>3</option>
+      <option value='4'>4</option>
+      <option value='5'>5</option>
+      <option value='6'>6</option>
+      <option value='7'>7</option>
+      <option value='8'>8</option>
+      <option value='9'>9</option>
+      <option  selected value='10'>10</option>
+      <option value='11'>11</option>
+      <option value='12'>12</option>
+      <option value='13'>13</option>
+      <option value='14'>14</option>
+      <option value='14+'>14</option>
+    </select>
+    <tr valign='top'>
+    <td>
+    Name:<input type='text'  id='p2' name='' value='Paul'>Zip Code:
+    <input type='text' id='z2' name='' value='94066'>
+    Highest School Grade Completed
+    <select id='g2' name='Grade' align='top'>
+        <option value='1'>1</option>
+      <option value='2'>2</option>
+      <option value='3'>3</option>
+      <option value='4'>4</option>
+      <option value='5'>5</option>
+      <option value='6'>6</option>
+      <option value='7'>7</option>
+      <option value='8'>8</option>
+      <option value='9'>9</option>
+      <option value='10'>10</option>
+      <option selected  value='11'>11</option>
+      <option value='12'>12</option>
+      <option value='13'>13</option>
+      <option value='14'>14</option>
+      <option value='14+'>14</option>
+    </select></td>
+    <tr>
+    
+    </td>
+    </table>
+    </div>
+    </div>
+
+
+
+
+ 
+<div id="styleInsrtPt"></div>
+<div>
+<input type="checkbox" name="OnNet" id="onNet" value="OnNet">
+<input type="button" name="Register" onclick="regPlayers()" id="butRegister"  value="Reg">
+<input type="text" id="strtNbr" value="0" size="1px">
+<input type="button" name="startSet" onclick="startSet()" id="butStartSet" disabled value="StrtSet">
+<td><input type="text" name="" style="width:90px;" id="serNbr" value="PRA1_1794"></td>
+<input type="button" name="start" id="butStartRound" onclick="startRnd()" disabled value="StrtRnd">
+<select id='rndMenu' name='rndMenu' align='left' >
+<option value=AA.Len00020>1  AA.Len00020 Match</option>
+<option value=AA.Ben00806>1  AA.Ben00806 Match</option>
+<option value=AA.Cen00042>1  AA.Cen00042 Match</option>
+<option value=AA.Men00006>1  AA.Men00006 Match</option>
+<option value=AA.Ben00001>1  AA.Ben00001 PresidentGrid</option> 
+<option value=AA.Ben00002>2  AA.Ben000024 kings</option>
+<option value=AA.Ben00244>3  AA.Ben00244 12 coins</option>
+<option value=AA.Ben00003>4  AA.Ben00003 USMap</option>
+<option value=AA.Ben00004>5  AA.Ben00004</option>
+<option value=AA.Ben00011>5  AA.Ben00011 Venus</option>
+<option value=AA.Ben00478>6  AA.Ben00479 3 yes Coins</option>
+<option value=AA.Cen00004>7  AA.Cen00004 NatPks</option>
+<option value=AA.Cen00006>8  AA.Cen00006</option>
+<option value=AA.Cen00100>9  AA.Cen00100 Sports</option>
+<option   selected value=AA.Den00002>10  AA.Den00002 MoonLanding</option>
+<option value=AA.Een00002>11  AA.Een00002 Letters</option>
+<option value=AA.Een00010>12  AA.Een00010 famous Things</option>
+<option value=AA.Een00012>13  AA.Een00012</option>
+<option value=AA.Een00016>14  AA.Een00016</option>
+<option value=AA.Een00025>15  AA.Een00025 spelling</option>
+<option value=AA.Ien00005>16  AA.Ien00005 MtR</option>
+<option value=AA.Ien00006>17  AA.Ien00006-IJMem</option>
+<option value=AA.Ien00008>18  AA.Ien00008 author Select</option>
+<option value=AA.Ien00022>19  AA.Ien00022JFK</option>
+<option value=AA.Ien00025>20  AA.Ien00025WashDC</option>
+<option value=AA.Len00002>21  AA.Len00002 Custer  </option>
+<option value=AA.Men00021>23  AA.Men00021</option>
+<option value=AA.Men00001>23  AA.Men00001</option>
+<option value=AA.Men00002>23  AA.Men00002</option>
+<option value=AA.Nen00001>24  AA.Nen00001</option>
+<option value=AA.Oen00001>25  AA.Oen00001Numbers</option>
+<option value=AA.Oen00002>26  AA.Oen00002</option>
+<option value=AA.Oen00005>27  AA.Oen00005</option>
+<option value=AA.Oen00014>28  AA.Oen00014</option>
+<option value=AA.Pen00006>29  AA.Pen00006Even Numbers</option>
+<option value=AA.Pen00016>30  AA.Pen00016</option>
+<option value=AA.Pen00018>31  AA.Pen00018</option>
+<option value=AA.Qen00002>32  AA.Qen00002 16PopPres</option>
+<option value=AA.Qen00003>33  AA.Qen00003</option>
+<option value=AA.Qen00003>34  AA.Qen00003PTblOfElements</option>
+<option value=AA.Qen00004>35  AA.Qen00004 US Map</option>
+<option value=AA.Qen00009>36  AA.Qen00009</option>
+<option value=AA.Qen00009>37  AA.Qen00009Labels</option>
+<option value=AA.Qen00021>38  AA.Qen00021</option>
+<option value=AA.Qen00027>39  AA.Qen00027</option>
+<option value=AA.Qen00034>40  AA.Qen00034</option>
+<option value=AA.Qen00076>41  AA.Qen00076</option>
+<option value=AA.Qen00076>42  AA.Qen00076RevWar</option>
+<option value=AA.Uen00017>43  AA.Uen00017</option>
+<option value=AA.Uen00022>44  AA.Uen00022</option>
+<option value=AA.Uen00030>45  AA.Uen00030</option>
+<option value=AA.Uen00045>46  AA.Uen00045</option>
+<option value=AA.Uen01219>47  AA.Uen01219</option>
+<option value=AA.Xen00003>48  AA.Xen00003</option>
+
+
+
+</div><div><table border="1"  width="80%">
+  <tr>
+     <td><input type="button" color="#0000ff"  onclick="cp.playNextRound()"  value="Nxt"></td>      
+     <td><input type="button" color="#0000ff"  onclick="cp.setBeingPlayed.listRnds"  value="LstRnds"></td>
+     <td><input type="button" onclick="cleanPlayArea()"  value="Clen"></td>
+     <td><input type="button" onclick="startRoundList(0)"  value="StrtRndTst"></td>
+     <td><input type="button" onclick="clearScore()"  value="ClearScore"></td>     
+     <td><input type="button" onclick="testABC()"  value="testABC"></td>    
+
+     
+                     
+</tr>
+  
+<div id="regFormInsrtPt"></div>
+<div id="selFormInsrtPt"></div> 
+<div id="itfInsrtPt"></div>
+
+<div width="181px" id="ansBar"  ></div>
+<div id="gameInsrtPt"></div></td> 
+
+
+<div id="imageInsertPt" class='imageInsertPt'></div>  
+<div id="gameLInsrtPtA" class='imageInsertPt'></div> 
+<div id="gameLInsrtPtB" class='imageInsertPt'></div>
+<div id='gamePlayArea' font-size='64px'></div> 
+
+<div id="insrtPtA"></div>
+<div id="insrtPtB"></div>
+<div id="insrtPtC"></div>
+<div id="insrtPtD"></div>
+<div id="insrtPtE"></div>
+<div id="insrtPtF"></div> 
+
+
+<!--  -->
+     
+<div height="20px" id="gameInsrtPt"></div></td>                                                            
+ 
+<!--<div id='gameAImageInsrtPt'></div><table border="1"  width="100%">   -->
+
+<!-- <div id='alphaBarInsrtPt' width="496"  height="288"></div> -->
+<!-- <div id='gameAImageInsrtPt'></div> -->
+             
+</body>
+</html>
+<script>                                                 
+ 
+function displayData(data){
+
+     console.log("*************" + data + "************");
+}
+
+set = null;
+
+
+
+
+function testABC(){console.log("getSet  "  );
+  const serNbr = document.getElementById("serNbr").value;
+  console.log("/edugames.com/cgi-bin/GetASet.pl?" + serNbr)        	
+  fetch("/edugames.com/cgi-bin/GetASet.pl?" + serNbr)     
+  	.then(response => response.text())
+  	.then(data => {
+    const set = new Set(data)
+    
+  	//console.log("fetch data=  " + data );
+  }); 
+}
+
+
+
+
+
+function netTestXX(){console.log("netTest()" );
+
+	const url = "http://edugames.com/cgi-bin/GetRnds.pl?1.00,16.00,LDAP,TrivCode/Ar,false,";
+	const data = fetch(url);
+	console.log("data = "  + data);
+
+}
+
+
+
+function setTest(){console.log(" setTest " );
+
+const sets = new Sets();
+    const theSetStr = sets.getData("PRA1_1781");
+    //console.log(" theSetStr="  + theSetStr)   
+    const set = new Set(theSetStr);
+    
+    console.log(" ________|||__________" );
+    const xx = set.listRnds("ABC"); 
+     console.log( xx );    
+    console.log(" ________|||__________\n" + xx );    
+    //console.log(" theSetStr " + theSetStr );
+}
+</script>
+
+
+ 
+<script src="js/script.js"></script>
+<script src="js/Interface.js"></script>
+<script src="js/PlayerLineUp.js"></script>
+<script src="js/Game.js"></script>
+<script src="js/ControlPanel.js"></script>
+<script src="js/SelectionPanel.js"></script>
+<script src="js/RndMenu.js"></script>
+<script src="js/BoxGame.js"></script>
+<script src="js/Rounds.js"></script>
+<script src="js/AnsButtons.js"></script>
+<script src="js/Sets.js"></script>
+<script src="js/SetMenu.js"></script>
+<script src="js/GameA.js"></script>
+<script src="js/GameB.js"></script>
+<script src="js/GameC.js"></script>
+<script src="js/GameD.js"></script>
+<script src="js/GameE.js"></script>
+<script src="js/GameI.js"></script>
+<script src="js/GameL.js"></script>
+<script src="js/GameM.js"></script>
+<script src="js/GameN.js"></script>
+<script src="js/GameO.js"></script>
+<script src="js/GameP.js"></script>
+<script src="js/GameQ.js"></script>
+<script src="js/GameU.js"></script>
+<script src="js/GameX.js"></script>
+<script src="js/Player.js"></script>
+ <script src="js/Round.js"></script>
+<script src="js/RoundB.js"></script>
+<script src="js/RoundC.js"></script>
+<script src="js/RoundD.js"></script>
+<script src="js/RoundE.js"></script>
+<script src="js/RoundI.js"></script>
+<script src="js/RoundL.js"></script>
+<script src="js/RoundM.js"></script>
+<script src="js/RoundN.js"></script>
+<script src="js/RoundO.js"></script>
+<script src="js/RoundP.js"></script>
+<script src="js/RoundQ.js"></script>
+<script src="js/RoundU.js"></script> 
+<script src="js/Set.js"></script> 
+<script src="js/Rnd.js"></script>
+<script src="NetTest.js"></script> 
+<!--  -->
+<script src="js/SetPRA.js"></script>
+<script src="js/Utl.js"></script>
+<script src="js/AlphaBar.js"></script>
