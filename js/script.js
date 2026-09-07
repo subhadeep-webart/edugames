@@ -45,6 +45,7 @@ let scoreFac = 1;
 let interval = 0.1;
 let dotInterval = 0.1;//clockInterval, panelInterval, ptFacInterval).
 let clockInterval = 0.1;
+let timedOutAlreadyScored = false;//guards against the clock scoring a timeout more than once
 let panelInterval = 0.1;
 let ptFacInterval = 0.1;
 
@@ -146,7 +147,7 @@ function stopGameLNDTimer() {//clockInterval, panelInterval, ptFacInterval).
 	console.log("script.stopGameLNDTimer() " + seconds);
 	const stopTime = seconds;
 	seconds = 0;
-	clearInterval(interval); // Stop the timer
+	clearInterval(clockInterval); // Stop the timer
 	return orgTimeForGameDNL - stopTime;
 }
 
@@ -154,7 +155,9 @@ function startGameLNDTimer(time) {
 	console.log("script.startGameLNDTimer() " + time);
 	orgTimeForGameDNL = time;
 	seconds = time;
-	interval = setInterval(runTheClock, 1000);
+	clearInterval(clockInterval);//never leave an earlier play clock running
+	timedOutAlreadyScored = false;
+	clockInterval = setInterval(runTheClock, 1000);
 }
 
 
@@ -1030,6 +1033,8 @@ function startPanelRemoval(bCnt,int){console.log("script startPanelRemoval  " + 
 //let clockInterval = 0.1;
 
 function startTheClock(){console.log("script startClock  "  + seconds);//Started by itf
+	clearInterval(clockInterval);//never leave an earlier play clock running
+	timedOutAlreadyScored = false;
 	clockInterval =  setInterval(runTheClock,1000);
 }
 function runTheClock() {//console.log("script runTheClock  " + seconds + " interval " + interval);
@@ -1056,6 +1061,9 @@ function runTheClock() {//console.log("script runTheClock  " + seconds + " inter
 			timeBox.value = 'Time\'s up!';
 			seconds = 0;
 			clearInterval(clockInterval); // Stop the timer
+			clearInterval(interval);//legacy handle - some starts still used this
+			if (timedOutAlreadyScored) return;//only ever score a timeout once
+			timedOutAlreadyScored = true;
 			count = new Audio("Audio/TimesUp.wav");
 			count.play();
 			cp.theGameInPlay.checkPlay("timedOut" );
@@ -1110,7 +1118,8 @@ function setUpTheIncreasingPtFac(startFac,inc,stopPt){console.log("script startF
 	stopPt = stopPt;
 	ptInc = inc;
 	///ptFacDoc =  document.getElementById("ptFac");//djustPtFacUp
-	interval = setInterval(adjustPtFacUp, 1000);
+	clearInterval(ptFacInterval);
+	ptFacInterval = setInterval(adjustPtFacUp, 1000);
 	console.log("script startFac" + startFac + " inc = " + inc)
 }
 
@@ -1123,7 +1132,7 @@ function adjustPtFacUp(plusMinus) {
 	} else {
 		console.log("script adjustPtFac XXX ");
 		///ptFacDoc.innerHTML = "Point Factor: 1.0";
-		clearInterval(interval); // Stop the timer
+		clearInterval(ptFacInterval); // Stop the timer
 	}
 } 
 
@@ -1133,13 +1142,14 @@ function setUpAndStartThePtFac(startFac, inc, stopPt) {
 	stopPt = stopPt;
 	ptInc = inc;
 	///ptFacDoc = document.getElementById("ptFac");
-	interval = setInterval(adjustPtFacDown, 1000);
+	clearInterval(ptFacInterval);
+	ptFacInterval = setInterval(adjustPtFacDown, 1000);
 }
 
 
 
 function stopThePtFac(){console.log("script stopThePtFac  ");//used bu GameN deprecated
-        clearInterval(interval);
+        clearInterval(ptFacInterval);
 }
 
 
