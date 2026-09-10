@@ -1,5 +1,6 @@
 /* ==========================================================================
-   tsd-dev-rewrite.js — LOCAL DEVELOPMENT ONLY. Do not deploy.
+   tsd-dev-rewrite.js — routes the hard-coded edugames.com data calls through
+   the same-origin proxy. Presentation/deployment shim; no game logic.
 
    Most of the game's remote calls use a relative path (/cgi-bin/...), which
    dev-server.js already proxies. Four call sites hard-code the absolute
@@ -20,21 +21,52 @@
    Images are untouched — <img src> is not subject to CORS, so absolute
    image URLs load from edugames.com directly and work as-is.
 
-   Loaded only by the dev server; never referenced from the deployed pages.
    Changes no game logic: it intercepts window.fetch, rewrites the URL
    string, and delegates to the original fetch.
+
+   ---------------------------------------------------------------------------
+   NOW ALSO RUNS ON DEPLOYED PREVIEWS (Netlify), not just localhost.
+
+   The same CORS refusal that blocks localhost blocks any preview host: the
+   server names exactly ONE origin (https://trivia-smackdown.com) and sends
+   that header to everyone, so a Netlify deploy fails identically --
+
+       Error fetching data: TypeError: Failed to fetch
+           at GameQ.getData (GameQ.js:430:5)
+
+   netlify.toml already proxies /cgi-bin/* and /DataBase/* to the real
+   server, exactly as dev-server.js does locally, and a proxied request is
+   same-origin so CORS never applies. js/Set.js already requests its paths
+   relatively, which is why sets and round lists load on Netlify while GameQ
+   does not -- GameQ's path is built absolute by script.js getTextFilePath().
+
+   The host gate below therefore allows any origin that is NOT the live site.
+   On trivia-smackdown.com the shim stays inert and the absolute URLs are
+   used exactly as before, so the production path is untouched.
    ========================================================================== */
 
 (function () {
   'use strict';
 
-  //Only meaningful on a local origin. On the real site this is a no-op, so
-  //an accidental deploy cannot change how the game talks to the server.
+  //Inert on the live site, active everywhere else (localhost and any preview
+  //deployment). The live site is the one origin the data server's CORS header
+  //names, so there the absolute URLs already work and must not be rewritten.
   const host = location.hostname;
-  const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
-  if (!isLocal) return;
+  const isLiveSite = /(^|\.)trivia-smackdown\.com$/i.test(host)
+                  || /(^|\.)edugames\.com$/i.test(host);
+  if (isLiveSite) return;
+
+  //dev-server.js injects this same tag into every page it serves, and
+  //GamePanel.html now carries it too, so locally it loads twice. Wrapping a
+  //wrapper would work but doubles the logging and the indirection -- bail if
+  //the shim is already installed.
+  if (window.fetch && window.fetch.__tsdRewrite) return;
 
   const ORIGIN_RE = /^https?:\/\/(www\.)?edugames\.com/i;
+
+  //Only these two prefixes are proxied (netlify.toml, dev-server.js). Any
+  //other path on that host is left absolute rather than rewritten into a 404.
+  const PROXIED_RE = /^\/(cgi-bin|DataBase)\//i;
 
   const nativeFetch = window.fetch.bind(window);
 
@@ -42,13 +74,17 @@
     try {
       if (typeof input === 'string' && ORIGIN_RE.test(input)) {
         const rewritten = input.replace(ORIGIN_RE, '');
-        console.log('[dev-rewrite] ' + input + '  ->  ' + rewritten);
-        return nativeFetch(rewritten, init);
+        if (PROXIED_RE.test(rewritten)) {
+          console.log('[tsd-rewrite] ' + input + '  ->  ' + rewritten);
+          return nativeFetch(rewritten, init);
+        }
       }
       if (input instanceof Request && ORIGIN_RE.test(input.url)) {
         const rewritten = input.url.replace(ORIGIN_RE, '');
-        console.log('[dev-rewrite] ' + input.url + '  ->  ' + rewritten);
-        return nativeFetch(new Request(rewritten, input), init);
+        if (PROXIED_RE.test(rewritten)) {
+          console.log('[tsd-rewrite] ' + input.url + '  ->  ' + rewritten);
+          return nativeFetch(new Request(rewritten, input), init);
+        }
       }
     } catch (e) {
       //Never let the shim break a real request.
@@ -57,5 +93,7 @@
     return nativeFetch(input, init);
   };
 
-  console.log('[dev-rewrite] active — edugames.com fetches routed via the dev proxy');
+  window.fetch.__tsdRewrite = true;
+
+  console.log('[tsd-rewrite] active — edugames.com fetches routed via the same-origin proxy');
 })();

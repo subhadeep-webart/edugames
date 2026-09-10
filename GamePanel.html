@@ -704,6 +704,14 @@
 </script>
 
 
+<!-- Deployment shim — must load BEFORE the game scripts so the wrapper is in
+     place before any of them calls fetch. Routes the hardcoded
+     edugames.com data URLs through the /cgi-bin and /DataBase proxies that
+     netlify.toml and dev-server.js already define, so localhost and preview
+     deployments are not blocked by that server's single-origin CORS header.
+     Inert on the live site. Rewrites the request url only; no game logic. -->
+<script src="js-ui/tsd-dev-rewrite.js"></script>
+
 <script src="js/Interface.js"></script>
 <script src="js/PlayerLineUp.js"></script>
 <script src="js/Game.js"></script>
