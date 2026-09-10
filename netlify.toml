@@ -30,6 +30,15 @@
 # so no CORS preflight applies) rather than a 301/302 bounce.
 # --------------------------------------------------------------------------
 
+# The game calls these with a BARE query string -- the path is the query, with
+# no key=value pair:
+#
+#   /cgi-bin/GetTextFileTSD.pl?Bu/Th/Ba/El/PeriodicTblOfElements/...BL.csv
+#
+# :splat captures only the path segment after /cgi-bin/, so the query has to
+# be carried across explicitly. Without it the Perl script receives no
+# argument and returns a 126-byte stub with no "AnswerType=" in it, which is
+# what made the Elements round fail while the round list loaded fine.
 [[redirects]]
   from   = "/cgi-bin/*"
   to     = "https://www.edugames.com/cgi-bin/:splat"

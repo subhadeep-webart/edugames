@@ -31,3 +31,10 @@ dev-server.js
 .dev-cache/
 docs/
 .claude/
+
+# Server-side Perl. Netlify is static hosting and cannot execute these, and
+# worse: a deployed file is matched BEFORE a redirect rule, so shipping this
+# directory lets /cgi-bin/GetASetTSD.pl resolve to the Perl SOURCE instead of
+# being proxied to the real server by netlify.toml. Keep it out of the deploy
+# so every /cgi-bin/* request falls through to the proxy.
+cgi-bin/
