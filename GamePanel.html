@@ -768,6 +768,12 @@
 
 <!-- new-UI presentation helper. Loads AFTER the game scripts and only
      writes a CSS variable; it changes no game state. -->
+<!-- Mirrors whose turn it is (cp.itf.nowPlaying) onto <body> as
+     data-tsd-turn, so the CSS can paint the year slider and its display
+     box in the ANSWERING player's colour. The slider was hard-coded to
+     player 2's pink, so player 1 saw the wrong side's colour. Reads one
+     integer and writes one attribute; no turn or game value changes. -->
+<script src="js-ui/tsd-player-turn.js"></script>
 <script src="js-ui/tsd-slider-fill.js"></script>
 <script src="js-ui/tsd-clock-bar.js"></script>
 <!-- Labels each bid square with what it is worth (points) and how long it

@@ -3705,6 +3705,24 @@ body.tsd-panel {
   color: var(--tsd-text);
 }
 
+/* The two rules above only fire if something writes SkyBlue/Salmon inline.
+   GameD.setPlayerColors() and setInitialValues() do exactly that -- but
+   neither is called from anywhere in js/, so in practice the box never gets
+   a player colour and sits neutral while the slider beside it is coloured.
+
+   Drive it from the same turn attribute the slider uses so the two agree.
+   Kept below the inline-style rules so that if those methods are ever wired
+   up again, what the game writes still wins. */
+body[data-tsd-turn="0"] .tsd-play-area #displayBoxYear:not([style*="white"]) {
+  background: rgba(6, 131, 252, .20);
+  border-color: rgba(6, 131, 252, .60);
+}
+
+body[data-tsd-turn="1"] .tsd-play-area #displayBoxYear:not([style*="white"]) {
+  background: rgba(232, 47, 47, .20);
+  border-color: rgba(232, 47, 47, .60);
+}
+
 /* ---- the range sliders -------------------------------------------------
    Figma: track #FFFFFF1F, progress #FD0C75, thumb #F6A3C7.
 
@@ -3713,6 +3731,38 @@ body.tsd-panel {
    WebKit/Blink has no progress pseudo-element, so the gradient on the track
    is what shows there. Without JS to update --tsd-sl-pct the WebKit track
    reads as unfilled — see the note under "progress fill" below.         */
+
+/* ---- whose slider is this? --------------------------------------------
+   BUG: player 1 dragged the slider and it was drawn in player 2's colour.
+
+   --tsd-sl-fill is #FD0C75, which is --tsd-accent-pink -- the colour this
+   stylesheet uses for PLAYER 2 everywhere else (.tsd-bid-panel--p2
+   .but2Player.is-bid). Player 1 is blue (--tsd-blue). The slider was pinned
+   to player 2's colour whoever was actually playing, so the answering player
+   saw the wrong side's colour on their own control.
+
+   (GameD does carry setPlayerColors() / setInitialValues() which assign a
+   background to #sliderYear, but neither is called from anywhere in js/ and
+   both use the pre-palette "Salmon"/"SkyBlue". The live colour is this
+   token, not that code -- so this is fixed here, not there.)
+
+   js-ui/tsd-player-turn.js mirrors cp.itf.nowPlaying onto <body> as
+   data-tsd-turn ("0" = left/blue, "1" = right/red). Re-point the slider
+   tokens at the player whose turn it is. Blue = player 0 = left is
+   preserved; only which of the two is used changes.
+
+   The default below stays pink so a round that somehow never sets the
+   attribute looks exactly as it does today rather than losing its colour. */
+body[data-tsd-turn="0"] {
+  --tsd-sl-fill:  var(--tsd-blue);
+  /* a lightened tint of the fill, matching how #F6A3C7 relates to #FD0C75 */
+  --tsd-sl-thumb: #9CC9FE;
+}
+
+body[data-tsd-turn="1"] {
+  --tsd-sl-fill:  var(--tsd-accent-pink);
+  --tsd-sl-thumb: #F6A3C7;
+}
 
 .tsd-play-area #gamePlayArea input[type="range"] {
   -webkit-appearance: none;
