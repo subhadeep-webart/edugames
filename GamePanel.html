@@ -762,6 +762,17 @@
      writes a CSS variable; it changes no game state. -->
 <script src="js-ui/tsd-slider-fill.js"></script>
 <script src="js-ui/tsd-clock-bar.js"></script>
+<!-- Labels each bid square with what it is worth (points) and how long it
+     allows (seconds), so the rising value of a higher bid is visible while
+     bidding. Reads the arrays BidButs.js already computes; writes only
+     data- attributes and a CSS variable, adds no element. -->
+<script src="js-ui/tsd-bid-value.js"></script>
+<!-- Fixes the picture grid registering a tap on the PREVIOUS picture.
+     GameB.js measures cells in the image's natural pixels but receives the
+     tap in rendered pixels; the CSS scales the picture down to fit, so on a
+     phone every tap landed a cell short. Converts the coordinates to natural
+     space before the game's own cell arithmetic runs -- no rule changed. -->
+<script src="js-ui/tsd-grid-hit-scale.js"></script>
 
 <!-- Keeps the whole panel inside the viewport: no page scrollbar and none
      inside the play area. Measures the rendered content and shrinks it with

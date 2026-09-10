@@ -447,6 +447,18 @@ body.tsd-panel {
   gap: clamp(6px, .7vw, 12px);
   min-width: 0;
 
+  /* The client asked for the card's empty space to be spent on bigger
+     numbers. The blocker was that every size in here was clamped against
+     the VIEWPORT, so the narrowest card (~145px at 1280) set the type size
+     for the widest one (~208px at 1920) as well -- the score had to stay
+     small everywhere so it would not overflow there.
+
+     Making the card a query container breaks that coupling: the sizes below
+     can now respond to the width of THIS card, so a roomy card gets a large
+     score and a tight one keeps the safe size. Purely presentational. */
+  container-type: inline-size;
+  container-name: plcard;
+
   padding: clamp(10px, 1.1vw, 16px) clamp(10px, 1vw, 16px);
   border-radius: 14px;
   /* 1.2px per the design; colour comes from the --p1/--p2 modifier */
@@ -740,6 +752,8 @@ body.tsd-panel {
 .tsd-pl-card .pt {
   display: flex;
   align-items: baseline;
+  /* Wraps to its own line inside the card body so the number is free to be
+     as large as the card allows, rather than sharing a line. */
   /* nowrap: "POINT 0" stays on ONE line. The wrap was added to stop a
      four-digit score overflowing the card, but it also let the number drop
      under its label, and centring made the row sit apart from the name and
@@ -756,12 +770,16 @@ body.tsd-panel {
   /* was clamp(19px,1.75vw,29px). Sized down so the number sits WITH its
      label rather than towering over it -- the card no longer needs the
      score to be the loudest thing in the scorebar. */
-  /* Sized so the widest realistic pairing -- "POINT" plus a four-digit
-     score -- still fits the card on ONE line. The number is a bare text
-     node (Interface.js writes textContent), so it is an anonymous flex item
-     that cannot be selected and cannot be told to shrink; the only lever is
-     the font size, and it has to clear the narrowest card (~145px at 1280).
-     Measured at 8850: 7px over at the old 1.25vw, 0 at 1.05vw. */
+  /* This is now the FLOOR only -- the size for the narrowest card, where a
+     four-digit score plus the "POINT" label has to clear ~145px. The card
+     is a query container (see .tsd-pl-card), so the @container steps below
+     raise this substantially as soon as the card has the room, which is
+     what the client's "unused empty space" note asked for.
+
+     The number is a bare text node (Interface.js writes textContent), so it
+     is an anonymous flex item that cannot be selected or told to shrink;
+     the font size is the only lever, which is why it is stepped rather than
+     left to shrink-to-fit. */
   font-size: clamp(14px, 1.05vw, 19px);
   font-weight: 800;
   line-height: 1.15;
@@ -806,8 +824,109 @@ body.tsd-panel {
   font-weight: 600;
   letter-spacing: .02em;
   line-height: 1.25;
-  white-space: nowrap;
+  /* was `nowrap`, which CLIPPED rather than wrapped. Interface.js writes the
+     whole "Set Total = 12400" into this one node, so it cannot be split or
+     shrunk per-part -- with nowrap the only way to make it fit was to keep
+     the font tiny, which is part of what made the card look empty.
+     Wrapping removes that constraint: the line breaks after the "=" in the
+     rare wide-value case instead of being cut off, so the size below can be
+     raised to something readable. */
+  white-space: normal;
+  overflow-wrap: anywhere;
   color: var(--tsd-text-muted);
+}
+
+/* ==========================================================================
+   CARD DENSITY -- spending the card's empty space on the numbers
+
+   Client feedback: "There is a lot of unused empty space in the player
+   boxes, that could display larger numbers etc."
+
+   The cause was that every size in the card was clamped against the
+   viewport, so the narrowest card set the type size for all of them. The
+   card is now a query container, so each step below applies only when THIS
+   card is actually wide enough to hold it -- the narrow-card sizes above
+   are untouched and nothing can overflow.
+
+   Presentation only: no id is renamed, no node is added or removed, and
+   Interface.js keeps writing the same textContent into the same elements.
+
+   The steps are deliberately conservative at the low end and generous at
+   the top, where the space genuinely is going unused.                     */
+
+/* ~168px+ -- the card has room beyond the narrow worst case. Lift the
+   score clear of its label and let the name breathe. */
+@container plcard (min-width: 168px) {
+  .tsd-pl-card .pt {
+    font-size: clamp(19px, 13cqi, 26px);
+    gap: clamp(5px, 3cqi, 8px);
+    margin-top: clamp(3px, 1.6cqi, 6px);
+  }
+
+  .tsd-pl-card .playerName {
+    font-size: clamp(13px, 8cqi, 17px);
+  }
+
+  .tsd-pl-total {
+    font-size: clamp(10px, 5.6cqi, 12px);
+    margin-top: clamp(5px, 2.4cqi, 8px);
+  }
+}
+
+/* ~200px+ -- the desktop card at 1440 and above. This is where most of the
+   dead space was, so this is where the number grows most. */
+@container plcard (min-width: 200px) {
+  .tsd-pl-card .pt {
+    font-size: clamp(26px, 16cqi, 38px);
+
+    /* At this size the pair no longer fits side by side: "POINT" plus a
+       four-digit score at 38px needs ~134px against a ~120px body. Stack
+       them instead -- the label sits above its number, which is the layout
+       that gives the number the FULL card width to grow into and is the
+       whole point of the client's note. The row above keeps its inline
+       arrangement, where the small number still fits beside the label. */
+    display: block;
+    gap: 0;
+    /* the number is a bare text node, so the wrap risk is handled by the
+       stack above rather than by nowrap */
+    white-space: normal;
+  }
+
+  .tsd-pl-card .pt::before {
+    display: block;
+    margin-bottom: clamp(1px, .8cqi, 3px);
+    font-size: clamp(10px, 5cqi, 12px);
+  }
+
+  .tsd-pl-card .playerName {
+    font-size: clamp(15px, 8.4cqi, 19px);
+  }
+
+  .tsd-pl-total {
+    font-size: clamp(11px, 5.8cqi, 13px);
+  }
+}
+
+/* ~260px+ -- the widest cards (large desktops, and the 768-1200 stacked
+   layout where each card spans half the row and is far wider than the
+   desktop one). Nothing here is allowed past a size a four-digit score
+   still clears: 38-48px against a 260px+ card leaves ample margin. */
+@container plcard (min-width: 260px) {
+  .tsd-pl-card .pt {
+    font-size: clamp(38px, 18cqi, 48px);
+  }
+
+  .tsd-pl-card .pt::before {
+    font-size: clamp(11px, 4.4cqi, 13px);
+  }
+
+  .tsd-pl-card .playerName {
+    font-size: clamp(17px, 7cqi, 22px);
+  }
+
+  .tsd-pl-total {
+    font-size: clamp(12px, 5cqi, 14px);
+  }
 }
 
 /* ---- bid panels --------------------------------------------------------
@@ -1002,6 +1121,150 @@ body.tsd-panel {
 .tsd-bid-panel--p2 .but2Player.is-bid:disabled {
   border-color: var(--tsd-accent-pink);
   color: var(--tsd-accent-pink);
+}
+
+/* ==========================================================================
+   BID VALUE -- what each bid is worth (js-ui/tsd-bid-value.js)
+
+   Client feedback: the bidding screen "must somehow indicate that higher
+   bids yield more points and allow more time."
+
+   This replaces the old points/time table (an unstyled border="1" grid at
+   8px, still commented out in js/BidButs.js) rather than restoring it. The
+   figures are attached to the bid squares themselves, which is where the
+   player is already looking when choosing a bid.
+
+   tsd-bid-value.js moves each bid square into a <span class="tsd-bid-pair">
+   alongside a <span class="tsd-bid-val"> label, and sets --tsd-bid-ramp on
+   both: 0..1, this bid's points as a fraction of the top bid's.
+
+   The ramp matters: points rise as the SQUARE of the bid (2, 8, 18 ... 100)
+   while time rises linearly, so the acceleration is the real message. The
+   tint makes it readable at a glance without parsing ten pairs of numbers.
+
+   ========================================================================== */
+
+/* The square and its label are separate siblings in the cell's grid, so
+   they must be paired explicitly -- auto-placement would put the label in
+   the next column rather than under its own square.
+
+   The square and its label are grouped in a <span class="tsd-bid-pair">
+   wrapper, so the pair is ONE grid item and the existing wrapping track
+   list keeps working unchanged -- a 10-button round still breaks onto a
+   second line exactly as before.
+
+   Wrapping the button is safe here only because the JS repairs it:
+   BidButs.js reduceButtons() removes a square with
+   `el.parentNode.removeChild(el)`, which empties the wrapper rather than
+   removing it, so tsd-bid-value.js sweeps empty pairs on every repaint (the
+   same MutationObserver that sees the removal triggers that sweep).
+
+   The 46px track (up from the bare square's 30px) is what two label lines
+   need: at 30px "100 pt" wrapped mid-number. Squares stay 30px inside it. */
+.tsd-bid-panel .bidButs td:has(.tsd-bid-pair) {
+  grid-template-columns: repeat(auto-fit, 46px);
+  column-gap: 6px;
+  row-gap: 10px;
+}
+
+.tsd-bid-pair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+/* the square keeps its 30px design size inside the wider pair column */
+.tsd-bid-pair .but2Player {
+  width: 30px;
+  flex: none;
+}
+
+.tsd-bid-pair .tsd-bid-val {
+  width: 100%;
+}
+
+/* The rising tint, painted on the square itself. `background` is safe to set
+   here: BidButs.js deliberately sets NO inline background (see its comments
+   in createButs/makeBid), so nothing competes with this. */
+.tsd-bid-panel .but2Player[style*="--tsd-bid-ramp"] {
+  background:
+    linear-gradient(to top,
+      rgba(6, 131, 252, calc(var(--tsd-bid-ramp, 0) * .34)) 0%,
+      rgba(6, 131, 252, calc(var(--tsd-bid-ramp, 0) * .06)) 100%);
+}
+
+.tsd-bid-panel--p2 .but2Player[style*="--tsd-bid-ramp"] {
+  background:
+    linear-gradient(to top,
+      rgba(253, 12, 117, calc(var(--tsd-bid-ramp, 0) * .34)) 0%,
+      rgba(253, 12, 117, calc(var(--tsd-bid-ramp, 0) * .06)) 100%);
+}
+
+/* A taken-out-of-play square drops its tint, so the ramp reads as "what is
+   still available" rather than "what once was". Matches the existing
+   :disabled treatment, which mutes rather than blanks. */
+.tsd-bid-panel .but2Player[style*="--tsd-bid-ramp"]:disabled {
+  background: none;
+}
+
+/* ---- the figures ------------------------------------------------------
+   textContent is "36 pt\n12 s" -- points first: the value the client named
+   first, and the one that accelerates. pre-line renders the break. */
+.tsd-bid-val {
+  display: block;
+  white-space: pre-line;
+
+  font-size: clamp(7px, .58vw, 9px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: .01em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--tsd-text-muted);
+  /* the better bids read brighter, reinforcing the tint behind them */
+  opacity: calc(.6 + var(--tsd-bid-ramp, 0) * .4);
+  pointer-events: none;
+}
+
+/* A label whose square is out of play mutes with it, so the ramp reads as
+   "what is still available". */
+.tsd-bid-pair:has(.but2Player:disabled) .tsd-bid-val {
+  opacity: .3;
+}
+
+/* The panel is sized for bare squares (Figma 160px). An extra two lines of
+   type under every square needs the box to grow rather than clip. */
+.tsd-bid-panel:has(.tsd-bid-val) {
+  min-height: min(200px, 27vh);
+}
+
+/* Rows after the first already get 12px of separation; with labels in play
+   that reads as too little between a label and the next row of squares. */
+.tsd-bid-panel .bidButs tr+tr td:has(.tsd-bid-pair) {
+  margin-top: 16px;
+}
+
+/* ---- when there is no room -------------------------------------------
+   Below this the squares are at their minimum tappable size and the pads
+   share a row with the clock. Two lines of 7px type under each square would
+   be unreadable and would push the bidding block past the fold, so the
+   printed figures are dropped and the TINT carries the message alone --
+   higher bid, stronger colour. The relationship still reads, and the
+   figures remain on each square's tooltip. */
+@media (max-width: 900px), (max-height: 700px) {
+  .tsd-bid-val {
+    display: none;
+  }
+
+  .tsd-bid-panel:has(.tsd-bid-val) {
+    min-height: min(160px, 22vh);
+  }
+
+  .tsd-bid-panel .bidButs tr+tr td:has(.tsd-bid-pair) {
+    margin-top: 12px;
+  }
 }
 
 /* ---- alpha bar (A-Z answer picker) -------------------------------------
@@ -5190,6 +5453,73 @@ body.tsd-panel {
   }
 }
 
+/* ==========================================================================
+   TIGHTEN THE VERTICAL RHYTHM  (client: "still some things can be tightened
+   up space-wise")
+
+   The existing spacing rules are all defensive: every clamp() in the bands
+   above is upper-bounded by a vh figure so a SHORT screen gives space back.
+   A tall screen -- a tablet in portrait, which is what the client is looking
+   at -- hits none of them, so every band takes its most generous value at
+   once: the header margin, the scorebar's clamp(32px, 4.2vw, 72px) bottom
+   margin, the bid panels' 160px design height, and the question bar's own
+   margin all stack up before the play area gets anything.
+
+   The result in the client's screenshot is a picture grid sitting in the top
+   third with a large empty band beneath it -- the play area HAS the height,
+   it just is not being used, because the content is centred in a band that
+   was sized by what was left over rather than by what the content needs.
+
+   This block tightens the gaps between the bands. It is scoped to portrait-
+   ish tall viewports so the desktop layout -- which the client has already
+   signed off -- is untouched.
+   ========================================================================== */
+/* 821px, not 820: the block above is `max-height: 820px` and the two must
+   not both apply at exactly 820. */
+@media (min-height: 821px) and (max-width: 1100px) {
+
+  /* The single biggest gap on the screen. 4.2vw was set to clear the clock
+     card, which overhangs the scorebar row; on this layout the clock sits on
+     its own row and there is nothing to clear. */
+  .tsd-scorebar {
+    margin-bottom: clamp(14px, 2vh, 26px);
+  }
+
+  .tsd-panel-header {
+    margin-bottom: clamp(6px, 1vh, 12px);
+  }
+
+  /* The bid pads reserve their 160px Figma height whatever they hold. A
+     7-button round with labels needs well under that here. */
+  .tsd-bid-panel {
+    min-height: 0;
+  }
+
+  .tsd-bid-clock {
+    min-height: 0;
+  }
+
+  /* Pull the question up against the grid it introduces. */
+  .tsd-question-bar {
+    margin-bottom: clamp(4px, .6vh, 10px);
+  }
+
+  /* NOTE on the large empty band under the picture grid in the client's
+     screenshot: that is NOT a spacing bug and is not touched here.
+     .tsd-play-area already carries `align-content: start`, which deliberately
+     collects all leftover height BELOW the content. The band is simply
+     taller than this round needs. Anchoring or shrinking it would fight the
+     no-scrollbar fit logic in js-ui/tsd-fit-screen.js, which measures this
+     band to decide whether to scale the content down. The gaps ABOVE the
+     play area are the ones worth closing, and they are what this block
+     tightens -- that is what moves the grid up the screen. */
+
+  /* The page's own bottom padding is the last of it. */
+  .tsd-panel-page {
+    padding-bottom: clamp(6px, .8vh, 14px);
+  }
+}
+
 /* Very short: trim the decorative elements too. */
 @media (max-height: 700px) {
 
@@ -5215,6 +5545,15 @@ body.tsd-panel {
      player card; the name and score matter, the portrait does not. */
   .tsd-pl-avatar {
     display: none;
+  }
+
+  /* Hiding the avatar hands its width to the card body, which pushes the
+     card past the container steps and would let the score grow to 48px --
+     on the one screen that has no vertical room to spare. Cap it here:
+     this block is about fitting a short screen, so the number stays large
+     enough to read but does not reclaim the height just saved above. */
+  .tsd-pl-card .pt {
+    font-size: clamp(20px, 11cqi, 28px);
   }
 
   .tsd-bid-title {

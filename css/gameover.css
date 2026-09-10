@@ -167,44 +167,15 @@ body.tsd-over {
   min-width: 0;
 }
 
+/* The player avatar is hidden at every width. The name and the score are
+   what the end screen is for; the photo ring was decoration around them.
+
+   Hidden rather than removed from the markup: #goAvatar0 / #goAvatar1 are
+   still written to by showPlayerPhotos() in GameOver.html, which drops the
+   player's chosen photo in as an <img>. That keeps working untouched -- it
+   just is not displayed. Deleting this rule brings the avatars back. */
 .tsd-over-avatar {
-  flex: none;
-  width:  clamp(88px, 9.6vw, 152px);
-  height: clamp(88px, 9.6vw, 152px);
-  border-radius: 50%;
-  overflow: hidden;
-  background: #1A1748;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* blue = player 0 = left, red = player 1 = right */
-.tsd-over-player--p1 .tsd-over-avatar { border: 3px solid var(--tsd-blue); }
-.tsd-over-player--p2 .tsd-over-avatar { border: 3px solid #E82F2F; }
-
-.tsd-over-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Placeholder glyph, shown when the player picked no photo. Same generic
-   person icon as setup.html and GamePanel.html rather than a gendered
-   male/female illustration, so it makes no assumption about the player. */
-.tsd-over-avatar .tsd-avatar-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: rgba(255, 255, 255, .35);
-}
-
-.tsd-over-avatar .tsd-avatar-empty svg {
-  width: 46%;
-  height: auto;
+  display: none;
 }
 
 .tsd-over-name {
@@ -737,7 +708,6 @@ body.tsd-over {
     font-style: italic;
     letter-spacing: .08em;
     color: rgba(255, 255, 255, .5);
-    padding-top: 34px;   /* sits level with the avatars, not the names */
   }
 
   /* ---- winner hero ----------------------------------------------------- */
@@ -762,12 +732,6 @@ body.tsd-over {
   /* ---- players as a two-up scoreboard ---------------------------------- */
 
   .tsd-over-player { gap: 8px; }
-
-  .tsd-over-avatar {
-    width: 74px;
-    height: 74px;
-    border-width: 2.5px;
-  }
 
   .tsd-over-name {
     font-size: 13px;
@@ -863,8 +827,6 @@ body.tsd-over {
   }
 
   .tsd-over-result::after { display: none; }
-
-  .tsd-over-avatar { width: 64px; height: 64px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
